@@ -1,0 +1,18 @@
+{
+  "type": "Service",
+  "name": "officer-delta-processor",
+  "description": "The Officer Delta Processor is responsible for reading from the officer-delta kafka topic.",
+  "owned_by": "Thundercats",
+  "calls_via": "Eric",
+  "documentation": "tbc",
+  "git_repo": "https://github.com/companieshouse/officer-delta-processor",
+  "specification": "https://github.com/companieshouse/officer-delta-processor/blob/master/spec/swagger.json",
+  "public": "false",
+  "users": "internal",
+  "code_analysis_link": "http://code-analysis.platform.aws.chdev.org:9000/dashboard?id=uk.gov.companieshouse%3Aofficer-delta-processor",
+  "test_automation_repo": "https://github.com/companieshouse/taf-api-karate",
+  "language": "Java",
+  "integration_outgoing": [
+    "TBC"
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "officer-delta-processor",
+    "description": "Officer Delta Processor specification",
+    "version": "0.2.4"
+  },
+  "basePath": "/officer-delta-processor",
+  "schemes": [
+    "https"
+  ],
+  "tags": [
+    {
+      "name": "new",
+      "description": "New submission resource"
+    }
+  ],
+  "parameters": {
+    "submission-id": {
+      "name": "submission-id",
+      "in": "path",
+      "description": "Unique submission selector",
+      "required": true,
+      "type": "string",
+      "pattern": "^[a-f0-9]{16}$",
+      "x-example": "eb4668886a6db281"
+    }
+  },
+  "responses": {
+    "Created": {
+      "description": "Submission created",
+      "schema": {
+        "$ref": "#/definitions/submission-id"
+      }
+    }
+  },
+  "paths": {
+    "/submissions/new": {
+      "post": {
+        "x-operationName": "newSubmission",
+        "tags": [
+          "new"
+        ],
+        "summary": "Start a new EFS submission",
+        "operationId": "newSubmission",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "presenter",
+            "in": "body",
+            "description": "Details of the presenter",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/presenter"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/Created"
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorised"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "payment-sessionId": {
+      "title": "Payment service session ID/reference",
+      "type": "string",
+      "minLength": 15,
+      "maxLength": 15,
+      "pattern": "[0-9a-zA-Z]{15}",
+      "example": "yMxgdNVSdwyk7sN"
+    }
+  }
+}
