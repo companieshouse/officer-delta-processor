@@ -1,7 +1,7 @@
 {
   "type": "Service",
   "name": "officer-delta-processor",
-  "description": "The Officer Delta Processor is responsible for reading from the officer-delta kafka topic.",
+  "description": "Tbc",
   "owned_by": "Thundercats",
   "calls_via": "Eric",
   "documentation": "tbc",
