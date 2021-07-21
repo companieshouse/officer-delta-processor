@@ -1,0 +1,56 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "officer-delta-processor",
+    "description": "Officer Delta Processor specification",
+    "version": "0.2.4"
+  },
+  "servers": [
+    {
+      "url": "/officer-delta-processor"
+    }
+  ],
+  "paths": {
+    "/healthcheck": {
+      "get": {
+        "tags": [
+          "information"
+        ],
+        "summary": "Service health check",
+        "description": "Checks the service is running.",
+        "operationId": "healthCheck",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceStatus"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {}
+          }
+        },
+        "x-operationName": "healthCheck"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ServiceStatus": {
+        "title": "Service Status",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "UP"
+          }
+        }
+      }
+    }
+  }
+}
