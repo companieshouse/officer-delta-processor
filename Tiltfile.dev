@@ -13,10 +13,6 @@ custom_build(
           remote_path = '/app/classes/uk'
         ),
         sync(
-            local_path = './target/classes/templates',
-            remote_path = '/app/resources/templates'
-        ),
-        sync(
             local_path = './target/classes/META-INF',
             remote_path = '/app/classes/META-INF'
         ),
