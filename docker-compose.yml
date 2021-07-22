@@ -1,0 +1,7 @@
+version: "3.8"
+
+services:
+  officer-delta-processor:
+    image: '169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/officer-delta-processor:latest'
+    expose:
+      - 8080
