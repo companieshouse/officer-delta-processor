@@ -11,7 +11,7 @@ clean:
 
 .PHONY: test-unit
 test-unit: clean
-	mvn -v test -Dskip.integration.tests=true
+	mvn test -Dskip.integration.tests=true
 
 .PHONY: test-integration
 test-integration: clean
@@ -38,7 +38,7 @@ endif
 .PHONY: build
 build:
 	mvn versions:set -DnewVersion=$(version) -DgenerateBackupPoms=false
-	mvn -v -X package -Dmaven.test.skip=true
+	mvn package -Dmaven.test.skip=true
 	cp ./target/$(artifact_name)-$(version).jar ./$(artifact_name).jar
 
 .PHONY: dist
