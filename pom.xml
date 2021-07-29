@@ -28,17 +28,18 @@
 		<!-- Test -->
 		<mockito-junit-jupiter.version>3.8.0</mockito-junit-jupiter.version>
 		<equalsverifier.version>3.1.9</equalsverifier.version>
+		<testcontainers.version>1.15.3</testcontainers.version>
 
 		<!-- Spring -->
 		<spring-boot-dependencies.version>2.4.4</spring-boot-dependencies.version>
 		<spring-test.version>5.2.0.RELEASE</spring-test.version>
 		<spring-boot-maven-plugin.version>2.2.0.RELEASE</spring-boot-maven-plugin.version>
 
-        <!-- Maven -->
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+		<!-- Maven -->
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
 
-    </properties>
+	</properties>
 		<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -122,6 +123,24 @@
 			<version>${equalsverifier.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>kafka</artifactId>
+			<version>${testcontainers.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers</artifactId>
+			<version>${testcontainers.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>${testcontainers.version}</version>
+			<scope>test</scope>
+		</dependency>
 
 	</dependencies>
 
@@ -143,10 +162,6 @@
 				<groupId>com.google.cloud.tools</groupId>
 				<artifactId>jib-maven-plugin</artifactId>
 				<version>3.1.1</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>
