@@ -21,7 +21,7 @@
 
 		<avro.version>1.8.1</avro.version>
 		<ch-kafka.version>1.4.4</ch-kafka.version>
-		<kafka-models.version>unversioned</kafka-models.version>
+		<kafka-models.version>1.0.25</kafka-models.version>
 		<structured-logging.version>1.9.3</structured-logging.version>
 		<commons-lang3.version>3.11</commons-lang3.version>
 
@@ -141,7 +141,12 @@
 			<version>${testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<version>4.1.0</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

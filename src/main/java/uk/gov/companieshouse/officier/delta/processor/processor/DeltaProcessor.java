@@ -1,22 +1,21 @@
-package uk.gov.companieshouse.officier.delta.processor.processr;
+package uk.gov.companieshouse.officier.delta.processor.processor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.officier.delta.processor.exception.ProcessException;
 
 @Component
-public class ProcessorImpl implements Processor {
+public class DeltaProcessor implements Processor<ChsDelta> {
     Logger logger;
 
     @Autowired
-    public ProcessorImpl(Logger logger) {
+    public DeltaProcessor(Logger logger) {
         this.logger = logger;
     }
 
     @Override
-    public void process(ChsDelta delta) throws ProcessException {
+    public void process(ChsDelta delta) {
         logger.info("Processing");
     }
 }
