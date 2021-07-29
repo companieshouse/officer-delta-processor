@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.delta.ChsDelta;
-import uk.gov.companieshouse.kafka.consumer.resilience.CHKafkaResilientConsumerGroup;
+import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
 import uk.gov.companieshouse.kafka.exceptions.DeserializationException;
 import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.logging.Logger;
@@ -21,14 +21,14 @@ public class DeltaConsumer {
     public static final int POLLING_DURATION_MS = 5 * 1000;
 
     // TODO: add graceful shutdown https://www.oreilly.com/library/view/kafka-the-definitive/9781491936153/ch04.html#:~:text=But-,How,-Do%20We%20Exit
-    private final CHKafkaResilientConsumerGroup consumer;
+    private final CHKafkaConsumerGroup consumer;
     private final OfficerDeltaDeserializer deserializer;
     private final Logger logger;
     private Processor processor;
 
     @Autowired
     public DeltaConsumer(
-            CHKafkaResilientConsumerGroup chKafkaConsumerGroup,
+            CHKafkaConsumerGroup chKafkaConsumerGroup,
             OfficerDeltaDeserializer deserializer,
             Logger logger,
             Processor processor) {

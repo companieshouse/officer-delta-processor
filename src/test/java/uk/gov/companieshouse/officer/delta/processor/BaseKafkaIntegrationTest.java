@@ -81,6 +81,7 @@ public abstract class BaseKafkaIntegrationTest {
             try {
                 Thread.sleep(250);
             } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

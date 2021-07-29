@@ -6,9 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import uk.gov.companieshouse.delta.ChsDelta;
+import uk.gov.companieshouse.kafka.consumer.CHKafkaConsumerGroup;
 import uk.gov.companieshouse.kafka.consumer.ConsumerConfig;
-import uk.gov.companieshouse.kafka.consumer.resilience.CHConsumerType;
-import uk.gov.companieshouse.kafka.consumer.resilience.CHKafkaResilientConsumerGroup;
 import uk.gov.companieshouse.kafka.deserialization.AvroDeserializer;
 import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
 import uk.gov.companieshouse.logging.Logger;
@@ -33,7 +32,7 @@ public class OfficerConsumerConfig {
 
     @Bean
     ConsumerConfig consumerConfig() {
-        ConsumerConfig config = ConsumerConfig.createConfigWithResilience("officer-delta-processor");
+        ConsumerConfig config = new ConsumerConfig();
 
         config.setAutoCommit(false);
         config.setTopics(List.of(OFFICER_DELTA_TOPIC));
@@ -41,6 +40,7 @@ public class OfficerConsumerConfig {
         config.setGroupName("officer-delta-processor");
         config.setAutoCommit(false);
         config.setMaxRetries(50);
+//        config.setRetryThrottle();
 
         return config;
     }
@@ -57,11 +57,10 @@ public class OfficerConsumerConfig {
     }
 
     @Bean
-    CHKafkaResilientConsumerGroup chKafkaConsumerGroup(ConsumerConfig consumerConfig) {
+    CHKafkaConsumerGroup chKafkaConsumerGroup(ConsumerConfig consumerConfig) {
         try {
             logger.info("Kafka url: " + kafkaURL);
-            return new CHKafkaResilientConsumerGroup(consumerConfig,
-                    CHConsumerType.MAIN_CONSUMER);
+            return new CHKafkaConsumerGroup(consumerConfig);
         } catch (KafkaException ke) {
             logger.error("Unable to create kafka consumer group: " + ke.getCause().getMessage(), ke);
             throw ke;
