@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officier.delta.processor.config;
+package uk.gov.companieshouse.officer.delta.processor.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +14,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @PropertySource("classpath:logger.properties")
 public class LoggingConfig {
 
+    @SuppressWarnings("unused")
     @Value("${logger.namespace}")
     private String loggerNamespace;
 

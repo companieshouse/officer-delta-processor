@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officier.delta.processor.exception;
+package uk.gov.companieshouse.officer.delta.processor.exception;
 
 /**
  * Process exception encapsulates exceptions occurred during processing. Indicating weather the
@@ -32,7 +32,7 @@ public class ProcessException extends Exception {
      * @return an exception that can be thrown within the processor
      */
     public static ProcessException nonFatal(String message, Throwable cause) {
-        return new ProcessException(message, cause, false);
+        return new ProcessException(message, cause, true);
     }
 
     public boolean canRetry() {

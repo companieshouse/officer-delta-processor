@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officier.delta.processor.deserialise;
+package uk.gov.companieshouse.officer.delta.processor.deserialise;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,7 +13,7 @@ import uk.gov.companieshouse.kafka.message.Message;
  */
 @Component
 public class ChsDeltaDeserializer {
-    AvroDeserializer<ChsDelta> deserializer;
+    final AvroDeserializer<ChsDelta> deserializer;
 
     @Autowired
     public ChsDeltaDeserializer(AvroDeserializer<ChsDelta> chsDeltaAvroDeserializer) {

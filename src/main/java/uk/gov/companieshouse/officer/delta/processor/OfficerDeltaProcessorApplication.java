@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officier.delta.processor;
+package uk.gov.companieshouse.officer.delta.processor;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

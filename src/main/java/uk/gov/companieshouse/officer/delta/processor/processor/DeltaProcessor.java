@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officier.delta.processor.processor;
+package uk.gov.companieshouse.officer.delta.processor.processor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -7,7 +7,7 @@ import uk.gov.companieshouse.logging.Logger;
 
 @Component
 public class DeltaProcessor implements Processor<ChsDelta> {
-    Logger logger;
+    final Logger logger;
 
     @Autowired
     public DeltaProcessor(Logger logger) {

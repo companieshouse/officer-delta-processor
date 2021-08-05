@@ -1,14 +1,17 @@
-package uk.gov.companieshouse.officier.delta.processor.consumer;
+package uk.gov.companieshouse.officer.delta.processor.consumer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.kafka.consumer.resilience.CHKafkaResilientConsumerGroup;
+import uk.gov.companieshouse.kafka.exceptions.DeserializationException;
 import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.officier.delta.processor.exception.ProcessException;
-import uk.gov.companieshouse.officier.delta.processor.processor.Processor;
+import uk.gov.companieshouse.officer.delta.processor.deserialise.ChsDeltaDeserializer;
+import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
+import uk.gov.companieshouse.officer.delta.processor.processor.Processor;
 
 import javax.annotation.PreDestroy;
 import java.util.HashMap;
@@ -24,18 +27,22 @@ import java.util.concurrent.ExecutionException;
 public class DeltaConsumer {
     private final CHKafkaResilientConsumerGroup consumer;
     private final Logger logger;
+    private final ChsDeltaDeserializer deserializer;
     @Value("${kafka.polling.duration.ms}")
     private int kafkaPollingDuration;
-    private Processor<Message> processor;
+    private Processor<ChsDelta> processor;
 
+    @SuppressWarnings("unused")
     @Autowired
     public DeltaConsumer(
             CHKafkaResilientConsumerGroup chKafkaConsumerGroup,
             Logger logger,
-            Processor<Message> processor) {
+            ChsDeltaDeserializer deserializer,
+            Processor<ChsDelta> processor) {
 
         this.consumer = chKafkaConsumerGroup;
         this.logger = logger;
+        this.deserializer = deserializer;
         this.processor = processor;
 
         consumer.connect();
@@ -51,11 +58,7 @@ public class DeltaConsumer {
     void pollKafka() {
         Map<String, Object> pollingInfo = new HashMap<>();
         pollingInfo.put("duration", String.format("%dms", kafkaPollingDuration));
-        logger.debug("Polling Kafka", pollingInfo);
-
-        // TODO: log index and when commit
-        // TODO: log retry and failure / error
-        // TODO: retry and error topics
+        logger.trace("Polling Kafka", pollingInfo);
 
         for (Message message : consumer.consume()) {
             Map<String, Object> info = new HashMap<>();
@@ -64,16 +67,19 @@ public class DeltaConsumer {
             logger.info("Received message from kafka", info);
 
             try {
-                processor.process(message);
+                ChsDelta delta = deserializer.deserialize(message);
+                processor.process(delta);
                 consumer.commit(message);
                 logger.info("Message committed", info);
             } catch (ProcessException e) {
-                // TODO: check if can retry, and push to relevant topic
                 if (e.canRetry()) {
                     sendMessageToRetryTopic(message);
                 } else {
-                    // TODO: handle error topic
+                    sendMessageToErrorTopic(message);
                 }
+            } catch (DeserializationException e) {
+                logger.error("Unable to deserialize message", e, info);
+                sendMessageToErrorTopic(message);
             }
         }
     }
@@ -93,21 +99,22 @@ public class DeltaConsumer {
             loggingInfo.put("attempts to retry", attemptsToRetry);
             try {
                 consumer.retry(0, message);
+                consumer.commit(message);
                 success = true;
                 logger.info("Message successfully sent to retry topic", loggingInfo);
             } catch (ExecutionException e) {
-                logger.error("Error occurred while send message to retry topic", e);
+                logger.error("Error occurred while send message to retry topic", e, loggingInfo);
             } catch (InterruptedException e) {
-                logger.error("Interrupted while sending message to retry topic", e);
+                logger.error("Interrupted while sending message to retry topic", e, loggingInfo);
                 break;
             }
         }
 
+        loggingInfo.put("kafkaMessage", message);
         logger.error(
                 "Unable to add message to retry topic. Reached max attempts. Attempting to send to error topic",
                 loggingInfo);
     }
-
 
     void sendMessageToErrorTopic(Message message) {
 
@@ -118,7 +125,7 @@ public class DeltaConsumer {
      *
      * @param processor the processor that will process the delta
      */
-    public void setProcessor(Processor<Message> processor) {
+    public void setProcessor(Processor<ChsDelta> processor) {
         this.processor = processor;
     }
 

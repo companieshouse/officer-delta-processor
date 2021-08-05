@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officier.delta.processor.config;
+package uk.gov.companieshouse.officer.delta.processor.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,7 +50,11 @@ public class DeltaConsumerConfig {
     @Bean
     @Profile("!test")
     ConsumerConfig consumerConfig() {
-        return ConsumerConfig.createConfigWithResilience("officer-delta-processor");
+        ConsumerConfig config = ConsumerConfig.createConfigWithResilience("officer-delta-processor");
+
+        config.setAutoCommit(false);
+
+        return config;
     }
 
     /**

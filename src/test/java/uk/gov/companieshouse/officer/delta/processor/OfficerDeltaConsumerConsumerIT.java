@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.delta.ChsDelta;
-import uk.gov.companieshouse.kafka.exceptions.DeserializationException;
 
 import java.time.Duration;
 import java.util.concurrent.TimeoutException;
@@ -18,14 +17,14 @@ class OfficerDeltaConsumerConsumerIT extends BaseKafkaIntegrationTest {
     @Test
     void testCanConsumeMessage() {
         // Given
-        captureMessages();
+        captureDeltas();
 
         // When
         sendChsDelta("officers-delta", "");
 
         final int maxWaitTimeSeconds = 10;
         try {
-            waitForMessage(Duration.ofSeconds(maxWaitTimeSeconds));
+            waitForDelta(Duration.ofSeconds(maxWaitTimeSeconds));
         } catch (TimeoutException e) {
             fail(String.format("No delta was consumed after %d seconds", maxWaitTimeSeconds));
         }
@@ -37,7 +36,7 @@ class OfficerDeltaConsumerConsumerIT extends BaseKafkaIntegrationTest {
     @Test
     void testCanDeserializeChsDelta() {
         // Given
-        captureMessages();
+        captureDeltas();
 
         // When
         String message = "{\"Hello\":\"World!\"}";
@@ -49,9 +48,6 @@ class OfficerDeltaConsumerConsumerIT extends BaseKafkaIntegrationTest {
             delta = waitForDelta(Duration.ofSeconds(maxWaitTimeSeconds));
         } catch (TimeoutException e) {
             fail(String.format("No delta was consumed after %d seconds", maxWaitTimeSeconds));
-        } catch (DeserializationException e) {
-            e.printStackTrace();
-            fail("Unable to deserialize kafka message into ChsDelta: " + e.getMessage());
         }
 
         // Then
