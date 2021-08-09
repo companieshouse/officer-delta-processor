@@ -17,7 +17,7 @@ import java.util.List;
 @TestConfiguration
 public class TestConsumerConfig {
     private static final String OFFICER_DELTA_TOPIC = "officers-delta";
-    @Value("${kafka.broker.url}")
+    @Value("${kafka.broker.addr}")
     private String kafkaBrokerAddress;
 
     @Bean
