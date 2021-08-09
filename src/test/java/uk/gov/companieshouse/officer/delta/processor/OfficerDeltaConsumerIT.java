@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(MockitoExtension.class)
-class OfficerDeltaConsumerConsumerIT extends BaseKafkaIntegrationTest {
+class OfficerDeltaConsumerIT extends BaseKafkaIntegrationTest {
     @Test
     void testCanConsumeMessage() {
         // Given
