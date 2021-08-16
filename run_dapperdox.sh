@@ -1,6 +1,6 @@
 ${DAPPERDOX}/dapperdox \
     -spec-dir=${PWD}/spec/ \
-    -spec-filename=swagger.json \
+    -spec-filename=openapi.json \
     -bind-addr=0.0.0.0:4005 \
     -site-url=http://localhost:4005 \
     -log-level=debug \
