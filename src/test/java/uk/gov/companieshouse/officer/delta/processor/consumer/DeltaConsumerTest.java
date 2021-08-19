@@ -190,6 +190,7 @@ class DeltaConsumerTest {
     }
 
     @Test
+    @SuppressWarnings("squid:S2699")
     void sendMessageToErrorTopic() {
 
     }
