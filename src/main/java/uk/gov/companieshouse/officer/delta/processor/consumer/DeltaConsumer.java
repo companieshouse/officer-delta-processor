@@ -55,7 +55,7 @@ public class DeltaConsumer {
     @Scheduled(
             fixedRateString = "${kafka.polling.duration.ms}",
             initialDelayString = "${kafka.polling.initial.delay.ms}")
-    void pollKafka() {
+    void pollKafka() throws InterruptedException {
         Map<String, Object> pollingInfo = new HashMap<>();
         pollingInfo.put("duration", String.format("%dms", kafkaPollingDuration));
         logger.trace("Polling Kafka", pollingInfo);
@@ -84,7 +84,7 @@ public class DeltaConsumer {
         }
     }
 
-    void sendMessageToRetryTopic(Message message) {
+    void sendMessageToRetryTopic(Message message) throws InterruptedException {
         Map<String, Object> loggingInfo = new HashMap<>();
         loggingInfo.put("key", message.getKey());
         loggingInfo.put("topic", message.getTopic());
@@ -104,9 +104,6 @@ public class DeltaConsumer {
                 logger.info("Message successfully sent to retry topic", loggingInfo);
             } catch (ExecutionException e) {
                 logger.error("Error occurred while send message to retry topic", e, loggingInfo);
-            } catch (InterruptedException e) {
-                logger.error("Interrupted while sending message to retry topic", e, loggingInfo);
-                break;
             }
         }
 

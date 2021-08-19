@@ -70,7 +70,7 @@ class DeltaConsumerTest {
 
     @Test
     @DisplayName("Given no messages on the topic, pollKafka shouldn't do anything")
-    void pollKafkaNoMessages() {
+    void pollKafkaNoMessages() throws InterruptedException {
         // Given
         addKafkaMessages(List.of());
 
@@ -81,7 +81,7 @@ class DeltaConsumerTest {
 
     @Test
     @DisplayName("Given a message is on the topic, pollKafka should pass it to the deserializer and processor")
-    void pollKafka() throws DeserializationException, ProcessException {
+    void pollKafka() throws DeserializationException, ProcessException, InterruptedException {
         // Given
         Message message = new Message();
         addKafkaMessages(List.of(message));
@@ -97,7 +97,7 @@ class DeltaConsumerTest {
 
     @Test
     @DisplayName("Given an exception occurs when deserializing, the message is passed to the error topic")
-    void pollKafkaDeserializeException() throws DeserializationException {
+    void pollKafkaDeserializeException() throws DeserializationException, InterruptedException {
         // Given
         Message message = new Message();
         addKafkaMessages(List.of(message));
@@ -111,7 +111,7 @@ class DeltaConsumerTest {
 
     @Test
     @DisplayName("Given a non-fatal exception occurs when processing, the message is passed to the retry topic")
-    void pollKafkaProcessorNonFatalException() throws DeserializationException, ProcessException {
+    void pollKafkaProcessorNonFatalException() throws DeserializationException, ProcessException, InterruptedException {
         // Given
         Message message = new Message();
         addKafkaMessages(List.of(message));
@@ -126,7 +126,7 @@ class DeltaConsumerTest {
 
     @Test
     @DisplayName("Given a fatal exception occurs when processing, the message is passed to the error topic")
-    void pollKafkaProcessorFatalException() throws DeserializationException, ProcessException {
+    void pollKafkaProcessorFatalException() throws DeserializationException, ProcessException, InterruptedException {
         // Given
         Message message = new Message();
         addKafkaMessages(List.of(message));
