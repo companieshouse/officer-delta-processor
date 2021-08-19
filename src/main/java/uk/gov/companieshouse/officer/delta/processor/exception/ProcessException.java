@@ -6,7 +6,7 @@ package uk.gov.companieshouse.officer.delta.processor.exception;
  * to the error topic.
  */
 public class ProcessException extends Exception {
-    private boolean canRetry;
+    private final boolean canRetry;
 
     public ProcessException(String message, Throwable cause, boolean canRetry) {
         super(message, cause);
@@ -37,9 +37,5 @@ public class ProcessException extends Exception {
 
     public boolean canRetry() {
         return canRetry;
-    }
-
-    public void setCanRetry(boolean canRetry) {
-        this.canRetry = canRetry;
     }
 }
