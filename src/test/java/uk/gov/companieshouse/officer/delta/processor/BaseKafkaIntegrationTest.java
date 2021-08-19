@@ -8,14 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.testcontainers.containers.KafkaContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.kafka.exceptions.SerializationException;
 import uk.gov.companieshouse.kafka.message.Message;
@@ -39,16 +33,12 @@ import java.util.function.BooleanSupplier;
 import static org.awaitility.Awaitility.await;
 
 @ExtendWith(SpringExtension.class)
-@Testcontainers
 @SpringBootTest(classes = OfficerDeltaProcessorApplication.class)
 @ActiveProfiles("test")
 @TestPropertySource(locations = "classpath:test.properties")
 @ContextConfiguration(classes = TestConsumerConfig.class)
+@ExtendWith(KafkaExtension.class)
 public abstract class BaseKafkaIntegrationTest {
-    @Container
-    static final KafkaContainer kafkaContainer = new KafkaContainer(
-            DockerImageName.parse("confluentinc/cp-kafka"));
-
     @Autowired
     DeltaConsumer consumer;
 
@@ -57,18 +47,8 @@ public abstract class BaseKafkaIntegrationTest {
 
     List<ChsDelta> deltasConsumed;
 
-    @DynamicPropertySource
-    static void kafkaBrokerProperties(DynamicPropertyRegistry registry) {
-        registry.add("kafka.broker.url",
-                () -> {
-                    String url = getBrokerAddress();
-                    setupKafka(url);
-                    return url;
-                });
-    }
-
     static String getBrokerAddress() {
-        return kafkaContainer.getHost() + ":" + kafkaContainer.getFirstMappedPort();
+        return System.getProperty("kafka.broker.url");
     }
 
     static void setupKafka(String url) {
