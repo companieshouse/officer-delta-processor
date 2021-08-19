@@ -117,7 +117,8 @@ public class DeltaConsumer {
     }
 
     void sendMessageToErrorTopic(Message message) {
-
+        // Remove once implemented
+        throw new UnsupportedOperationException();
     }
 
     /**
