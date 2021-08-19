@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -176,17 +177,14 @@ class DeltaConsumerTest {
     }
 
     @Test
-    @DisplayName("Given the consumer is interrupted while trying to send a message to the retry topic, ")
+    @DisplayName("Given the consumer is interrupted while trying to send a message to the retry topic, it is passed to the caller")
     void sendMessageToRetryTopicInterrupt() throws ExecutionException, InterruptedException {
         Message message = new Message();
         doThrow(new InterruptedException(null)).when(chKafkaConsumerGroup).retry(0, message);
 
-        consumer.sendMessageToRetryTopic(message);
-
-        verify(chKafkaConsumerGroup, atLeastOnce()).retry(0, message);
-        verify(chKafkaConsumerGroup, never()).commit(message);
-        verify(logger, atLeastOnce()).error(contains("Interrupted"), any(InterruptedException.class),
-                argThat(hasKey("kafkaMessage")));
+        assertThrows(InterruptedException.class, () -> {
+            consumer.sendMessageToRetryTopic(message);
+        });
     }
 
     @Test

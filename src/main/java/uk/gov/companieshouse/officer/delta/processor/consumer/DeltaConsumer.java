@@ -113,9 +113,9 @@ public class DeltaConsumer {
                 loggingInfo);
     }
 
+    @SuppressWarnings("java:S1186")
+        // Remove once method
     void sendMessageToErrorTopic(Message message) {
-        // Remove once implemented
-        throw new UnsupportedOperationException();
     }
 
     /**
