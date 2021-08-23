@@ -13,6 +13,7 @@ import org.springframework.test.context.TestPropertySource;
 class OfficerDeltaProcessorApplicationTests {
 
     @Test
+    @SuppressWarnings("squid:S2699")
     void contextLoads() {
     }
 
