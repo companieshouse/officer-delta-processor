@@ -25,6 +25,7 @@
 		<kafka-models.version>1.0.25</kafka-models.version>
 		<structured-logging.version>1.9.3</structured-logging.version>
 		<commons-lang3.version>3.11</commons-lang3.version>
+		<private.sdk.version>unversioned</private.sdk.version>
 
 		<!-- Test -->
 		<mockito-junit-jupiter.version>3.8.0</mockito-junit-jupiter.version>
@@ -110,6 +111,11 @@
 			<groupId>uk.gov.companieshouse</groupId>
 			<artifactId>kafka-models</artifactId>
 			<version>${kafka-models.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.gov.companieshouse</groupId>
+			<artifactId>private-api-sdk-java</artifactId>
+			<version>${private.sdk.version}</version>
 		</dependency>
 
 
