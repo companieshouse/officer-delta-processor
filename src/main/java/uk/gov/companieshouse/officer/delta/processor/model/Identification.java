@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import uk.gov.companieshouse.api.model.delta.officers.IdentificationAPI;
 
 import java.util.Objects;
 
@@ -11,46 +12,46 @@ import java.util.Objects;
 public class Identification {
 
     @JsonProperty("EEA")
-    private EEAIdentification eEA;
+    private IdentificationAPI eEA;
 
     @JsonProperty("other_corporate_body_or_firm")
-    private EEAIdentification otherCorporateBodyOrFirm;
+    private IdentificationAPI otherCorporateBodyOrFirm;
 
     @JsonProperty("non_eea")
-    private EEAIdentification nonEeaApi;
+    private IdentificationAPI nonEeaApi;
 
     @JsonProperty("UK_limited_company")
-    private EEAIdentification uKLimitedCompany;
+    private IdentificationAPI uKLimitedCompany;
 
-    public EEAIdentification geteEA() {
+    public IdentificationAPI geteEA() {
         return eEA;
     }
 
-    public void seteEA(EEAIdentification eEA) {
+    public void seteEA(IdentificationAPI eEA) {
         this.eEA = eEA;
     }
 
-    public EEAIdentification getOtherCorporateBodyOrFirm() {
+    public IdentificationAPI getOtherCorporateBodyOrFirm() {
         return otherCorporateBodyOrFirm;
     }
 
-    public void setOtherCorporateBodyOrFirm(EEAIdentification otherCorporateBodyOrFirm) {
+    public void setOtherCorporateBodyOrFirm(IdentificationAPI otherCorporateBodyOrFirm) {
         this.otherCorporateBodyOrFirm = otherCorporateBodyOrFirm;
     }
 
-    public EEAIdentification getNonEeaApi() {
+    public IdentificationAPI getNonEeaApi() {
         return nonEeaApi;
     }
 
-    public void setNonEeaApi(EEAIdentification nonEeaApi) {
+    public void setNonEeaApi(IdentificationAPI nonEeaApi) {
         this.nonEeaApi = nonEeaApi;
     }
 
-    public EEAIdentification getuKLimitedCompany() {
+    public IdentificationAPI getuKLimitedCompany() {
         return uKLimitedCompany;
     }
 
-    public void setuKLimitedCompany(EEAIdentification uKLimitedCompany) {
+    public void setuKLimitedCompany(IdentificationAPI uKLimitedCompany) {
         this.uKLimitedCompany = uKLimitedCompany;
     }
 

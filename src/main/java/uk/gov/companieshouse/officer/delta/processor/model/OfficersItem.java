@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
 
 import java.util.Objects;
 
@@ -49,10 +50,10 @@ public class OfficersItem {
     private String corporateInd;
 
     @JsonProperty("service_address")
-    private Address serviceAddress;
+    private AddressAPI serviceAddress;
 
     @JsonProperty("usual_residential_address")
-    private Address usualResidentialAddress;
+    private AddressAPI usualResidentialAddress;
 
     @JsonProperty("forename")
     private String forename;
@@ -174,19 +175,19 @@ public class OfficersItem {
         return corporateInd;
     }
 
-    public void setServiceAddress(Address serviceAddress) {
+    public void setServiceAddress(AddressAPI serviceAddress) {
         this.serviceAddress = serviceAddress;
     }
 
-    public Address getServiceAddress() {
+    public AddressAPI getServiceAddress() {
         return serviceAddress;
     }
 
-    public void setUsualResidentialAddress(Address usualResidentialAddress) {
+    public void setUsualResidentialAddress(AddressAPI usualResidentialAddress) {
         this.usualResidentialAddress = usualResidentialAddress;
     }
 
-    public Address getUsualResidentialAddress() {
+    public AddressAPI getUsualResidentialAddress() {
         return usualResidentialAddress;
     }
 
