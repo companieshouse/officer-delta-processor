@@ -8,7 +8,7 @@ import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
 import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
+import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
 import uk.gov.companieshouse.logging.Logger;
 
 /**
@@ -58,16 +58,15 @@ public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements Ap
     }
 
     @Override
-    public ApiResponse<Void> putOfficers(String companyNumber, String appointmentId, OfficerAPI appointment) {
+    public ApiResponse<Void> putAppointment(String companyNumber, String appointmentId, AppointmentAPI appointment) {
         final String uri = String.format("%s/company/%s/appointments/%s", ROOT_URI, companyNumber, appointmentId);
 
         logger.debug(String.format("PUT %s", uri));
         logger.debug(String.format("appointment=%s", appointment));
 
-// TODO: needs company-appointments.api.ch.gov.uk service
-
         return executeOp("putCompanyAppointment",
                 uri,
-                getApiClient().privateDeltaCompanyAppointmentResourceHandler().putOfficers().upsert(uri, appointment));
+                getApiClient().privateDeltaCompanyAppointmentResourceHandler().putAppointment().upsert(uri,
+                    appointment));
     }
 }

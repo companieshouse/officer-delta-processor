@@ -6,7 +6,6 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
-import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
@@ -56,7 +55,7 @@ public class DeltaProcessor implements Processor<ChsDelta> {
             final String internalId = Base64.getUrlEncoder().encodeToString(
                     officer.getInternalId().getBytes(StandardCharsets.UTF_8));
 
-            //apiClientService.putOfficers(officer.getCompanyNumber(), internalId, transformedOfficers.get(0));
+            apiClientService.putAppointment(officer.getCompanyNumber(), internalId, transformedOfficers.get(0));
         } catch (JsonProcessingException e) {
             // TODO: figure out how to print exception without dumping sensitive fields
             logger.error("Unable to read JSON from delta: " + ExceptionUtils.getRootCauseMessage(e),
