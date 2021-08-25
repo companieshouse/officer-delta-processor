@@ -2,7 +2,7 @@ package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
+import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 
 import java.util.List;
@@ -16,8 +16,8 @@ public class Transformer {
         this.transforms = transforms;
     }
 
-    public OfficerAPI transform(OfficersItem officer) {
-        OfficerAPI output = new OfficerAPI();
+    public AppointmentAPI transform(OfficersItem officer) {
+        AppointmentAPI output = new AppointmentAPI();
 
         transforms
                 .parallelStream()
