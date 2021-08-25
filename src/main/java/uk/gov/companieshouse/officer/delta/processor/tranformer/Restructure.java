@@ -24,7 +24,7 @@ public class Restructure implements Transform {
         outputOfficer.setOtherForenames(inputOfficer.getMiddleName());
         outputOfficer.setSurname(inputOfficer.getSurname());
         outputOfficer.setNationality(inputOfficer.getNationality());
-        outputOfficer.setOccupation(inputOfficer.getNationality());
+        outputOfficer.setOccupation(inputOfficer.getOccupation());
 
         outputOfficer.setServiceAddress(inputOfficer.getServiceAddress());
         outputOfficer.setServiceAddressSameAsRegisteredOfficeAddress(setValueOfServiceAddress(inputOfficer.getServiceAddressSameAsRegisteredAddress()));
