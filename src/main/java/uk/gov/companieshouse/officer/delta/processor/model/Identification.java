@@ -17,7 +17,7 @@ import java.util.Objects;
 public class Identification {
 
     @JsonProperty("EEA")
-    private IdentificationAPI eEA;
+    private IdentificationAPI eea;
 
     @JsonProperty("other_corporate_body_or_firm")
     private IdentificationAPI otherCorporateBodyOrFirm;
@@ -41,12 +41,12 @@ public class Identification {
         this.additionalProperties.put(name, value);
     }
 
-    public IdentificationAPI geteEA() {
-        return eEA;
+    public IdentificationAPI getEea() {
+        return eea;
     }
 
-    public void seteEA(IdentificationAPI eEA) {
-        this.eEA = eEA;
+    public void setEea(IdentificationAPI eea) {
+        this.eea = eea;
     }
 
     public IdentificationAPI getOtherCorporateBodyOrFirm() {
@@ -82,7 +82,7 @@ public class Identification {
             return false;
         }
         Identification that = (Identification) o;
-        return Objects.equals(geteEA(), that.geteEA())
+        return Objects.equals(getEea(), that.getEea())
                 && Objects.equals(getOtherCorporateBodyOrFirm(),
                 that.getOtherCorporateBodyOrFirm())
                 && Objects.equals(getNonEeaApi(), that.getNonEeaApi())
@@ -91,7 +91,7 @@ public class Identification {
 
     @Override
     public int hashCode() {
-        return Objects.hash(geteEA(), getOtherCorporateBodyOrFirm(), getNonEeaApi(), getuKLimitedCompany());
+        return Objects.hash(getEea(), getOtherCorporateBodyOrFirm(), getNonEeaApi(), getuKLimitedCompany());
     }
 
     @Override

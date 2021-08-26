@@ -48,6 +48,9 @@ public class OfficersItem {
     @JsonProperty("title")
     private String title;
 
+    @JsonProperty("honours")
+    private String honours;
+
     @JsonProperty("middle_name")
     private String middleName;
 
@@ -177,6 +180,14 @@ public class OfficersItem {
         return title;
     }
 
+    public void setHonours(String honours) {
+        this.honours = honours;
+    }
+
+    public String getHonours() {
+        return honours;
+    }
+
     public void setMiddleName(String middleName) {
         this.middleName = middleName;
     }
@@ -304,6 +315,7 @@ public class OfficersItem {
                 && Objects.equals(getOfficerDetailId(), that.getOfficerDetailId())
                 && Objects.equals(getChangedAt(), that.getChangedAt())
                 && Objects.equals(getTitle(), that.getTitle())
+                && Objects.equals(getHonours(), that.getHonours())
                 && Objects.equals(getMiddleName(), that.getMiddleName())
                 && Objects.equals(getCorporateInd(), that.getCorporateInd())
                 && Objects.equals(getServiceAddress(), that.getServiceAddress())
@@ -331,6 +343,7 @@ public class OfficersItem {
                 getOfficerDetailId(),
                 getChangedAt(),
                 getTitle(),
+                getHonours(),
                 getMiddleName(),
                 getCorporateInd(),
                 getServiceAddress(),
