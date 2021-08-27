@@ -1,18 +1,23 @@
 package uk.gov.companieshouse.officer.delta.processor.model;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import uk.gov.companieshouse.api.model.delta.officers.IdentificationAPI;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Identification {
 
     @JsonProperty("EEA")
-    private IdentificationAPI eEA;
+    private IdentificationAPI eea;
 
     @JsonProperty("other_corporate_body_or_firm")
     private IdentificationAPI otherCorporateBodyOrFirm;
@@ -23,12 +28,25 @@ public class Identification {
     @JsonProperty("UK_limited_company")
     private IdentificationAPI uKLimitedCompany;
 
-    public IdentificationAPI geteEA() {
-        return eEA;
+    @JsonIgnore
+    private Map<String, Object> additionalProperties = new HashMap<>();
+
+    @JsonAnyGetter
+    public Map<String, Object> getAdditionalProperties() {
+        return this.additionalProperties;
     }
 
-    public void seteEA(IdentificationAPI eEA) {
-        this.eEA = eEA;
+    @JsonAnySetter
+    public void setAdditionalProperty(String name, Object value) {
+        this.additionalProperties.put(name, value);
+    }
+
+    public IdentificationAPI getEea() {
+        return eea;
+    }
+
+    public void setEea(IdentificationAPI eea) {
+        this.eea = eea;
     }
 
     public IdentificationAPI getOtherCorporateBodyOrFirm() {
@@ -64,7 +82,7 @@ public class Identification {
             return false;
         }
         Identification that = (Identification) o;
-        return Objects.equals(geteEA(), that.geteEA())
+        return Objects.equals(getEea(), that.getEea())
                 && Objects.equals(getOtherCorporateBodyOrFirm(),
                 that.getOtherCorporateBodyOrFirm())
                 && Objects.equals(getNonEeaApi(), that.getNonEeaApi())
@@ -73,7 +91,7 @@ public class Identification {
 
     @Override
     public int hashCode() {
-        return Objects.hash(geteEA(), getOtherCorporateBodyOrFirm(), getNonEeaApi(), getuKLimitedCompany());
+        return Objects.hash(getEea(), getOtherCorporateBodyOrFirm(), getNonEeaApi(), getuKLimitedCompany());
     }
 
     @Override

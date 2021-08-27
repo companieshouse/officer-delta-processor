@@ -1,11 +1,16 @@
 package uk.gov.companieshouse.officer.delta.processor.model;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -43,6 +48,9 @@ public class OfficersItem {
     @JsonProperty("title")
     private String title;
 
+    @JsonProperty("honours")
+    private String honours;
+
     @JsonProperty("middle_name")
     private String middleName;
 
@@ -78,6 +86,19 @@ public class OfficersItem {
 
     @JsonProperty("previous_name_array")
     private PreviousNameArray previousNameArray;
+
+    @JsonIgnore
+    private Map<String, Object> additionalProperties = new HashMap<>();
+
+    @JsonAnyGetter
+    public Map<String, Object> getAdditionalProperties() {
+        return this.additionalProperties;
+    }
+
+    @JsonAnySetter
+    public void setAdditionalProperty(String name, Object value) {
+        this.additionalProperties.put(name, value);
+    }
 
     public void setOccupation(String occupation) {
         this.occupation = occupation;
@@ -157,6 +178,14 @@ public class OfficersItem {
 
     public String getTitle() {
         return title;
+    }
+
+    public void setHonours(String honours) {
+        this.honours = honours;
+    }
+
+    public String getHonours() {
+        return honours;
     }
 
     public void setMiddleName(String middleName) {
@@ -286,6 +315,7 @@ public class OfficersItem {
                 && Objects.equals(getOfficerDetailId(), that.getOfficerDetailId())
                 && Objects.equals(getChangedAt(), that.getChangedAt())
                 && Objects.equals(getTitle(), that.getTitle())
+                && Objects.equals(getHonours(), that.getHonours())
                 && Objects.equals(getMiddleName(), that.getMiddleName())
                 && Objects.equals(getCorporateInd(), that.getCorporateInd())
                 && Objects.equals(getServiceAddress(), that.getServiceAddress())
@@ -313,6 +343,7 @@ public class OfficersItem {
                 getOfficerDetailId(),
                 getChangedAt(),
                 getTitle(),
+                getHonours(),
                 getMiddleName(),
                 getCorporateInd(),
                 getServiceAddress(),
