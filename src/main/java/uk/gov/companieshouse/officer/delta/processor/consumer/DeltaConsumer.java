@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.officer.delta.processor.consumer;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -75,9 +76,8 @@ public class DeltaConsumer {
                 if (e.canRetry()) {
                     sendMessageToRetryTopic(message);
                 } else {
-                    Map<String, Object> info = new HashMap<>();
                     info.put("stackTrace", ExceptionUtils.getStackTrace(e));
-                    logger.error("Recieved fatal excpetion from processor.", e, info);
+                    logger.error("Received fatal exception from processor.", e, info);
                     sendMessageToErrorTopic(message);
                 }
             } catch (DeserializationException e) {
