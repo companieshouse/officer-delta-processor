@@ -10,6 +10,7 @@ import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
 
 /**
  * Service that sends REST requests via private SDK.
@@ -42,20 +43,20 @@ public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements Ap
 
     @Override
     public InternalApiClient getApiClient() {
-        InternalApiClient internalApiClient = new InternalApiClient(getHttpClient());
-        internalApiClient.setBasePath(apiUrl);
-        internalApiClient.setBasePaymentsPath(paymentsApiUrl);
-        internalApiClient.setInternalBasePath(internalApiUrl);
 
-        return internalApiClient;
+        //        internalApiClient.setBasePath(apiUrl);
+//        internalApiClient.setBasePaymentsPath(paymentsApiUrl);
+//        internalApiClient.setInternalBasePath(internalApiUrl);
+
+        return ApiSdkManager.getPrivateSDK();
     }
 
-    private HttpClient getHttpClient() {
-        ApiKeyHttpClient httpClient = new ApiKeyHttpClient(chsApiKey);
-        // TODO: find out what the request id is supposed to be.
-        httpClient.setRequestId("Test request id");
-        return httpClient;
-    }
+//    private HttpClient getHttpClient() {
+//        ApiKeyHttpClient httpClient = new ApiKeyHttpClient(chsApiKey);
+//        // TODO: find out what the request id is supposed to be.
+//        httpClient.setRequestId("Test request id");
+//        return httpClient;
+//    }
 
     @Override
     public ApiResponse<Void> putAppointment(String companyNumber, String appointmentId, AppointmentAPI appointment) {
