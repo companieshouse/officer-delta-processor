@@ -75,6 +75,9 @@ public class DeltaConsumer {
                 if (e.canRetry()) {
                     sendMessageToRetryTopic(message);
                 } else {
+                    Map<String, Object> info = new HashMap<>();
+                    info.put("stackTrace", ExceptionUtils.getStackTrace(e));
+                    logger.error("Recieved fatal excpetion from processor.", e, info);
                     sendMessageToErrorTopic(message);
                 }
             } catch (DeserializationException e) {
