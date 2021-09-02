@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.officer.delta.processor;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -10,6 +11,7 @@ import org.springframework.test.context.TestPropertySource;
 @ActiveProfiles("test")
 @ContextConfiguration(classes = TestConsumerConfig.class)
 @TestPropertySource(locations = "classpath:test.properties")
+@Disabled
 class OfficerDeltaProcessorApplicationTests {
 
     @Test
