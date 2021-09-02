@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.officer.delta.processor.consumer;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
