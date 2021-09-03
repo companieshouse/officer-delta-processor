@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officer.delta.processor.tranformer;
+package uk.gov.companieshouse.officer.delta.processor.transformer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,6 @@ public class Transformer {
         AppointmentAPI output = new AppointmentAPI();
 
         transforms
-                .parallelStream()
                 .forEach(transformer -> transformer.transform(officer, output));
 
         return output;

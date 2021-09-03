@@ -3,6 +3,8 @@ package uk.gov.companieshouse.officer.delta.processor.processor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
@@ -10,26 +12,22 @@ import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
 import uk.gov.companieshouse.officer.delta.processor.model.Officers;
-import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientService;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.Transformer;
+import uk.gov.companieshouse.officer.delta.processor.transformer.OfficersTransformer;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 public class DeltaProcessor implements Processor<ChsDelta> {
     final Logger logger;
 
-    final Transformer transformer;
+    final OfficersTransformer transformer;
     final ApiClientService apiClientService;
 
     @Autowired
-    public DeltaProcessor(Logger logger, Transformer transformer, ApiClientService apiClientService) {
+    public DeltaProcessor(Logger logger, OfficersTransformer transformer, ApiClientService apiClientService) {
         this.transformer = transformer;
         this.logger = logger;
         this.apiClientService = apiClientService;
@@ -42,20 +40,16 @@ public class DeltaProcessor implements Processor<ChsDelta> {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             Officers officers = objectMapper.readValue(delta.getData(), Officers.class);
-
-            List<AppointmentAPI> transformedOfficers = officers.getOfficers().stream()
-                    .map(transformer::transform)
-                    .collect(Collectors.toList());
+            List<AppointmentAPI> xformed = transformer.transform(officers);
 
             Map<String, Object> info = new HashMap<>();
-            info.put("output Officers", transformedOfficers);
-            logger.debug("Transformed officer", info);
+            info.put("output Appointments",
+                    ReflectionToStringBuilder.toString(xformed.get(0), ToStringStyle.SHORT_PREFIX_STYLE));
+            logger.debug("Transformed officers", info);
 
-            final OfficersItem officer = officers.getOfficers().get(0);
-            final String internalId = Base64.getUrlEncoder().encodeToString(
-                    officer.getInternalId().getBytes(StandardCharsets.UTF_8));
-
-            apiClientService.putAppointment(officer.getCompanyNumber(), internalId, transformedOfficers.get(0));
+            xformed.forEach(app -> apiClientService.putAppointment(app.getData().getCompanyNumber(),
+                    app.getId(),
+                    app));
         } catch (JsonProcessingException e) {
             // TODO: figure out how to print exception without dumping sensitive fields
             logger.error("Unable to read JSON from delta: " + ExceptionUtils.getRootCauseMessage(e),

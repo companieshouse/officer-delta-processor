@@ -1,7 +1,7 @@
-package uk.gov.companieshouse.officer.delta.processor.tranformer;
+package uk.gov.companieshouse.officer.delta.processor.transformer;
 
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseBackwardsDate;
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseYesOrNo;
+import static uk.gov.companieshouse.officer.delta.processor.transformer.TransformerUtils.parseBackwardsDate;
+import static uk.gov.companieshouse.officer.delta.processor.transformer.TransformerUtils.parseYesOrNo;
 
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
