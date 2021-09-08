@@ -12,54 +12,52 @@ import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
 import uk.gov.companieshouse.officer.delta.processor.model.Officers;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientService;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.Transformer;
+import uk.gov.companieshouse.officer.delta.processor.tranformer.AppointmentTransform;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 public class DeltaProcessor implements Processor<ChsDelta> {
     final Logger logger;
 
-    final Transformer transformer;
+    final AppointmentTransform transformer;
     final ApiClientService apiClientService;
 
     @Autowired
-    public DeltaProcessor(Logger logger, Transformer transformer, ApiClientService apiClientService) {
-        this.transformer = transformer;
+    public DeltaProcessor(Logger logger,
+                          AppointmentTransform transformer,
+                          ApiClientService apiClientService) {
         this.logger = logger;
+        this.transformer = transformer;
         this.apiClientService = apiClientService;
     }
 
     @Override
     public void process(ChsDelta delta) throws ProcessException {
-        logger.info("Processing");
+        logger.infoContext(delta.getContextId(), "Processing", null);
 
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             Officers officers = objectMapper.readValue(delta.getData(), Officers.class);
 
-            List<AppointmentAPI> transformedOfficers = officers.getOfficers().stream()
-                    .map(transformer::transform)
-                    .collect(Collectors.toList());
+            for (OfficersItem officer : officers.getOfficers()) {
+                AppointmentAPI appointmentAPI = transformer.transform(officer);
+                appointmentAPI.setDeltaAt(officers.getDeltaAt());
 
-            Map<String, Object> info = new HashMap<>();
-            info.put("output Officers", transformedOfficers);
-            logger.debug("Transformed officer", info);
+                // This will be moved to the transformer
+                final String internalId = Base64.getUrlEncoder().encodeToString(
+                        officer.getInternalId().getBytes(StandardCharsets.UTF_8));
 
-            final OfficersItem officer = officers.getOfficers().get(0);
-            final String internalId = Base64.getUrlEncoder().encodeToString(
-                    officer.getInternalId().getBytes(StandardCharsets.UTF_8));
-
-            apiClientService.putAppointment(officer.getCompanyNumber(), internalId, transformedOfficers.get(0));
+                // Should be be making API calls for each officer or should be batch them together?
+                apiClientService.putAppointment(officer.getCompanyNumber(), internalId, appointmentAPI);
+            }
         } catch (JsonProcessingException e) {
             // TODO: figure out how to print exception without dumping sensitive fields
-            logger.error("Unable to read JSON from delta: " + ExceptionUtils.getRootCauseMessage(e),
-                    e);
+            logger.errorContext(delta.getContextId(),
+                    "Unable to read JSON from delta: " + ExceptionUtils.getRootCauseMessage(e),
+                    e,
+                    null);
 
             throw ProcessException.fatal("Unable to JSON parse CHSDelta", e);
         } catch (Throwable e) {
