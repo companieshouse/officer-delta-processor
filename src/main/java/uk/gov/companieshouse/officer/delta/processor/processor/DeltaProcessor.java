@@ -3,8 +3,6 @@ package uk.gov.companieshouse.officer.delta.processor.processor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
@@ -14,11 +12,7 @@ import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
 import uk.gov.companieshouse.officer.delta.processor.model.Officers;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientService;
-import uk.gov.companieshouse.officer.delta.processor.transformer.OfficersTransformer;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.AppointmentTransform;
 
 import java.nio.charset.StandardCharsets;
