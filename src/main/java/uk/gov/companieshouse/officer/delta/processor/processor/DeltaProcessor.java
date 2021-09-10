@@ -12,6 +12,7 @@ import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
 import uk.gov.companieshouse.officer.delta.processor.model.Officers;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientService;
+
 import uk.gov.companieshouse.officer.delta.processor.tranformer.AppointmentTransform;
 
 import java.nio.charset.StandardCharsets;

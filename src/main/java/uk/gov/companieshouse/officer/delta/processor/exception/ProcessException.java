@@ -14,6 +14,17 @@ public class ProcessException extends Exception {
     }
 
     /**
+     * Creates an exception which indicates processing cannot continue. There is no cause, or the cause is to be
+     * masked (e.g. it contains sensitive data).
+     *
+     * @param message a message to show what when wrong
+     * @return an exception that can be thrown within the processor
+     */
+    public ProcessException(final String message, final boolean canRetry) {
+        this(message, null, canRetry);
+    }
+
+    /**
      * Creates an exception which indicates processing cannot continue
      *
      * @param message a message to show what when wrong
