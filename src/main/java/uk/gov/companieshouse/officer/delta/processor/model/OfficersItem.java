@@ -39,6 +39,9 @@ public class OfficersItem {
     @JsonProperty(value = "appointment_date", required = true)
     private String appointmentDate;
 
+    @JsonProperty(value = "resignation_date")
+    private String resignationDate;
+
     @JsonProperty(value = "officer_detail_id", required = true)
     private String officerDetailId;
 
@@ -154,6 +157,14 @@ public class OfficersItem {
 
     public String getAppointmentDate() {
         return appointmentDate;
+    }
+
+    public String getResignationDate() {
+        return resignationDate;
+    }
+
+    public void setResignationDate(final String resignationDate) {
+        this.resignationDate = resignationDate;
     }
 
     public void setOfficerDetailId(String officerDetailId) {
@@ -293,25 +304,28 @@ public class OfficersItem {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        OfficersItem that = (OfficersItem) o;
-        return Objects.equals(getOccupation(), that.getOccupation())
-                && Objects.equals(getOfficerRole(),
-                that.getOfficerRole())
-                && Objects.equals(getInternalId(), that.getInternalId())
-                && Objects.equals(getKind(),
-                that.getKind())
-                && Objects.equals(getDateOfBirth(), that.getDateOfBirth())
+        final OfficersItem that = (OfficersItem) o;
+        return Objects.equals(getCompanyNumber(), that.getCompanyNumber())
+                && Objects.equals(getOccupation(),
+                that.getOccupation())
+                && Objects.equals(getOfficerRole(), that.getOfficerRole())
+                && Objects.equals(getInternalId(),
+                that.getInternalId())
+                && Objects.equals(getKind(), that.getKind())
+                && Objects.equals(getDateOfBirth(),
+                that.getDateOfBirth())
                 && Objects.equals(getServiceAddressSameAsRegisteredAddress(),
                 that.getServiceAddressSameAsRegisteredAddress())
                 && Objects.equals(getAppointmentDate(),
                 that.getAppointmentDate())
+                && Objects.equals(getResignationDate(), that.getResignationDate())
                 && Objects.equals(getOfficerDetailId(), that.getOfficerDetailId())
                 && Objects.equals(getChangedAt(), that.getChangedAt())
                 && Objects.equals(getTitle(), that.getTitle())
@@ -321,25 +335,27 @@ public class OfficersItem {
                 && Objects.equals(getServiceAddress(), that.getServiceAddress())
                 && Objects.equals(getUsualResidentialAddress(), that.getUsualResidentialAddress())
                 && Objects.equals(getForename(), that.getForename())
-                && Objects.equals(getCompanyNumber(), that.getCompanyNumber())
                 && Objects.equals(getOfficerId(), that.getOfficerId())
                 && Objects.equals(getUsualResidentialCountry(), that.getUsualResidentialCountry())
                 && Objects.equals(getIdentification(), that.getIdentification())
                 && Objects.equals(getNationality(), that.getNationality())
                 && Objects.equals(getSurname(), that.getSurname())
                 && Objects.equals(getSecureDirector(), that.getSecureDirector())
-                && Objects.equals(getPreviousNameArray(), that.getPreviousNameArray());
+                && Objects.equals(getPreviousNameArray(), that.getPreviousNameArray())
+                && Objects.equals(getAdditionalProperties(), that.getAdditionalProperties());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getOccupation(),
+        return Objects.hash(getCompanyNumber(),
+                getOccupation(),
                 getOfficerRole(),
                 getInternalId(),
                 getKind(),
                 getDateOfBirth(),
                 getServiceAddressSameAsRegisteredAddress(),
                 getAppointmentDate(),
+                getResignationDate(),
                 getOfficerDetailId(),
                 getChangedAt(),
                 getTitle(),
@@ -349,14 +365,14 @@ public class OfficersItem {
                 getServiceAddress(),
                 getUsualResidentialAddress(),
                 getForename(),
-                getCompanyNumber(),
                 getOfficerId(),
                 getUsualResidentialCountry(),
                 getIdentification(),
                 getNationality(),
                 getSurname(),
                 getSecureDirector(),
-                getPreviousNameArray());
+                getPreviousNameArray(),
+                getAdditionalProperties());
     }
 
     @Override

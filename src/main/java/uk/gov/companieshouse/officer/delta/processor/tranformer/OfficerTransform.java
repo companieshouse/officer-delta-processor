@@ -1,15 +1,15 @@
 package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
 
+import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseDateString;
+import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseDateTimeString;
+import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseYesOrNo;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
 import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
-
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseDateString;
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseDateTimeString;
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseYesOrNo;
 
 @Component
 public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI> {
@@ -30,10 +30,8 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
         officer.setUpdatedAt(parseDateTimeString("changedAt", source.getChangedAt()));
         officer.setAppointedOn(parseDateString("appointmentDate", source.getAppointmentDate()));
 
-        final String resignationDate = (String) source.getAdditionalProperties().get("resignation_date");
-
-        if (resignationDate != null) {
-            officer.setResignedOn(parseDateString("resignation_date", resignationDate));
+        if (source.getResignationDate() != null) {
+            officer.setResignedOn(parseDateString("resignation_date", source.getResignationDate()));
         }
         officer.setCompanyNumber(source.getCompanyNumber());
         officer.setTitle(source.getTitle());

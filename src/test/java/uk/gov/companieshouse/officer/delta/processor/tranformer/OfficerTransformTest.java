@@ -12,9 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
@@ -25,7 +23,6 @@ import uk.gov.companieshouse.officer.delta.processor.model.Identification;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 
 import java.time.Instant;
-import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 class OfficerTransformTest {
@@ -86,7 +83,7 @@ class OfficerTransformTest {
 
         officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate("20000101");
-        officer.setAdditionalProperty("resignation_date", INVALID_DATE);
+        officer.setResignationDate(INVALID_DATE);
 
         verifyProcessException(officerAPI, officer, "resignation_date: date/time pattern not matched: [yyyyMMdd]");
     }
@@ -104,14 +101,9 @@ class OfficerTransformTest {
         verifyProcessException(officerAPI, officer, "dateOfBirth: date/time pattern not matched: [yyyyMMdd]");
     }
 
-    private static Stream<Arguments> provideResignationDate() {
-        return Stream.of(Arguments.of(VALID_DATE_INSTANT));
-    }
-
-    @ParameterizedTest(name="{index}: resignation_date={0}")
-    @NullSource
-    @MethodSource("provideResignationDate")
-    void verifySuccessfulTransform(final Instant expectedResignedOn) throws ProcessException {
+    @ParameterizedTest(name="{index}: has resignation_date={0}")
+    @ValueSource(booleans = {true, false})
+    void verifySuccessfulTransform(final boolean hasResignationDate) throws ProcessException {
         final OfficerAPI officerAPI = testTransform.factory();
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
@@ -119,15 +111,15 @@ class OfficerTransformTest {
         officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate(VALID_DATE);
         officer.setDateOfBirth(VALID_DATE);
-        if (expectedResignedOn != null) {
-            officer.setAdditionalProperty("resignation_date", VALID_DATE);
+        if (hasResignationDate) {
+            officer.setResignationDate(VALID_DATE);
         }
 
         final OfficerAPI result = testTransform.transform(officer, officerAPI);
 
         assertThat(result.getUpdatedAt(), is(CHANGED_INSTANT));
         assertThat(result.getAppointedOn(), is(VALID_DATE_INSTANT));
-        assertThat(result.getResignedOn(), is(expectedResignedOn));
+        assertThat(result.getResignedOn(), is(hasResignationDate ? VALID_DATE_INSTANT: null));
         assertThat(result.getDateOfBirth(), is(VALID_DATE_INSTANT));
         assertThat(result.getCompanyNumber(), is(officer.getCompanyNumber()));
         assertThat(result.getTitle(), is(officer.getTitle()));
