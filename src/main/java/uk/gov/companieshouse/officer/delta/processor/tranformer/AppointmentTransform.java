@@ -22,7 +22,13 @@ public class AppointmentTransform implements Transformative<OfficersItem, Appoin
 
     @Override
     public AppointmentAPI transform(OfficersItem inputOfficer, AppointmentAPI outputAppointment) throws ProcessException {
+
         outputAppointment.setInternalId(inputOfficer.getInternalId());
+
+        final String encodedInternalId = TransformerUtils.encode(inputOfficer.getInternalId());
+        outputAppointment.setId(encodedInternalId);
+        outputAppointment.setAppointmentId(encodedInternalId);
+
         outputAppointment.setData(officerTransform.transform(inputOfficer));
 
         return outputAppointment;

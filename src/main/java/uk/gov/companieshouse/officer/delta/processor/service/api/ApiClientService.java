@@ -18,11 +18,9 @@ public interface ApiClientService {
      * Apply a Company Appointment delta.
      *
      * @param companyNumber the company number
-     * @param appointmentId the (encoded) appointment ID
      * @param appointment
      * @return the api response
      */
-    ApiResponse<Void> putAppointment(final String companyNumber, final String appointmentId,
-                                  final AppointmentAPI appointment);
+    ApiResponse<Void> putAppointment(final String companyNumber, final AppointmentAPI appointment);
 
 }
