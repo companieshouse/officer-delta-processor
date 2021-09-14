@@ -29,6 +29,12 @@ public class AppointmentTransform implements Transformative<OfficersItem, Appoin
         outputAppointment.setId(encodedInternalId);
         outputAppointment.setAppointmentId(encodedInternalId);
 
+        final String encodedOfficerId = TransformerUtils.encode(inputOfficer.getOfficerId());
+        outputAppointment.setOfficerId(encodedOfficerId);
+
+        final String encodedPreviousOfficerId = TransformerUtils.encode(inputOfficer.getPreviousOfficerId());
+        outputAppointment.setPreviousOfficerId(encodedPreviousOfficerId);
+
         outputAppointment.setData(officerTransform.transform(inputOfficer));
 
         return outputAppointment;

@@ -72,6 +72,9 @@ public class OfficersItem {
     @JsonProperty(value = "officer_id", required = true)
     private String officerId;
 
+    @JsonProperty("previous_officer_id")
+    private String previousOfficerId;
+
     @JsonProperty("usual_residential_country")
     private String usualResidentialCountry;
 
@@ -255,6 +258,14 @@ public class OfficersItem {
         return officerId;
     }
 
+    public String getPreviousOfficerId() {
+        return previousOfficerId;
+    }
+
+    public void setPreviousOfficerId(String previousOfficerId) {
+        this.previousOfficerId = previousOfficerId;
+    }
+
     public void setUsualResidentialCountry(String usualResidentialCountry) {
         this.usualResidentialCountry = usualResidentialCountry;
     }
@@ -336,6 +347,7 @@ public class OfficersItem {
                 && Objects.equals(getUsualResidentialAddress(), that.getUsualResidentialAddress())
                 && Objects.equals(getForename(), that.getForename())
                 && Objects.equals(getOfficerId(), that.getOfficerId())
+                && Objects.equals(getPreviousOfficerId(), that.getPreviousOfficerId())
                 && Objects.equals(getUsualResidentialCountry(), that.getUsualResidentialCountry())
                 && Objects.equals(getIdentification(), that.getIdentification())
                 && Objects.equals(getNationality(), that.getNationality())
@@ -366,6 +378,7 @@ public class OfficersItem {
                 getUsualResidentialAddress(),
                 getForename(),
                 getOfficerId(),
+                getPreviousOfficerId(),
                 getUsualResidentialCountry(),
                 getIdentification(),
                 getNationality(),
