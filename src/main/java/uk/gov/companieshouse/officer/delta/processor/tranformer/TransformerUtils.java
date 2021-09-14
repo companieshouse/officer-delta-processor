@@ -16,6 +16,7 @@ public class TransformerUtils {
 
     public static final String TIME_START_OF_DAY = "000000";
     public static final String DATETIME_PATTERN = "yyyyMMddHHmmss";
+    public static final int DATETIME_LENGTH = DATETIME_PATTERN.length();
     public static final String DATE_PATTERN = "yyyyMMdd";
     public static final DateTimeFormatter UTC_DATETIME_FORMATTER =
             DateTimeFormatter.ofPattern(DATETIME_PATTERN, Locale.UK).withZone(ZoneId.of("UTC"));
@@ -30,7 +31,7 @@ public class TransformerUtils {
     }
 
     /**
-     * @param identifier
+     * @param identifier       the field identifier to provide context in error messages
      * @param s                the string representation of the UTC datetime. Expected to match pattern
      *                         DATETIME_PATTERN.
      * @param effectivePattern the date pattern to mention in the ProcessException
@@ -73,7 +74,11 @@ public class TransformerUtils {
      */
     public static Instant parseDateTimeString(final String identifier, String rawDateTimeString)
             throws ProcessException {
-        return convertToInstant(identifier, rawDateTimeString, DATETIME_PATTERN);
+        final String dateTimeString = rawDateTimeString.length() > DATETIME_LENGTH
+                ? rawDateTimeString.substring(0, DATETIME_LENGTH)
+                : rawDateTimeString;
+
+        return convertToInstant(identifier, dateTimeString, DATETIME_PATTERN);
     }
 
     public static String base64Encode(final byte[] bytes) {

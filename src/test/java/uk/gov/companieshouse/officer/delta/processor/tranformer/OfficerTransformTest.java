@@ -7,12 +7,14 @@ import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
+import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.DATETIME_LENGTH;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
@@ -23,11 +25,12 @@ import uk.gov.companieshouse.officer.delta.processor.model.Identification;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 
 import java.time.Instant;
+import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 class OfficerTransformTest {
-    private static final String CHANGED_AT = "20210909133736";
-    private static final Instant CHANGED_INSTANT = Instant.parse("2021-09-09T13:37:36Z");
+    private static final String CHANGED_AT = "20210909133736012345";
+    private static final Instant CHANGED_INSTANT = Instant.parse("2021-09-09T13:37:36.000Z");
     public static final String VALID_DATE = "20000101";
     public static final String INVALID_DATE = "12345";
     private static final Instant VALID_DATE_INSTANT = Instant.parse("2000-01-01T00:00:00Z");
@@ -56,7 +59,7 @@ class OfficerTransformTest {
     }
 
     @Test
-    void transformSingleWhenChangedAtInvalid() throws ProcessException {
+    void transformSingleWhenChangedAtInvalid() {
         final OfficerAPI officerAPI = testTransform.factory();
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
@@ -66,7 +69,7 @@ class OfficerTransformTest {
     }
 
     @Test
-    void transformSingleWhenAppointmentDateInvalid() throws ProcessException {
+    void transformSingleWhenAppointmentDateInvalid() {
         final OfficerAPI officerAPI = testTransform.factory();
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
@@ -77,7 +80,7 @@ class OfficerTransformTest {
     }
 
     @Test
-    void transformSingleWhenResignationDateInvalid() throws ProcessException {
+    void transformSingleWhenResignationDateInvalid() {
         final OfficerAPI officerAPI = testTransform.factory();
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
@@ -89,7 +92,7 @@ class OfficerTransformTest {
     }
 
     @Test
-    void transformSingleWhenDateOfBirthInvalid() throws ProcessException {
+    void transformSingleWhenDateOfBirthInvalid() {
         final OfficerAPI officerAPI = testTransform.factory();
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
@@ -101,14 +104,22 @@ class OfficerTransformTest {
         verifyProcessException(officerAPI, officer, "dateOfBirth: date/time pattern not matched: [yyyyMMdd]");
     }
 
-    @ParameterizedTest(name="{index}: has resignation_date={0}")
-    @ValueSource(booleans = {true, false})
-    void verifySuccessfulTransform(final boolean hasResignationDate) throws ProcessException {
+    private static Stream<Arguments> provideScenarioParams() {
+        return Stream.of(Arguments.of(CHANGED_AT, true),
+                // changedAt full accuracy, resignation date present
+                Arguments.of(CHANGED_AT.substring(0, DATETIME_LENGTH), false)
+                // changedAt seconds accuracy, resignation date absent
+        );
+    }
+
+    @ParameterizedTest(name = "{index}: changedAt={0}, has resignation_date={1}")
+    @MethodSource("provideScenarioParams")
+    void verifySuccessfulTransform(final String changedAt, final boolean hasResignationDate) throws ProcessException {
         final OfficerAPI officerAPI = testTransform.factory();
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         when(identificationTransform.transform(identification)).thenReturn(identificationAPI);
-        officer.setChangedAt(CHANGED_AT);
+        officer.setChangedAt(changedAt);
         officer.setAppointmentDate(VALID_DATE);
         officer.setDateOfBirth(VALID_DATE);
         if (hasResignationDate) {
