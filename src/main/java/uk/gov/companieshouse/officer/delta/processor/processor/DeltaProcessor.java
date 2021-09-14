@@ -46,12 +46,8 @@ public class DeltaProcessor implements Processor<ChsDelta> {
                 AppointmentAPI appointmentAPI = transformer.transform(officer);
                 appointmentAPI.setDeltaAt(officers.getDeltaAt());
 
-                // This will be moved to the transformer
-                final String internalId = Base64.getUrlEncoder().encodeToString(
-                        officer.getInternalId().getBytes(StandardCharsets.UTF_8));
-
                 // Should be be making API calls for each officer or should be batch them together?
-                apiClientService.putAppointment(officer.getCompanyNumber(), internalId, appointmentAPI);
+                apiClientService.putAppointment(officer.getCompanyNumber(), appointmentAPI);
             }
         } catch (JsonProcessingException e) {
             // TODO: figure out how to print exception without dumping sensitive fields

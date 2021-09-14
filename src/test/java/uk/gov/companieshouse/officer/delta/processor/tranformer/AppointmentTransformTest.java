@@ -41,6 +41,8 @@ class AppointmentTransformTest {
     void transformSingle() throws ProcessException {
         final OfficersItem item = createOfficer();
         final AppointmentAPI appointmentAPI = testTransform.factory();
+        appointmentAPI.setId("internalId");
+        appointmentAPI.setAppointmentId("internalId");
 
         when(officerTransform.transform(item)).thenReturn(officerAPI);
 
@@ -48,6 +50,10 @@ class AppointmentTransformTest {
 
         assertThat(result, is(sameInstance(appointmentAPI)));
         assertThat(appointmentAPI.getInternalId(), is("internalId"));
+        assertThat(appointmentAPI.getId(), is("inamTI4b12taUuJyjgA72RNkYbs"));
+        assertThat(appointmentAPI.getAppointmentId(), is("inamTI4b12taUuJyjgA72RNkYbs"));
+        assertThat(appointmentAPI.getOfficerId(), is("6zmr-K93Jh_iDBMbWqRj3GuaQwQ"));
+        assertThat(appointmentAPI.getPreviousOfficerId(), is("F_kqEbg83lQRIXkF6yUjxZ-wN9E"));
         verify(officerTransform).transform(item);
         assertThat(appointmentAPI.getData(), is(sameInstance(officerAPI)));
     }
@@ -56,6 +62,8 @@ class AppointmentTransformTest {
         final OfficersItem item = new OfficersItem();
 
         item.setInternalId("internalId");
+        item.setOfficerId("officerId");
+        item.setPreviousOfficerId("previousOfficerId");
 
         return item;
     }

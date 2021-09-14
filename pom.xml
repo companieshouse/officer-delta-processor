@@ -25,7 +25,7 @@
 		<kafka-models.version>1.0.25</kafka-models.version>
 		<structured-logging.version>1.9.3</structured-logging.version>
 		<commons-lang3.version>3.11</commons-lang3.version>
-		<private.sdk.version>2.0.78</private.sdk.version>
+		<private.sdk.version>2.0.83</private.sdk.version>
 
 		<!-- Test -->
 		<mockito-junit-jupiter.version>3.8.0</mockito-junit-jupiter.version>

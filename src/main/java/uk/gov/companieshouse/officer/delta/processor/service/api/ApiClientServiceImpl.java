@@ -58,8 +58,8 @@ public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements Ap
     }
 
     @Override
-    public ApiResponse<Void> putAppointment(String companyNumber, String appointmentId, AppointmentAPI appointment) {
-        final String uri = String.format("%s/company/%s/appointments/%s", ROOT_URI, companyNumber, appointmentId);
+    public ApiResponse<Void> putAppointment(String companyNumber, AppointmentAPI appointment) {
+        final String uri = String.format("%s/company/%s/appointments/%s", ROOT_URI, companyNumber, appointment.getAppointmentId());
 
         logger.debug(String.format("PUT %s", uri));
         logger.debug(String.format("appointment=%s", appointment));
