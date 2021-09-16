@@ -47,6 +47,7 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
         officer.setServiceAddress(source.getServiceAddress());
         officer.setServiceAddressSameAsRegisteredOfficeAddress(
                 parseYesOrNo(source.getServiceAddressSameAsRegisteredAddress()));
+        officer.setUsualResidentialAddress(source.getUsualResidentialAddress());
         officer.setCountryOfResidence(source.getUsualResidentialCountry());
 
         officer.setIdentificationData(idTransform.transform(source.getIdentification()));
