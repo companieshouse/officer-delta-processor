@@ -7,6 +7,8 @@ import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 
+import java.util.ArrayList;
+import java.util.List;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.BeforeEach;
@@ -188,7 +190,7 @@ class OfficersItemTest {
 
     @Test
     void setPreviousNameArray() {
-        final PreviousNameArray expected = new PreviousNameArray();
+        final List<PreviousNameArray> expected = new ArrayList<PreviousNameArray>();
 
         testItem.setPreviousNameArray(expected);
         assertThat(testItem.getPreviousNameArray(), is(sameInstance(expected)));
