@@ -72,6 +72,12 @@ class OfficersItemTest {
     }
 
     @Test
+    void setResidentialAddressSameAsServiceAddress() {
+        testItem.setResidentialAddressSameAsServiceAddress(EXPECTED);
+        assertThat(testItem.getResidentialAddressSameAsServiceAddress(), is(EXPECTED));
+    }
+
+    @Test
     void setAppointmentDate() {
         testItem.setAppointmentDate(EXPECTED);
         assertThat(testItem.getAppointmentDate(), is(EXPECTED));
