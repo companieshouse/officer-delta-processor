@@ -18,7 +18,7 @@ import uk.gov.companieshouse.kafka.producer.CHKafkaProducer;
 import uk.gov.companieshouse.kafka.producer.ProducerConfig;
 import uk.gov.companieshouse.kafka.serialization.AvroSerializer;
 import uk.gov.companieshouse.kafka.serialization.SerializerFactory;
-import uk.gov.companieshouse.officer.delta.processor.consumer.DeltaConsumer;
+import uk.gov.companieshouse.officer.delta.processor.service.DeltaConsumerService;
 import uk.gov.companieshouse.officer.delta.processor.processor.Processor;
 
 import java.time.Duration;
@@ -40,7 +40,7 @@ import static org.awaitility.Awaitility.await;
 @ExtendWith(KafkaExtension.class)
 public abstract class BaseKafkaIntegrationTest {
     @Autowired
-    DeltaConsumer consumer;
+    DeltaConsumerService consumer;
 
     @Autowired
     Processor<ChsDelta> processor;

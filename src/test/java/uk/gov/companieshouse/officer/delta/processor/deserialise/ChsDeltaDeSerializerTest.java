@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.officer.delta.processor.deserialise;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,19 +18,19 @@ import uk.gov.companieshouse.kafka.serialization.SerializerFactory;
 
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-class ChsDeltaDeserializerTest {
+class ChsDeltaDeSerializerTest {
 
     public static final String data = "{\"Hello\": \"World!\"}";
     public static final int attempt = 0;
     public static final String CONTEXT_ID = "context_id";
 
 
-    final AvroDeserializer<ChsDelta> chsDeltaAvroDeserializer = new DeserializerFactory()
-            .getSpecificRecordDeserializer(ChsDelta.class);
+    private final AvroDeserializer<ChsDelta> chsDeltaAvroDeserializer =
+            new DeserializerFactory().getSpecificRecordDeserializer(ChsDelta.class);
+    private final AvroSerializer<ChsDelta> chsDeltaAvroSerializer =
+            new SerializerFactory().getSpecificRecordSerializer(ChsDelta.class);
 
-    ChsDeltaDeserializer deserializer;
+    ChsDeltaDeSerializer testDeSerializer;
 
     private static Stream<Arguments> deserializeParameters() {
         return Stream.of(
@@ -48,7 +50,7 @@ class ChsDeltaDeserializerTest {
 
     @BeforeEach
     void setUp() {
-        deserializer = new ChsDeltaDeserializer(chsDeltaAvroDeserializer);
+        testDeSerializer = new ChsDeltaDeSerializer(chsDeltaAvroDeserializer, chsDeltaAvroSerializer);
     }
 
     @ParameterizedTest
@@ -57,7 +59,7 @@ class ChsDeltaDeserializerTest {
     void deserialize(String data, int attempt, String contextId) throws SerializationException, DeserializationException {
         Message message = messageOf(data, attempt, contextId);
 
-        ChsDelta delta = deserializer.deserialize(message);
+        ChsDelta delta = testDeSerializer.deserialize(message);
 
         assertEquals(delta.getAttempt(), attempt);
         assertEquals(delta.getData(), data);

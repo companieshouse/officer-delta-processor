@@ -16,7 +16,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.fail;
 import static uk.gov.companieshouse.officer.delta.processor.Util.withKafkaEnvironment;
 
-class DeltaConsumerConfigTest {
+class DeltaConsumerServiceConfigTest {
 
     DeltaConsumerConfig config;
 

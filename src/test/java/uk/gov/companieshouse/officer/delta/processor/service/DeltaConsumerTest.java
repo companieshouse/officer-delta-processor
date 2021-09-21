@@ -1,4 +1,17 @@
-package uk.gov.companieshouse.officer.delta.processor.consumer;
+package uk.gov.companieshouse.officer.delta.processor.service;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,26 +27,13 @@ import uk.gov.companieshouse.kafka.consumer.resilience.CHKafkaResilientConsumerG
 import uk.gov.companieshouse.kafka.exceptions.DeserializationException;
 import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.officer.delta.processor.deserialise.ChsDeltaDeserializer;
+import uk.gov.companieshouse.officer.delta.processor.deserialise.ChsDeltaDeSerializer;
 import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
 import uk.gov.companieshouse.officer.delta.processor.processor.Processor;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DeltaConsumerTest {
@@ -42,7 +42,7 @@ class DeltaConsumerTest {
     Logger logger;
 
     @Mock
-    ChsDeltaDeserializer deserializer;
+    ChsDeltaDeSerializer deserializer;
 
     @Mock
     Processor<ChsDelta> processor;
@@ -52,7 +52,7 @@ class DeltaConsumerTest {
 
     @Spy
     @InjectMocks
-    DeltaConsumer consumer;
+    DeltaConsumerService consumer;
 
     private static <T> Answer<T> processException(boolean fatal) {
         return invocationOnMock -> {

@@ -1,140 +1,193 @@
 package uk.gov.companieshouse.officer.delta.processor.consumer;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.delta.ChsDelta;
+import uk.gov.companieshouse.kafka.consumer.resilience.CHConsumerType;
 import uk.gov.companieshouse.kafka.consumer.resilience.CHKafkaResilientConsumerGroup;
 import uk.gov.companieshouse.kafka.exceptions.DeserializationException;
+import uk.gov.companieshouse.kafka.exceptions.SerializationException;
 import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.officer.delta.processor.deserialise.ChsDeltaDeserializer;
+import uk.gov.companieshouse.officer.delta.processor.deserialise.ChsDeltaDeSerializer;
 import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
 import uk.gov.companieshouse.officer.delta.processor.processor.Processor;
 
-import javax.annotation.PreDestroy;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
-/**
- * Consumes officer deltas from kafka, processes them, and handles any errors.
- * Messages are consumed via polling kafka for new messages.
- * Processing is delegated to a processor, which handles the business logic.
- */
-@Component
 public class DeltaConsumer {
-    private final CHKafkaResilientConsumerGroup consumer;
+    private final CHKafkaResilientConsumerGroup consumerGroup;
+    private final ChsDeltaDeSerializer deserializer;
+    private final Processor<ChsDelta> processor;
     private final Logger logger;
-    private final ChsDeltaDeserializer deserializer;
-    @Value("${kafka.polling.duration.ms}")
-    private int kafkaPollingDuration;
-    private Processor<ChsDelta> processor;
 
-    @SuppressWarnings("unused")
-    @Autowired
-    public DeltaConsumer(
-            CHKafkaResilientConsumerGroup chKafkaConsumerGroup,
-            Logger logger,
-            ChsDeltaDeserializer deserializer,
-            Processor<ChsDelta> processor) {
+    /**
+     * Deque of messages waiting to be processed.
+     * Faster performance of remove first element than ArrayList
+     */
+    private Deque<Message> messages = new ArrayDeque<>();
 
-        this.consumer = chKafkaConsumerGroup;
-        this.logger = logger;
+    /**
+     * Initialise the consumer by connecting to the consumer group
+     */
+    public DeltaConsumer(final CHKafkaResilientConsumerGroup consumerGroup, final ChsDeltaDeSerializer deserializer,
+            final Processor<ChsDelta> processor, final Logger logger) {
+        this.consumerGroup = consumerGroup;
         this.deserializer = deserializer;
         this.processor = processor;
+        this.logger = logger;
 
-        consumer.connect();
+        consumerGroup.connect();
     }
 
     /**
-     * Periodically polls kafka kafka for new ChsDelta messages. Poll rate configured through
-     * the POLLING_RATE_MS variable.
+     * Commits the offset into Kafka for the message.
+     *
+     * @param message the message
      */
-    @Scheduled(
-            fixedRateString = "${kafka.polling.duration.ms}",
-            initialDelayString = "${kafka.polling.initial.delay.ms}")
-    void pollKafka() throws InterruptedException {
-        Map<String, Object> pollingInfo = new HashMap<>();
-        pollingInfo.put("duration", String.format("%dms", kafkaPollingDuration));
-        logger.trace("Polling Kafka", pollingInfo);
+    public void commitOffset(Message message) {
+        consumerGroup.commit();
+    }
 
-        for (Message message : consumer.consume()) {
+    /**
+     * Retrieve an optional message from the message list.<br>
+     * Return the next message from the cache; poll the topic for new
+     * messages if the cache is empty.
+     * If no messages exist, return Optional.empty().
+     *
+     * @return message
+     */
+    public Optional<Message> getNextDeltaMessage() {
+        if (messages.isEmpty()) {
+            messages.addAll(consumerGroup.consume());
+            logger.debug(String.format("Polled %d new message(s)", messages.size()));
+        }
+
+        return Optional.ofNullable(messages.pollFirst());
+    }
+
+    public long getRetryThrottle() {
+        return consumerGroup.getConfig().getRetryThrottle();
+    }
+
+    public int getMaxRetryAttempts() {
+        return consumerGroup.getConfig().getMaxRetries();
+    }
+
+    public long stopAtOffset() {
+        return consumerGroup.stopAtOffset();
+    }
+
+    public CHConsumerType getConsumerType() {
+        return consumerGroup.getConsumerType();
+    }
+
+    @Scheduled(fixedDelayString = "${kafka.polling.delay.ms}", initialDelayString = "${kafka.polling.initial.delay.ms}")
+    void consumeMessage() throws InterruptedException, ExecutionException {
+        final Optional<Message> nextDeltaMessage = getNextDeltaMessage();
+
+        if (nextDeltaMessage.isPresent()) {
+            final Message deltaMessage = nextDeltaMessage.get();
+            final Long offset = deltaMessage.getOffset();
             Map<String, Object> info = new HashMap<>();
-            info.put("partition", message.getPartition());
-            info.put("offset", message.getOffset());
-            logger.info("Received message from kafka", info);
+
+            info.put("topic", deltaMessage.getTopic());
+            info.put("partition", deltaMessage.getPartition());
+            info.put("offset", offset);
+            logger.info("Consume message", info);
+
+            ChsDelta delta = null;
+            int attempt = 0;
 
             try {
-                ChsDelta delta = deserializer.deserialize(message);
+                delta = deserializer.deserialize(deltaMessage);
+
+                attempt = delta.getAttempt();
                 processor.process(delta);
-                consumer.commit(message);
-                logger.info("Message committed", info);
-            } catch (ProcessException e) {
+            }
+            catch (ProcessException e) {
+                logger.error("Processor failed on message: " + e.getMessage());
                 if (e.canRetry()) {
-                    sendMessageToRetryTopic(message);
-                } else {
+                    queueRetry(offset, attempt, delta);
+                }
+                else {
                     info.put("stackTrace", ExceptionUtils.getStackTrace(e));
                     logger.error("Received fatal exception from processor.", e, info);
-                    sendMessageToErrorTopic(message);
                 }
-            } catch (DeserializationException e) {
+            }
+            catch (DeserializationException e) {
                 logger.error("Unable to deserialize message", e, info);
-                sendMessageToErrorTopic(message);
+            }
+            catch (Exception e) {
+                info.put("stackTrace", ExceptionUtils.getStackTrace(e));
+                logger.error("Processor failed on message", e, info);
+                queueRetry(offset, attempt, delta);
+            }
+            finally {
+                logger.info("Commit message", info);
+                commitOffset(deltaMessage);
             }
         }
-    }
-
-    void sendMessageToRetryTopic(Message message) throws InterruptedException {
-        Map<String, Object> loggingInfo = new HashMap<>();
-        loggingInfo.put("key", message.getKey());
-        loggingInfo.put("topic", message.getTopic());
-        loggingInfo.put("partition", message.getPartition());
-        loggingInfo.put("offset", message.getOffset());
-
-        int attemptsToRetry = 0;
-        boolean success = false;
-
-        while (!success && attemptsToRetry < 8) {
-            attemptsToRetry++;
-            loggingInfo.put("attempts to retry", attemptsToRetry);
-            try {
-                consumer.retry(0, message);
-                consumer.commit(message);
-                success = true;
-                logger.info("Message successfully sent to retry topic", loggingInfo);
-            } catch (ExecutionException e) {
-                logger.error("Error occurred while send message to retry topic", e, loggingInfo);
-            }
-        }
-
-        loggingInfo.put("kafkaMessage", message);
-        logger.error(
-                "Unable to add message to retry topic. Reached max attempts. Attempting to send to error topic",
-                loggingInfo);
-    }
-
-    @SuppressWarnings("java:S1186")
-        // Remove once method
-    void sendMessageToErrorTopic(Message message) {
     }
 
     /**
-     * Sets the processor that will be called with the deserialized ChsDelta
+     * Send the message to the appropriate topic because of a transient error:
+     * - the retry topic if retries < max retries
+     * - the error topic if retries >= max retries
      *
-     * @param processor the processor that will process the delta
+     * @param attempt      the attempt counter
+     * @param delta        the ChsDelta payload to queue
+     * @param sourceOffset the offset of the originating message
+     * @throws ExecutionException
+     * @throws InterruptedException
      */
-    public void setProcessor(Processor<ChsDelta> processor) {
-        this.processor = processor;
+    public void queueRetry(long sourceOffset, int attempt, final ChsDelta delta)
+            throws ExecutionException, InterruptedException {
+        consumerGroup.retry(attempt, createRetryMessage(delta, sourceOffset));
     }
 
     /**
-     * Clean up consumer connections when the program ends.
+     * Send the message to the error topic because of a non-transient error.
+     *
+     * @param message the message to queue
+     * @throws ExecutionException
+     * @throws InterruptedException
      */
-    @PreDestroy
-    public void destroy() {
-        consumer.close();
+    public void queueError(final Message message) throws ExecutionException, InterruptedException {
+        consumerGroup.retry(Integer.MAX_VALUE, message);
     }
+
+    private void logRetryFailure(final String logContext, final Throwable cause, final String topic,
+            final Long offset) {
+        final Map<String, Object> logMap = new HashMap<>();
+
+        logMap.put("error", cause);
+        logMap.put("topic", topic);
+        logMap.put("offset", offset);
+        logger.error(logContext, logMap);
+    }
+
+    private Message createRetryMessage(final ChsDelta delta, final Long sourceOffset) {
+        final Message retry = new Message();
+        final ChsDelta payload = new ChsDelta();
+        int nextAttempt = delta.getAttempt() >= getMaxRetryAttempts() ? 0 : delta.getAttempt() + 1;
+
+        payload.setAttempt(nextAttempt);
+        payload.setContextId(delta.getContextId());
+        payload.setData(delta.getData());
+        try {
+            retry.setValue(deserializer.serialize(payload));
+        }
+        catch (SerializationException e) {
+            logRetryFailure("Failed to create new retry message", e, retry.getTopic(), sourceOffset);
+        }
+
+        return retry;
+    }
+
 }

@@ -12,11 +12,7 @@ import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
 import uk.gov.companieshouse.officer.delta.processor.model.Officers;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientService;
-
 import uk.gov.companieshouse.officer.delta.processor.tranformer.AppointmentTransform;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 @Component
 public class DeltaProcessor implements Processor<ChsDelta> {
@@ -43,10 +39,13 @@ public class DeltaProcessor implements Processor<ChsDelta> {
             Officers officers = objectMapper.readValue(delta.getData(), Officers.class);
 
             for (OfficersItem officer : officers.getOfficers()) {
+                if (officer.getAppointmentDate().endsWith("00")) {
+                    throw ProcessException.nonFatal("Testing retry flow", new RuntimeException("Dummy transient error"));
+                }
                 AppointmentAPI appointmentAPI = transformer.transform(officer);
                 appointmentAPI.setDeltaAt(officers.getDeltaAt());
 
-                // Should be be making API calls for each officer or should be batch them together?
+                // Should we be making API calls for each officer or should we batch them?
                 apiClientService.putAppointment(officer.getCompanyNumber(), appointmentAPI);
             }
         } catch (JsonProcessingException e) {
@@ -55,10 +54,6 @@ public class DeltaProcessor implements Processor<ChsDelta> {
                     "Unable to read JSON from delta: " + ExceptionUtils.getRootCauseMessage(e),
                     e,
                     null);
-
-            throw ProcessException.fatal("Unable to JSON parse CHSDelta", e);
-        } catch (Throwable e) {
-            // TODO: figure out how to print exception without dumping sensitive fields
 
             throw ProcessException.fatal("Unable to JSON parse CHSDelta", e);
         }
