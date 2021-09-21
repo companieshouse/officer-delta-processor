@@ -20,11 +20,11 @@
       "officer_detail_id": "3456251385",
       "officer_role": "Director",
       "usual_residential_country": "United Kingdom",
-      "previous_name_array": {
+      "previous_name_array": [{
         "previous_surname": "BURCH",
         "previous_forename": "VALERIE JEAN",
         "previous_timestamp": "20091101072217613702"
-      },
+      }],
       "identification": {
         "EEA": {
           "place_registered": "United Kingdom",
