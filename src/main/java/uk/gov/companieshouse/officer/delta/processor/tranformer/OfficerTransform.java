@@ -53,6 +53,10 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
 
         officer.setIdentificationData(idTransform.transform(source.getIdentification()));
 
+        if (RolesWithDateOfBirth.officerRequiresDateOfBirth(source)) {
+            officer.setDateOfBirth(parseDateString("dateOfBirth", source.getDateOfBirth()));
+        }
+
         return officer;
     }
 }
