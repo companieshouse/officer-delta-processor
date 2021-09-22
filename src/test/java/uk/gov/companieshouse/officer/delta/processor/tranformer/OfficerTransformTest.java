@@ -39,7 +39,7 @@ class OfficerTransformTest {
     public static final String VALID_DATE = "20000101";
     public static final String INVALID_DATE = "12345";
     private static final Instant VALID_DATE_INSTANT = Instant.parse("2000-01-01T00:00:00Z");
-    public static final String OFFICER_ROLE_WITH_DOB = RolesWithDateOfBirth.DIRECTOR.getOfficerRole();
+    public static final String KIND_OF_OFFICER_ROLE_WITH_DOB = OfficerRole.DIR.name();
 
     private OfficerTransform testTransform;
 
@@ -106,7 +106,7 @@ class OfficerTransformTest {
         officer.setAppointmentDate(VALID_DATE);
         officer.setAdditionalProperty("resignation_date", VALID_DATE);
         officer.setDateOfBirth(INVALID_DATE);
-        officer.setOfficerRole(OFFICER_ROLE_WITH_DOB);
+        officer.setOfficerRole(KIND_OF_OFFICER_ROLE_WITH_DOB);
 
         verifyProcessException(officerAPI, officer, "dateOfBirth: date/time pattern not matched: [yyyyMMdd]");
     }
@@ -118,7 +118,7 @@ class OfficerTransformTest {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         officer.setDateOfBirth(VALID_DATE);
-        officer.setOfficerRole(officerRole.getValue());
+        officer.setKind(officerRole.name());
         officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate(VALID_DATE);
 
@@ -195,7 +195,8 @@ class OfficerTransformTest {
         item.setNationality("nationality");
         item.setOccupation("occupation");
         item.setDateOfBirth("dateOfBirth");
-        item.setOfficerRole("officerRole");
+        item.setOfficerRole("director");
+        item.setKind("DIR");
         item.setHonours("honours");
         item.setServiceAddress(serviceAddress);
         item.setServiceAddressSameAsRegisteredAddress("Y");

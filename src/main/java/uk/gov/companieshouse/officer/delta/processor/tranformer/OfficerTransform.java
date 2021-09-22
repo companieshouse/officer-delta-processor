@@ -45,7 +45,9 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
         officer.setNationality(source.getNationality());
         officer.setOccupation(source.getOccupation());
 
-        officer.setOfficerRole(source.getOfficerRole());
+
+        final String officerRole = TransformerUtils.lookupOfficeRole(source.getKind());
+        officer.setOfficerRole(officerRole);
         officer.setHonours(source.getHonours());
 
         officer.setServiceAddress(source.getServiceAddress());
@@ -58,7 +60,7 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
 
         officer.setIdentificationData(idTransform.transform(source.getIdentification()));
 
-        if (RolesWithDateOfBirth.includes(source.getOfficerRole())) {
+        if (RolesWithDateOfBirth.includes(officerRole)) {
             officer.setDateOfBirth(parseDateString("dateOfBirth", source.getDateOfBirth()));
         }
 
