@@ -124,7 +124,7 @@ class OfficerTransformTest {
 
         final OfficerAPI outputOfficer = testTransform.transform(officer);
 
-        if (RolesWithDateOfBirth.officerRequiresDateOfBirth(officerRole)) {
+        if (RolesWithDateOfBirth.includes(officerRole)) {
             assertThat(outputOfficer.getDateOfBirth(), is(notNullValue()));
         } else {
             assertThat(outputOfficer.getDateOfBirth(), is(nullValue()));
@@ -158,7 +158,7 @@ class OfficerTransformTest {
         assertThat(result.getUpdatedAt(), is(CHANGED_INSTANT));
         assertThat(result.getAppointedOn(), is(VALID_DATE_INSTANT));
         assertThat(result.getResignedOn(), is(hasResignationDate ? VALID_DATE_INSTANT : null));
-        if (RolesWithDateOfBirth.officerRequiresDateOfBirth(result.getOfficerRole())) {
+        if (RolesWithDateOfBirth.includes(result.getOfficerRole())) {
             assertThat(result.getDateOfBirth(), is(VALID_DATE_INSTANT));
         }
         assertThat(result.getCompanyNumber(), is(officer.getCompanyNumber()));

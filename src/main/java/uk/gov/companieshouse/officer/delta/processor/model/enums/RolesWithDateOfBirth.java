@@ -1,8 +1,6 @@
 package uk.gov.companieshouse.officer.delta.processor.model.enums;
 
-import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
-
-import java.util.Arrays;
+import java.util.EnumSet;
 
 public enum RolesWithDateOfBirth {
     DIRECTOR(OfficerRole.DIR),
@@ -23,17 +21,13 @@ public enum RolesWithDateOfBirth {
         return officerRole.getValue();
     }
 
-    public static boolean officerRequiresDateOfBirth(final OfficersItem officer) {
-        return officerRequiresDateOfBirth(officer.getOfficerRole());
+    public static boolean includes(final OfficerRole role) {
+        return includes(role.getValue());
     }
 
-    public static boolean officerRequiresDateOfBirth(final OfficerRole role) {
-        return officerRequiresDateOfBirth(role.getValue());
-    }
-
-    public static boolean officerRequiresDateOfBirth(final String role) {
-        return Arrays.stream(RolesWithDateOfBirth.values())
+    public static boolean includes(final String role) {
+        return EnumSet.allOf(RolesWithDateOfBirth.class).stream()
                 .map(r -> r.officerRole.getValue())
-                .anyMatch(rid -> rid.equals(role));
+                .anyMatch(role::equals);
     }
 }
