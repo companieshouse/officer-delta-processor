@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OfficersItem {
@@ -35,6 +35,9 @@ public class OfficersItem {
 
     @JsonProperty(value = "service_address_same_as_registered_address", required = true)
     private String serviceAddressSameAsRegisteredAddress;
+
+    @JsonProperty(value = "residential_address_same_as_service_address", required = true)
+    private String residentialAddressSameAsServiceAddress;
 
     @JsonProperty(value = "appointment_date", required = true)
     private String appointmentDate;
@@ -94,7 +97,7 @@ public class OfficersItem {
     private String secureDirector;
 
     @JsonProperty("previous_name_array")
-    private PreviousNameArray previousNameArray;
+    private List<PreviousNameArray> previousNameArray;
 
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -155,6 +158,15 @@ public class OfficersItem {
 
     public String getServiceAddressSameAsRegisteredAddress() {
         return serviceAddressSameAsRegisteredAddress;
+    }
+
+    public String getResidentialAddressSameAsServiceAddress() {
+        return residentialAddressSameAsServiceAddress;
+    }
+
+    public void setResidentialAddressSameAsServiceAddress(
+        final String residentialAddressSameAsServiceAddress) {
+        this.residentialAddressSameAsServiceAddress = residentialAddressSameAsServiceAddress;
     }
 
     public void setAppointmentDate(String appointmentDate) {
@@ -317,12 +329,12 @@ public class OfficersItem {
         return secureDirector;
     }
 
-    public void setPreviousNameArray(PreviousNameArray previousNameArray) {
-        this.previousNameArray = previousNameArray;
+    public List<PreviousNameArray> getPreviousNameArray() {
+        return previousNameArray;
     }
 
-    public PreviousNameArray getPreviousNameArray() {
-        return previousNameArray;
+    public void setPreviousNameArray(final List<PreviousNameArray> previousNameArray) {
+        this.previousNameArray = previousNameArray;
     }
 
     @Override
@@ -345,6 +357,8 @@ public class OfficersItem {
                 that.getDateOfBirth())
                 && Objects.equals(getServiceAddressSameAsRegisteredAddress(),
                 that.getServiceAddressSameAsRegisteredAddress())
+               && Objects.equals(getResidentialAddressSameAsServiceAddress(),
+            that.getResidentialAddressSameAsServiceAddress())
                 && Objects.equals(getAppointmentDate(),
                 that.getAppointmentDate())
                 && Objects.equals(getApptDatePrefix(), that.getApptDatePrefix())
@@ -378,6 +392,7 @@ public class OfficersItem {
                 getKind(),
                 getDateOfBirth(),
                 getServiceAddressSameAsRegisteredAddress(),
+                getResidentialAddressSameAsServiceAddress(),
                 getAppointmentDate(),
                 getApptDatePrefix(),
                 getResignationDate(),
