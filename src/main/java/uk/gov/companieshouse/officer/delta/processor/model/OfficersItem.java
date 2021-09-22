@@ -39,6 +39,9 @@ public class OfficersItem {
     @JsonProperty(value = "appointment_date", required = true)
     private String appointmentDate;
 
+    @JsonProperty(value = "appt_date_prefix")
+    private String apptDatePrefix;
+
     @JsonProperty(value = "resignation_date")
     private String resignationDate;
 
@@ -160,6 +163,14 @@ public class OfficersItem {
 
     public String getAppointmentDate() {
         return appointmentDate;
+    }
+
+    public String getApptDatePrefix() {
+        return apptDatePrefix;
+    }
+
+    public void setApptDatePrefix(String apptDatePrefix) {
+        this.apptDatePrefix = apptDatePrefix;
     }
 
     public String getResignationDate() {
@@ -336,6 +347,7 @@ public class OfficersItem {
                 that.getServiceAddressSameAsRegisteredAddress())
                 && Objects.equals(getAppointmentDate(),
                 that.getAppointmentDate())
+                && Objects.equals(getApptDatePrefix(), that.getApptDatePrefix())
                 && Objects.equals(getResignationDate(), that.getResignationDate())
                 && Objects.equals(getOfficerDetailId(), that.getOfficerDetailId())
                 && Objects.equals(getChangedAt(), that.getChangedAt())
@@ -367,6 +379,7 @@ public class OfficersItem {
                 getDateOfBirth(),
                 getServiceAddressSameAsRegisteredAddress(),
                 getAppointmentDate(),
+                getApptDatePrefix(),
                 getResignationDate(),
                 getOfficerDetailId(),
                 getChangedAt(),

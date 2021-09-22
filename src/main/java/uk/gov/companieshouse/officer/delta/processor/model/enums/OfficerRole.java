@@ -40,7 +40,8 @@ public enum OfficerRole {
     }
 
     @JsonValue
-    public String getValue() {
+    @Override
+    public String toString() {
         return value;
     }
 }

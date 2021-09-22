@@ -20,7 +20,8 @@ public enum Pre1992Role {
     }
 
     @JsonValue
-    public String getValue() {
+    @Override
+    public String toString() {
         return value;
     }
 }

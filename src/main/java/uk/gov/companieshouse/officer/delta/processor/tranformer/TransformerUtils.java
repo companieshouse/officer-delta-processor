@@ -108,6 +108,6 @@ public class TransformerUtils {
 
         OfficerRole officerRole = OfficerRole.valueOf(kind);
 
-        return officerRole.getValue();
+        return officerRole.toString();
     }
 }
