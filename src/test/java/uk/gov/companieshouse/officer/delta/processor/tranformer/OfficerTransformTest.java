@@ -39,6 +39,7 @@ class OfficerTransformTest {
     public static final String VALID_DATE = "20000101";
     public static final String INVALID_DATE = "12345";
     private static final Instant VALID_DATE_INSTANT = Instant.parse("2000-01-01T00:00:00Z");
+    public static final String OFFICER_ROLE_WITH_DOB = RolesWithDateOfBirth.DIRECTOR.getOfficerRole();
 
     private OfficerTransform testTransform;
 
@@ -105,6 +106,7 @@ class OfficerTransformTest {
         officer.setAppointmentDate(VALID_DATE);
         officer.setAdditionalProperty("resignation_date", VALID_DATE);
         officer.setDateOfBirth(INVALID_DATE);
+        officer.setOfficerRole(OFFICER_ROLE_WITH_DOB);
 
         verifyProcessException(officerAPI, officer, "dateOfBirth: date/time pattern not matched: [yyyyMMdd]");
     }
@@ -155,8 +157,10 @@ class OfficerTransformTest {
 
         assertThat(result.getUpdatedAt(), is(CHANGED_INSTANT));
         assertThat(result.getAppointedOn(), is(VALID_DATE_INSTANT));
-        assertThat(result.getResignedOn(), is(hasResignationDate ? VALID_DATE_INSTANT: null));
-        assertThat(result.getDateOfBirth(), is(VALID_DATE_INSTANT));
+        assertThat(result.getResignedOn(), is(hasResignationDate ? VALID_DATE_INSTANT : null));
+        if (RolesWithDateOfBirth.officerRequiresDateOfBirth(result.getOfficerRole())) {
+            assertThat(result.getDateOfBirth(), is(VALID_DATE_INSTANT));
+        }
         assertThat(result.getCompanyNumber(), is(officer.getCompanyNumber()));
         assertThat(result.getTitle(), is(officer.getTitle()));
         assertThat(result.getForename(), is(officer.getForename()));
