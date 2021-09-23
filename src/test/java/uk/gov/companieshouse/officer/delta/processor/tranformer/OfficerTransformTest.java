@@ -166,7 +166,8 @@ class OfficerTransformTest {
         item.setNationality("nationality");
         item.setOccupation("occupation");
         item.setDateOfBirth("dateOfBirth");
-        item.setOfficerRole("officerRole");
+        item.setOfficerRole("director");
+        item.setKind("DIR");
         item.setHonours("honours");
         item.setServiceAddress(serviceAddress);
         item.setServiceAddressSameAsRegisteredAddress("Y");

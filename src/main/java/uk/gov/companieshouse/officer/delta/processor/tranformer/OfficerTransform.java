@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
 import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
+import uk.gov.companieshouse.officer.delta.processor.model.enums.OfficerRole;
 
 @Component
 public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI> {
@@ -41,7 +42,7 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
         officer.setNationality(source.getNationality());
         officer.setOccupation(source.getOccupation());
         officer.setDateOfBirth(parseDateString("dateOfBirth", source.getDateOfBirth()));
-        officer.setOfficerRole(source.getOfficerRole());
+        officer.setOfficerRole(TransformerUtils.lookupOfficeRole(source.getKind()));
         officer.setHonours(source.getHonours());
 
         officer.setServiceAddress(source.getServiceAddress());
