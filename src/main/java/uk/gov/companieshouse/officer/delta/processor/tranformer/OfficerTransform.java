@@ -7,6 +7,7 @@ import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
 import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithDateOfBirth;
+import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupation;
 
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseDateString;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseDateTimeString;
@@ -42,12 +43,15 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
         officer.setForename(source.getForename());
         officer.setOtherForenames(source.getMiddleName());
         officer.setSurname(source.getSurname());
-        officer.setNationality(source.getNationality());
-        officer.setOccupation(source.getOccupation());
-
 
         final String officerRole = TransformerUtils.lookupOfficeRole(source.getKind());
         officer.setOfficerRole(officerRole);
+
+        // Occupation and Nationality are in the same set of Roles
+        if (RolesWithOccupation.includes(officerRole)) {
+            officer.setNationality(source.getNationality());
+            officer.setOccupation(source.getOccupation());
+        }
         officer.setHonours(source.getHonours());
 
         officer.setServiceAddress(source.getServiceAddress());

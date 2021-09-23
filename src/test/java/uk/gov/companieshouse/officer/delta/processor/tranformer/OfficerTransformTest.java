@@ -21,6 +21,7 @@ import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithDateOf
 
 import java.time.Instant;
 import java.util.stream.Stream;
+import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupation;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -128,6 +129,30 @@ class OfficerTransformTest {
             assertThat(outputOfficer.getDateOfBirth(), is(notNullValue()));
         } else {
             assertThat(outputOfficer.getDateOfBirth(), is(nullValue()));
+        }
+    }
+
+    @DisplayName("Occupation and Nationality is not included when the officers role does not require it")
+    @ParameterizedTest
+    @EnumSource
+    void onlyRolesWithOccupationIncludeOccupationAndNationality(OfficerRole officerRole) throws ProcessException {
+        final OfficersItem officer = createOfficer(addressAPI, identification);
+
+        officer.setDateOfBirth(VALID_DATE);
+        officer.setKind(officerRole.name());
+        officer.setChangedAt(CHANGED_AT);
+        officer.setAppointmentDate(VALID_DATE);
+        officer.setOccupation("Super Hero");
+        officer.setNationality("Krypton");
+
+        final OfficerAPI outputOfficer = testTransform.transform(officer);
+
+        if (RolesWithOccupation.includes(officerRole)) {
+            assertThat(outputOfficer.getOccupation(), is(notNullValue()));
+            assertThat(outputOfficer.getNationality(), is(notNullValue()));
+        } else {
+            assertThat(outputOfficer.getOccupation(), is(nullValue()));
+            assertThat(outputOfficer.getNationality(), is(nullValue()));
         }
     }
 
