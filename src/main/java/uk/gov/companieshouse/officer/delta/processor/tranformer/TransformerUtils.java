@@ -107,6 +107,6 @@ public class TransformerUtils {
     public static String lookupOfficeRole(String kind) {
         OfficerRole officerRole = OfficerRole.valueOf(kind);
 
-        return officerRole.toString();
+        return officerRole.getValue();
     }
 }

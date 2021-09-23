@@ -1,5 +1,14 @@
 package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
+import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.DATETIME_LENGTH;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -147,11 +156,9 @@ class OfficerTransformTest {
         final OfficerAPI officerAPI = testTransform.factory();
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
-        when(identificationTransform.transform(identification)).thenReturn(identificationAPI);
         officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate(VALID_DATE);
         officer.setDateOfBirth(VALID_DATE);
-        officer.setResignationDate(VALID_DATE);
         officer.setApptDatePrefix("Y");
 
         final OfficerAPI result = testTransform.transform(officer, officerAPI);
@@ -161,35 +168,19 @@ class OfficerTransformTest {
         assertThat(result.getAppointedBefore(), is(VALID_DATE_INSTANT));
         assertThat(result.getOfficerRole(), is(officer.getOfficerRole()));
         assertThat(result.isPre1992Appointment(), is(true));
-        assertThat(result.getResignedOn(), is(VALID_DATE_INSTANT));
-        assertThat(result.getDateOfBirth(), is(VALID_DATE_INSTANT));
-        assertThat(result.getCompanyNumber(), is(officer.getCompanyNumber()));
-        assertThat(result.getTitle(), is(officer.getTitle()));
-        assertThat(result.getForename(), is(officer.getForename()));
-        assertThat(result.getOtherForenames(), is(officer.getMiddleName()));
-        assertThat(result.getSurname(), is(officer.getSurname()));
-        assertThat(result.getNationality(), is(officer.getNationality()));
-        assertThat(result.getOccupation(), is(officer.getOccupation()));
-        assertThat(result.getHonours(), is(officer.getHonours()));
-        assertThat(result.getServiceAddress(), is(sameInstance(addressAPI)));
-        assertThat(result.isServiceAddressSameAsRegisteredOfficeAddress(), is(true));
-        assertThat(result.getCountryOfResidence(), is(officer.getUsualResidentialCountry()));
-        assertThat(result.getIdentificationData(), is(sameInstance(identificationAPI)));
     }
 
     @Test
-    void nonPre1992RoleSuccessfulTransform() throws ProcessException {
+    void nonPre1992SuccessfulTransform() throws ProcessException {
 
         final OfficerAPI officerAPI = testTransform.factory();
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
-        when(identificationTransform.transform(identification)).thenReturn(identificationAPI);
         officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate(VALID_DATE);
         officer.setDateOfBirth(VALID_DATE);
-        officer.setResignationDate(VALID_DATE);
         officer.setKind(OfficerRole.LLPGENPART.name());
-        officer.setOfficerRole(OfficerRole.LLPGENPART.toString());
+        officer.setOfficerRole(OfficerRole.LLPGENPART.getValue());
         officer.setApptDatePrefix("Y");
 
         final OfficerAPI result = testTransform.transform(officer, officerAPI);
@@ -199,19 +190,42 @@ class OfficerTransformTest {
         assertThat(result.getAppointedBefore(), is(nullValue()));
         assertThat(result.getOfficerRole(), is(officer.getOfficerRole()));
         assertThat(result.isPre1992Appointment(), is(false));
-        assertThat(result.getResignedOn(), is(VALID_DATE_INSTANT));
-        assertThat(result.getCompanyNumber(), is(officer.getCompanyNumber()));
-        assertThat(result.getTitle(), is(officer.getTitle()));
-        assertThat(result.getForename(), is(officer.getForename()));
-        assertThat(result.getOtherForenames(), is(officer.getMiddleName()));
-        assertThat(result.getSurname(), is(officer.getSurname()));
-        assertThat(result.getNationality(), is(officer.getNationality()));
-        assertThat(result.getOccupation(), is(officer.getOccupation()));
-        assertThat(result.getHonours(), is(officer.getHonours()));
-        assertThat(result.getServiceAddress(), is(sameInstance(addressAPI)));
-        assertThat(result.isServiceAddressSameAsRegisteredOfficeAddress(), is(true));
+    }
+
+    @Test
+    void rolesWithCountryOfResidenceSuccessfulTransform() throws ProcessException {
+
+        final OfficerAPI officerAPI = testTransform.factory();
+        final OfficersItem officer = createOfficer(addressAPI, identification);
+
+        officer.setChangedAt(CHANGED_AT);
+        officer.setAppointmentDate(VALID_DATE);
+        officer.setDateOfBirth(VALID_DATE);
+
+        final OfficerAPI result = testTransform.transform(officer, officerAPI);
+
+        assertThat(result.getUpdatedAt(), is(CHANGED_INSTANT));
+        assertThat(result.getOfficerRole(), is(officer.getOfficerRole()));
         assertThat(result.getCountryOfResidence(), is(officer.getUsualResidentialCountry()));
-        assertThat(result.getIdentificationData(), is(sameInstance(identificationAPI)));
+    }
+
+    @Test
+    void rolesWithoutCountryOfResidenceSuccessfulTransform() throws ProcessException {
+
+        final OfficerAPI officerAPI = testTransform.factory();
+        final OfficersItem officer = createOfficer(addressAPI, identification);
+
+        officer.setChangedAt(CHANGED_AT);
+        officer.setAppointmentDate(VALID_DATE);
+        officer.setDateOfBirth(VALID_DATE);
+        officer.setKind(OfficerRole.LLPGENPART.name());
+        officer.setOfficerRole(OfficerRole.LLPGENPART.getValue());
+
+        final OfficerAPI result = testTransform.transform(officer, officerAPI);
+
+        assertThat(result.getUpdatedAt(), is(CHANGED_INSTANT));
+        assertThat(result.getOfficerRole(), is(officer.getOfficerRole()));
+        assertThat(result.getCountryOfResidence(), is(nullValue()));
     }
 
     @ParameterizedTest(name = "{index}: changedAt={0}, has resignation_date={1}")
@@ -274,7 +288,7 @@ class OfficerTransformTest {
         item.setOccupation("occupation");
         item.setDateOfBirth("dateOfBirth");
         item.setKind(OfficerRole.DIR.name());
-        item.setOfficerRole(OfficerRole.DIR.toString());
+        item.setOfficerRole(OfficerRole.DIR.getValue());
         item.setApptDatePrefix("N");
         item.setHonours("honours");
         item.setServiceAddress(serviceAddress);
