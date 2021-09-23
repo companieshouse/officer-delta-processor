@@ -101,11 +101,10 @@ public class TransformerUtils {
 
     public static String encode(String plain) throws ProcessException {
 
-        return base64Encode(sha1Digest(plain)).replace("=","");
+        return base64Encode(sha1Digest(plain)).replace("=", "");
     }
 
     public static String lookupOfficeRole(String kind) {
-
         OfficerRole officerRole = OfficerRole.valueOf(kind);
 
         return officerRole.toString();
