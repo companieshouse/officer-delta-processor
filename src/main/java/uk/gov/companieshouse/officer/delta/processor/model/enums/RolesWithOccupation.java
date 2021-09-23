@@ -32,8 +32,3 @@ public enum RolesWithOccupation {
             .anyMatch(role::equals);
     }
 }
-
-
-
-
-
