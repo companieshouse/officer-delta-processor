@@ -115,7 +115,7 @@ class OfficerTransformTest {
     @DisplayName("Date of Birth is not included when the officers role does not require it")
     @ParameterizedTest
     @EnumSource
-    void onlyRolesWithDobIncludeDateOfBirth(OfficerRole officerRole) throws ProcessException {
+    void onlyRolesWithDobIncludeDateOfBirth(OfficerRole officerRole) {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         officer.setDateOfBirth(VALID_DATE);
@@ -135,7 +135,7 @@ class OfficerTransformTest {
     @DisplayName("Occupation and Nationality is not included when the officers role does not require it")
     @ParameterizedTest
     @EnumSource
-    void onlyRolesWithOccupationIncludeOccupationAndNationality(OfficerRole officerRole) throws ProcessException {
+    void onlyRolesWithOccupationIncludeOccupationAndNationality(OfficerRole officerRole) {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         officer.setDateOfBirth(VALID_DATE);

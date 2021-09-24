@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.officer.delta.processor.consumer;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.kafka.consumer.resilience.CHConsumerType;
@@ -115,12 +116,13 @@ public class DeltaConsumer {
                 logInfo("Consume message", attempt, topic, offset);
                 processor.process(delta);
             }
-            catch (RetryableErrorException e) {
-                logError("Retryable error while processing message", e, attempt, topic, offset);
-                queueRetry(topic, offset, attempt, delta);
-            }
             catch (NonRetryableErrorException e) {
                 logError("Non-retryable error while processing message", e, attempt, topic, offset);
+            }
+            catch (Exception e) {
+                // includes RetryableErrorException; and assume any other kind of exception is retryable
+                logError("Retryable error while processing message", e, attempt, topic, offset);
+                queueRetry(topic, offset, attempt, delta);
             }
             finally {
                 logInfo("Commit message", attempt, topic, offset);

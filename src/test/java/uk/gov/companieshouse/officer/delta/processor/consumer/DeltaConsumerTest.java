@@ -3,11 +3,13 @@ package uk.gov.companieshouse.officer.delta.processor.consumer;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -35,6 +37,7 @@ import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableError
 import uk.gov.companieshouse.officer.delta.processor.exception.RetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.processor.Processor;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -173,7 +176,7 @@ class DeltaConsumerTest {
     }
 
     @Test
-    void consumeMessageWhenDeserializeFails() {
+    void consumeMessageWhenDeserializeFails() throws ExecutionException, InterruptedException {
         final Message nextMessage = messageList.get(0);
 
         when(consumerGroup.consume()).thenReturn(new ArrayList<>(messageList));
@@ -186,12 +189,13 @@ class DeltaConsumerTest {
         inOrder.verify(consumerGroup).connect();
         inOrder.verify(marshaller).deserialize(nextMessage);
         inOrder.verify(logger).error(anyString(), anyMap());
+        inOrder.verify(consumerGroup, never()).retry(anyInt(), any(Message.class));
         inOrder.verify(consumerGroup).commit();
         inOrder.verifyNoMoreInteractions();
     }
 
     @Test
-    void consumeMessageWhenProcessingTransientError() {
+    void consumeMessageWhenProcessingNonTransientError() {
         when(consumerGroup.consume()).thenReturn(new ArrayList<>(messageList));
 
         final Message nextMessage = messageList.get(0);
@@ -211,13 +215,41 @@ class DeltaConsumerTest {
         inOrder.verifyNoMoreInteractions();
     }
 
+    @Test
+    void consumeMessageWhenUnexpectedException() throws Exception {
+        when(consumerGroup.getConfig().getMaxRetries()).thenReturn(EXPECTED.intValue());
+        when(consumerGroup.consume()).thenReturn(new ArrayList<>(messageList));
+
+        final Message nextMessage = messageList.get(0);
+        final ChsDelta delta = createDelta(4);
+        final ChsDelta retry = createDelta(5);
+        final byte[] messageBytes = "retry_serialized".getBytes(StandardCharsets.UTF_8);
+
+        when(marshaller.deserialize(nextMessage)).thenReturn(delta);
+        when(marshaller.serialize(retry)).thenReturn(messageBytes);
+        doThrow(new IllegalStateException("unexpected")).when(processor).process(delta);
+
+        testConsumer.consumeMessage();
+
+        final InOrder inOrder = inOrder(consumerGroup, marshaller, processor, logger);
+
+        inOrder.verify(consumerGroup).connect();
+        inOrder.verify(marshaller).deserialize(nextMessage);
+        inOrder.verify(processor).process(delta);
+        inOrder.verify(logger).error(anyString(), anyMap());
+        inOrder.verify(marshaller).serialize(retry);
+        inOrder.verify(consumerGroup).retry(anyInt(), any(Message.class));
+        inOrder.verify(consumerGroup).commit();
+        inOrder.verifyNoMoreInteractions();
+    }
+
     static private Stream<Arguments> provideRetries() {
         return Stream.of(Arguments.of(4, 5), Arguments.of(5, 0));
     }
 
     @ParameterizedTest(name="For max retries = 5, after {0} attempts, next attempt is {1}")
     @MethodSource("provideRetries")
-    void consumeMessageWhenProcessingNonTransientError(final int attempt, final int nextAttempt)
+    void consumeMessageWhenProcessingTransientError(final int attempt, final int nextAttempt)
             throws ExecutionException, InterruptedException {
         when(consumerGroup.getConfig().getMaxRetries()).thenReturn(EXPECTED.intValue());
         when(consumerGroup.consume()).thenReturn(new ArrayList<>(messageList));
