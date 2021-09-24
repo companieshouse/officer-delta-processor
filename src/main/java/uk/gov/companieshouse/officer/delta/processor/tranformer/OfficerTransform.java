@@ -3,20 +3,28 @@ package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.api.model.delta.officers.FormerNamesAPI;
 import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
 import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
+import uk.gov.companieshouse.officer.delta.processor.model.PreviousNameArray;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithCountryOfResidence;
+import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithFormerNames;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithPre1992Appointment;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithDateOfBirth;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupation;
 
+import static java.util.stream.Collectors.toList;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseDateString;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseDateTimeString;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseYesOrNo;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.lookupOfficeRole;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI> {
@@ -58,6 +66,12 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
         if (RolesWithOccupation.includes(officerRole)) {
             officer.setNationality(source.getNationality());
             officer.setOccupation(source.getOccupation());
+        }
+
+        if (RolesWithFormerNames.includes(officerRole) && source.getPreviousNameArray() != null) {
+                officer.setFormerNameData(source.getPreviousNameArray().stream()
+                    .map(s -> new FormerNamesAPI(
+                        s.getPreviousForename(), s.getPreviousSurname())).collect(Collectors.toList()));
         }
 
         final Instant appointmentDate = parseDateString(
