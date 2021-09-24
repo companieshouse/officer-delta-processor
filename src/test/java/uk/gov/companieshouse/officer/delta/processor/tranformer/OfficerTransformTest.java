@@ -1,5 +1,14 @@
 package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
+import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.DATETIME_LENGTH;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,21 +26,15 @@ import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
 import uk.gov.companieshouse.officer.delta.processor.model.Identification;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.OfficerRole;
+import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithCountryOfResidence;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithDateOfBirth;
+import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupation;
+import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithPre1992Appointment;
 
 import java.time.Instant;
 import java.util.stream.Stream;
-import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupation;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.DATETIME_LENGTH;
 
 @ExtendWith(MockitoExtension.class)
 class OfficerTransformTest {
@@ -82,6 +85,8 @@ class OfficerTransformTest {
 
         officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate(INVALID_DATE);
+        officer.setDateOfBirth(VALID_DATE);
+        officer.setKind(OfficerRole.DIR.name());
 
         verifyProcessException(officerAPI, officer, "appointmentDate: date/time pattern not matched: [yyyyMMdd]");
     }
@@ -156,6 +161,50 @@ class OfficerTransformTest {
         }
     }
 
+    @DisplayName("Country of Residence is not included when the officers role does not require it")
+    @ParameterizedTest
+    @EnumSource
+    void onlyRolesWithCountryOfResidenceIncludeCountryOfResidence(OfficerRole officerRole) throws ProcessException {
+        final OfficersItem officer = createOfficer(addressAPI, identification);
+
+        officer.setDateOfBirth(VALID_DATE);
+        officer.setKind(officerRole.name());
+        officer.setChangedAt(CHANGED_AT);
+        officer.setAppointmentDate(VALID_DATE);
+
+        final OfficerAPI outputOfficer = testTransform.transform(officer);
+
+        if (RolesWithCountryOfResidence.includes(officerRole)) {
+            assertThat(outputOfficer.getCountryOfResidence(), is(notNullValue()));
+        } else {
+            assertThat(outputOfficer.getCountryOfResidence(), is(nullValue()));
+        }
+    }
+
+    @DisplayName("Set AppointedOn to AppointedBefore when the OfficerRole is included in the roleSet " +
+        "and is Pre1992Appointment")
+    @ParameterizedTest
+    @EnumSource
+    void onlyRolesWithPre1992AppointmentIncludePre1992Appointment(OfficerRole officerRole) throws ProcessException {
+        final OfficersItem officer = createOfficer(addressAPI, identification);
+
+        officer.setDateOfBirth(VALID_DATE);
+        officer.setKind(officerRole.name());
+        officer.setChangedAt(CHANGED_AT);
+        officer.setAppointmentDate(VALID_DATE);
+        officer.setApptDatePrefix("Y");
+
+        final OfficerAPI outputOfficer = testTransform.transform(officer);
+
+        if (RolesWithPre1992Appointment.includes(officerRole)) {
+            assertThat(outputOfficer.isPre1992Appointment(), is(true));
+            assertThat(outputOfficer.getAppointedBefore(), is(VALID_DATE_INSTANT));
+        } else {
+            assertThat(outputOfficer.isPre1992Appointment(), is(false));
+            assertThat(outputOfficer.getAppointedOn(), is(VALID_DATE_INSTANT));
+        }
+    }
+
     private static Stream<Arguments> provideScenarioParams() {
         return Stream.of(Arguments.of(CHANGED_AT, true),
                 // changedAt full accuracy, resignation date present
@@ -186,6 +235,10 @@ class OfficerTransformTest {
         if (RolesWithDateOfBirth.includes(result.getOfficerRole())) {
             assertThat(result.getDateOfBirth(), is(VALID_DATE_INSTANT));
         }
+        assertThat(result.getOfficerRole(), is(officer.getOfficerRole()));
+        assertThat(result.isPre1992Appointment(), is(false));
+        assertThat(result.getResignedOn(), is(hasResignationDate ? VALID_DATE_INSTANT: null));
+        assertThat(result.getDateOfBirth(), is(VALID_DATE_INSTANT));
         assertThat(result.getCompanyNumber(), is(officer.getCompanyNumber()));
         assertThat(result.getTitle(), is(officer.getTitle()));
         assertThat(result.getForename(), is(officer.getForename()));
@@ -193,7 +246,6 @@ class OfficerTransformTest {
         assertThat(result.getSurname(), is(officer.getSurname()));
         assertThat(result.getNationality(), is(officer.getNationality()));
         assertThat(result.getOccupation(), is(officer.getOccupation()));
-        assertThat(result.getOfficerRole(), is(officer.getOfficerRole()));
         assertThat(result.getHonours(), is(officer.getHonours()));
         assertThat(result.getServiceAddress(), is(sameInstance(addressAPI)));
         assertThat(result.isServiceAddressSameAsRegisteredOfficeAddress(), is(true));
@@ -220,8 +272,9 @@ class OfficerTransformTest {
         item.setNationality("nationality");
         item.setOccupation("occupation");
         item.setDateOfBirth("dateOfBirth");
-        item.setOfficerRole("director");
-        item.setKind("DIR");
+        item.setKind(OfficerRole.DIR.name());
+        item.setOfficerRole(OfficerRole.DIR.getValue());
+        item.setApptDatePrefix("N");
         item.setHonours("honours");
         item.setServiceAddress(serviceAddress);
         item.setServiceAddressSameAsRegisteredAddress("Y");
