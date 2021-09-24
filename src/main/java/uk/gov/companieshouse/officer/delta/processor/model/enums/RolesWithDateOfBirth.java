@@ -17,8 +17,8 @@ public enum RolesWithDateOfBirth {
         this.officerRole = officerRole;
     }
 
-    public String getOfficerRole() {
-        return officerRole.getValue();
+    public OfficerRole getOfficerRole() {
+        return officerRole;
     }
 
     public static boolean includes(final OfficerRole role) {

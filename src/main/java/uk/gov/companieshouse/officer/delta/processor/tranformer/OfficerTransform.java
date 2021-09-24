@@ -7,16 +7,17 @@ import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
 import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithCountryOfResidence;
-import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithPre1992Appointment;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithDateOfBirth;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupation;
+import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithPre1992Appointment;
 
+import java.time.Instant;
+
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.lookupOfficeRole;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseDateString;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseDateTimeString;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseYesOrNo;
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.lookupOfficeRole;
-
-import java.time.Instant;
 
 @Component
 public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI> {
@@ -88,7 +89,7 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
 
         officer.setIdentificationData(idTransform.transform(source.getIdentification()));
 
-        if (RolesWithDateOfBirth.includes(officerRole)) {
+        if (RolesWithDateOfBirth.includes(officerRole) && isNotEmpty(source.getDateOfBirth())) {
             officer.setDateOfBirth(parseDateString("dateOfBirth", source.getDateOfBirth()));
         }
 

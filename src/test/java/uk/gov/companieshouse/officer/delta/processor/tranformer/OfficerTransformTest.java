@@ -1,14 +1,5 @@
 package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.DATETIME_LENGTH;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,9 +23,18 @@ import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupa
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithPre1992Appointment;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
+import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.DATETIME_LENGTH;
 
 @ExtendWith(MockitoExtension.class)
 class OfficerTransformTest {
@@ -135,6 +135,32 @@ class OfficerTransformTest {
         } else {
             assertThat(outputOfficer.getDateOfBirth(), is(nullValue()));
         }
+    }
+
+    private static Stream<Arguments> emptyDobsWithDobRoles() {
+        Stream<OfficerRole> requiresDob = Arrays.stream(RolesWithDateOfBirth.values())
+                .map(RolesWithDateOfBirth::getOfficerRole);
+
+        return requiresDob.flatMap(role -> Stream.of(
+                Arguments.of(role, null),
+                Arguments.of(role, "")
+        ));
+    }
+
+    @DisplayName("Transformation doesn't fail when no DOB on role which requires it")
+    @ParameterizedTest
+    @MethodSource("emptyDobsWithDobRoles")
+    void transformsWhenNoDob(OfficerRole role, String dob) throws ProcessException {
+        final OfficersItem officer = createOfficer(addressAPI, identification);
+
+        officer.setDateOfBirth(dob);
+        officer.setKind(role.name());
+        officer.setChangedAt(CHANGED_AT);
+        officer.setAppointmentDate(VALID_DATE);
+
+        final OfficerAPI outputOfficer = testTransform.transform(officer);
+
+        assertThat(outputOfficer.getDateOfBirth(), is(nullValue()));
     }
 
     @DisplayName("Occupation and Nationality is not included when the officers role does not require it")
