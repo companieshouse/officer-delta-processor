@@ -13,7 +13,8 @@ import uk.gov.companieshouse.kafka.serialization.AvroSerializer;
 import uk.gov.companieshouse.kafka.serialization.SerializerFactory;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.officer.delta.processor.consumer.DeltaConsumer;
-import uk.gov.companieshouse.officer.delta.processor.deserialise.ChsDeltaDeSerializer;
+import uk.gov.companieshouse.officer.delta.processor.deserialise.ChsDeltaMarshaller;
+import uk.gov.companieshouse.officer.delta.processor.processor.DeltaProcessor;
 import uk.gov.companieshouse.officer.delta.processor.processor.Processor;
 
 
@@ -95,31 +96,28 @@ public class DeltaConsumerConfig {
      */
     @Bean
     @Profile("!test")
-    CHKafkaResilientConsumerGroup chKafkaConsumerGroup(ConsumerConfig consumerConfig) {
+    CHKafkaResilientConsumerGroup mainKafkaConsumerGroup(ConsumerConfig consumerConfig) {
         return new CHKafkaResilientConsumerGroup(consumerConfig, CHConsumerType.MAIN_CONSUMER);
 
     }
 
     /**
      * Creates a DeltaConsumer for the MAIN topic.
-     * Creates its own producer using variables from the environment. For testing a separate
+     * Creates its own kafka producer using variables from the environment. For testing a separate
      * ContextConfiguration is needed as the environment variables are not present to create a producer.
      *
-     * @param consumerConfig the configuration for the consumer
-     * @param deserializer   the ChsDelta De-/Serializer
-     * @param processor      the ChsDelta processor
-     * @param logger         the logger
+     * @param consumerGroup the {@link CHKafkaResilientConsumerGroup}
+     * @param marshaller  the {@link ChsDeltaMarshaller}
+     * @param processor     the {@link DeltaProcessor}
+     * @param logger        the logger
      * @return the DeltaConsumer
      */
     @Bean("MainConsumer")
     @Profile("!test")
-    DeltaConsumer mainDeltaConsumer(ConsumerConfig consumerConfig, final ChsDeltaDeSerializer deserializer,
-            final Processor<ChsDelta> processor, final Logger logger) {
-        final CHKafkaResilientConsumerGroup consumerGroup =
-                new CHKafkaResilientConsumerGroup(consumerConfig, CHConsumerType.MAIN_CONSUMER);
+    DeltaConsumer mainDeltaConsumer(final CHKafkaResilientConsumerGroup consumerGroup,
+            final ChsDeltaMarshaller marshaller, final Processor<ChsDelta> processor, final Logger logger) {
+        logger.debug("Creating DeltaConsumer [MAIN ]...");
 
-        logger.debug("Creating DeltaConsumer [MAIN]...");
-        return new DeltaConsumer(consumerGroup, deserializer, processor, logger);
-
+        return new DeltaConsumer(consumerGroup, marshaller, processor, logger);
     }
 }

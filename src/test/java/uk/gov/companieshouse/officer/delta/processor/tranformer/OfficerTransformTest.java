@@ -20,7 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
 import uk.gov.companieshouse.api.model.delta.officers.IdentificationAPI;
 import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
-import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
+import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.Identification;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 
@@ -65,7 +65,7 @@ class OfficerTransformTest {
 
         officer.setChangedAt(INVALID_DATE);
 
-        verifyProcessException(officerAPI, officer, "changedAt: date/time pattern not matched: [yyyyMMddHHmmss]");
+        verifyProcessingError(officerAPI, officer, "changedAt: date/time pattern not matched: [yyyyMMddHHmmss]");
     }
 
     @Test
@@ -76,7 +76,7 @@ class OfficerTransformTest {
         officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate(INVALID_DATE);
 
-        verifyProcessException(officerAPI, officer, "appointmentDate: date/time pattern not matched: [yyyyMMdd]");
+        verifyProcessingError(officerAPI, officer, "appointmentDate: date/time pattern not matched: [yyyyMMdd]");
     }
 
     @Test
@@ -88,7 +88,7 @@ class OfficerTransformTest {
         officer.setAppointmentDate("20000101");
         officer.setResignationDate(INVALID_DATE);
 
-        verifyProcessException(officerAPI, officer, "resignation_date: date/time pattern not matched: [yyyyMMdd]");
+        verifyProcessingError(officerAPI, officer, "resignation_date: date/time pattern not matched: [yyyyMMdd]");
     }
 
     @Test
@@ -101,7 +101,7 @@ class OfficerTransformTest {
         officer.setAdditionalProperty("resignation_date", VALID_DATE);
         officer.setDateOfBirth(INVALID_DATE);
 
-        verifyProcessException(officerAPI, officer, "dateOfBirth: date/time pattern not matched: [yyyyMMdd]");
+        verifyProcessingError(officerAPI, officer, "dateOfBirth: date/time pattern not matched: [yyyyMMdd]");
     }
 
     private static Stream<Arguments> provideScenarioParams() {
@@ -114,7 +114,7 @@ class OfficerTransformTest {
 
     @ParameterizedTest(name = "{index}: changedAt={0}, has resignation_date={1}")
     @MethodSource("provideScenarioParams")
-    void verifySuccessfulTransform(final String changedAt, final boolean hasResignationDate) throws ProcessException {
+    void verifySuccessfulTransform(final String changedAt, final boolean hasResignationDate) {
         final OfficerAPI officerAPI = testTransform.factory();
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
@@ -147,10 +147,10 @@ class OfficerTransformTest {
         assertThat(result.getIdentificationData(), is(sameInstance(identificationAPI)));
     }
 
-    private void verifyProcessException(final OfficerAPI officerAPI, final OfficersItem officer,
+    private void verifyProcessingError(final OfficerAPI officerAPI, final OfficersItem officer,
             final String expectedMessage) {
-        final ProcessException exception =
-                assertThrows(ProcessException.class, () -> testTransform.transform(officer, officerAPI));
+        final NonRetryableErrorException exception =
+                assertThrows(NonRetryableErrorException.class, () -> testTransform.transform(officer, officerAPI));
 
         assertThat(exception.getMessage(), is(expectedMessage));
         assertThat(exception.getCause(), is(nullValue()));

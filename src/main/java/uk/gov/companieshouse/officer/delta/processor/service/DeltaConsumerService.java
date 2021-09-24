@@ -1,17 +1,13 @@
 package uk.gov.companieshouse.officer.delta.processor.service;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.kafka.consumer.resilience.CHKafkaResilientConsumerGroup;
-import uk.gov.companieshouse.kafka.exceptions.DeserializationException;
 import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.officer.delta.processor.deserialise.ChsDeltaDeSerializer;
-import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
+import uk.gov.companieshouse.officer.delta.processor.deserialise.ChsDeltaMarshaller;
 import uk.gov.companieshouse.officer.delta.processor.processor.Processor;
 
 import javax.annotation.PreDestroy;
@@ -24,11 +20,13 @@ import java.util.concurrent.ExecutionException;
  * Messages are consumed via polling kafka for new messages.
  * Processing is delegated to a processor, which handles the business logic.
  */
+@Deprecated(forRemoval = true)
+// replaced by DeltaConsumer, but used by BaseKafkaIntegrationTest, OfficerDeltaConsumerIT which are @Disabled
 @Service
 public class DeltaConsumerService {
     private final CHKafkaResilientConsumerGroup consumer;
     private final Logger logger;
-    private final ChsDeltaDeSerializer deserializer;
+    private final ChsDeltaMarshaller marshaller;
     @Value("${kafka.polling.duration.ms}")
     private int kafkaPollingDuration;
     private Processor<ChsDelta> processor;
@@ -38,12 +36,12 @@ public class DeltaConsumerService {
     public DeltaConsumerService(
             CHKafkaResilientConsumerGroup chKafkaConsumerGroup,
             Logger logger,
-            ChsDeltaDeSerializer deserializer,
+            ChsDeltaMarshaller marshaller,
             Processor<ChsDelta> processor) {
 
         this.consumer = chKafkaConsumerGroup;
         this.logger = logger;
-        this.deserializer = deserializer;
+        this.marshaller = marshaller;
         this.processor = processor;
 
         consumer.connect();
@@ -67,23 +65,23 @@ public class DeltaConsumerService {
             info.put("offset", message.getOffset());
             logger.info("Received message from kafka", info);
 
-            try {
-                ChsDelta delta = deserializer.deserialize(message);
+//            try {
+                ChsDelta delta = marshaller.deserialize(message);
                 processor.process(delta);
                 consumer.commit(message);
                 logger.info("Message committed", info);
-            } catch (ProcessException e) {
-                if (e.canRetry()) {
-                    sendMessageToRetryTopic(message);
-                } else {
-                    info.put("stackTrace", ExceptionUtils.getStackTrace(e));
-                    logger.error("Received fatal exception from processor.", e, info);
-                    sendMessageToErrorTopic(message);
-                }
-            } catch (DeserializationException e) {
-                logger.error("Unable to deserialize message", e, info);
-                sendMessageToErrorTopic(message);
-            }
+//            } catch (ProcessException e) {
+//                if (e.canRetry()) {
+//                    sendMessageToRetryTopic(message);
+//                } else {
+//                    info.put("stackTrace", ExceptionUtils.getStackTrace(e));
+//                    logger.error("Received fatal exception from processor.", e, info);
+//                    sendMessageToErrorTopic(message);
+//                }
+//            } catch (DeserializationException e) {
+//                logger.error("Unable to deserialize message", e, info);
+//                sendMessageToErrorTopic(message);
+//            }
         }
     }
 

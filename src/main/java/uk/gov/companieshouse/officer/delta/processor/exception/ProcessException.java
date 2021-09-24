@@ -1,10 +1,13 @@
 package uk.gov.companieshouse.officer.delta.processor.exception;
 
 /**
- * Process exception encapsulates exceptions occurred during processing. Indicating weather the
+ * Process exception encapsulates exceptions occurred during processing. Indicating whether the
  * exception is retry-able (so the message can be retried) or fatal to the message is added
  * to the error topic.
  */
+@Deprecated(forRemoval = true)
+// replaced by RetryableErrorException, NonRetryableErrorException, but used by DeltaConsumerService which is
+// @Deprecated
 public class ProcessException extends Exception {
     private final boolean canRetry;
 

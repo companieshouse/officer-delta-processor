@@ -1,18 +1,17 @@
 package uk.gov.companieshouse.officer.delta.processor.consumer;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.kafka.consumer.resilience.CHConsumerType;
 import uk.gov.companieshouse.kafka.consumer.resilience.CHKafkaResilientConsumerGroup;
-import uk.gov.companieshouse.kafka.exceptions.DeserializationException;
-import uk.gov.companieshouse.kafka.exceptions.SerializationException;
 import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.officer.delta.processor.deserialise.ChsDeltaDeSerializer;
-import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
+import uk.gov.companieshouse.officer.delta.processor.deserialise.ChsDeltaMarshaller;
+import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
+import uk.gov.companieshouse.officer.delta.processor.exception.RetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.processor.Processor;
 
+import javax.annotation.PreDestroy;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
@@ -22,7 +21,7 @@ import java.util.concurrent.ExecutionException;
 
 public class DeltaConsumer {
     private final CHKafkaResilientConsumerGroup consumerGroup;
-    private final ChsDeltaDeSerializer deserializer;
+    private final ChsDeltaMarshaller marshaller;
     private final Processor<ChsDelta> processor;
     private final Logger logger;
 
@@ -35,14 +34,22 @@ public class DeltaConsumer {
     /**
      * Initialise the consumer by connecting to the consumer group
      */
-    public DeltaConsumer(final CHKafkaResilientConsumerGroup consumerGroup, final ChsDeltaDeSerializer deserializer,
+    public DeltaConsumer(final CHKafkaResilientConsumerGroup consumerGroup, final ChsDeltaMarshaller marshaller,
             final Processor<ChsDelta> processor, final Logger logger) {
         this.consumerGroup = consumerGroup;
-        this.deserializer = deserializer;
+        this.marshaller = marshaller;
         this.processor = processor;
         this.logger = logger;
 
         consumerGroup.connect();
+    }
+
+    /**
+     * Clean up consumer connections when the program ends.
+     */
+    @PreDestroy
+    public void destroy() {
+        consumerGroup.close();
     }
 
     /**
@@ -62,13 +69,17 @@ public class DeltaConsumer {
      *
      * @return message
      */
-    public Optional<Message> getNextDeltaMessage() {
+    Optional<Message> getNextDeltaMessage() {
         if (messages.isEmpty()) {
             messages.addAll(consumerGroup.consume());
             logger.debug(String.format("Polled %d new message(s)", messages.size()));
         }
 
         return Optional.ofNullable(messages.pollFirst());
+    }
+
+    public int getPendingMessageCount() {
+        return messages.size();
     }
 
     public long getRetryThrottle() {
@@ -88,51 +99,55 @@ public class DeltaConsumer {
     }
 
     @Scheduled(fixedDelayString = "${kafka.polling.delay.ms}", initialDelayString = "${kafka.polling.initial.delay.ms}")
-    void consumeMessage() throws InterruptedException, ExecutionException {
+    void consumeMessage() {
         final Optional<Message> nextDeltaMessage = getNextDeltaMessage();
 
-        if (nextDeltaMessage.isPresent()) {
-            final Message deltaMessage = nextDeltaMessage.get();
+        nextDeltaMessage.ifPresent(deltaMessage -> {
+            final String topic = deltaMessage.getTopic();
             final Long offset = deltaMessage.getOffset();
-            Map<String, Object> info = new HashMap<>();
-
-            info.put("topic", deltaMessage.getTopic());
-            info.put("partition", deltaMessage.getPartition());
-            info.put("offset", offset);
-            logger.info("Consume message", info);
-
             ChsDelta delta = null;
             int attempt = 0;
 
             try {
-                delta = deserializer.deserialize(deltaMessage);
+                delta = marshaller.deserialize(deltaMessage);
 
                 attempt = delta.getAttempt();
+                logInfo("Consume message", attempt, topic, offset);
                 processor.process(delta);
             }
-            catch (ProcessException e) {
-                logger.error("Processor failed on message: " + e.getMessage());
-                if (e.canRetry()) {
-                    queueRetry(offset, attempt, delta);
-                }
-                else {
-                    info.put("stackTrace", ExceptionUtils.getStackTrace(e));
-                    logger.error("Received fatal exception from processor.", e, info);
-                }
+            catch (RetryableErrorException e) {
+                logError("Retryable error while processing message", e, attempt, topic, offset);
+                queueRetry(topic, offset, attempt, delta);
             }
-            catch (DeserializationException e) {
-                logger.error("Unable to deserialize message", e, info);
-            }
-            catch (Exception e) {
-                info.put("stackTrace", ExceptionUtils.getStackTrace(e));
-                logger.error("Processor failed on message", e, info);
-                queueRetry(offset, attempt, delta);
+            catch (NonRetryableErrorException e) {
+                logError("Non-retryable error while processing message", e, attempt, topic, offset);
             }
             finally {
-                logger.info("Commit message", info);
+                logInfo("Commit message", attempt, topic, offset);
                 commitOffset(deltaMessage);
             }
-        }
+        });
+
+    }
+
+    private void logInfo(final String logContext, final Integer attempt, final String topic, final Long offset) {
+        final Map<String, Object> logMap = new HashMap<>();
+
+        logMap.put("attempt", attempt);
+        logMap.put("topic", topic);
+        logMap.put("offset", offset);
+        logger.info(logContext, logMap);
+    }
+
+    private void logError(final String logContext, final Throwable cause, final Integer attempt, final String topic,
+            final Long offset) {
+        final Map<String, Object> logMap = new HashMap<>();
+
+        logMap.put("error", cause);
+        logMap.put("attempt", attempt);
+        logMap.put("topic", topic);
+        logMap.put("sourceOffset", offset);
+        logger.error(logContext, logMap);
     }
 
     /**
@@ -140,52 +155,34 @@ public class DeltaConsumer {
      * - the retry topic if retries < max retries
      * - the error topic if retries >= max retries
      *
+     * @param sourceTopic  the topic of the originating message
+     * @param sourceOffset the offset of the originating message
      * @param attempt      the attempt counter
      * @param delta        the ChsDelta payload to queue
-     * @param sourceOffset the offset of the originating message
-     * @throws ExecutionException
-     * @throws InterruptedException
      */
-    public void queueRetry(long sourceOffset, int attempt, final ChsDelta delta)
-            throws ExecutionException, InterruptedException {
-        consumerGroup.retry(attempt, createRetryMessage(delta, sourceOffset));
-    }
-
-    /**
-     * Send the message to the error topic because of a non-transient error.
-     *
-     * @param message the message to queue
-     * @throws ExecutionException
-     * @throws InterruptedException
-     */
-    public void queueError(final Message message) throws ExecutionException, InterruptedException {
-        consumerGroup.retry(Integer.MAX_VALUE, message);
-    }
-
-    private void logRetryFailure(final String logContext, final Throwable cause, final String topic,
-            final Long offset) {
-        final Map<String, Object> logMap = new HashMap<>();
-
-        logMap.put("error", cause);
-        logMap.put("topic", topic);
-        logMap.put("offset", offset);
-        logger.error(logContext, logMap);
-    }
-
-    private Message createRetryMessage(final ChsDelta delta, final Long sourceOffset) {
-        final Message retry = new Message();
-        final ChsDelta payload = new ChsDelta();
-        int nextAttempt = delta.getAttempt() >= getMaxRetryAttempts() ? 0 : delta.getAttempt() + 1;
-
-        payload.setAttempt(nextAttempt);
-        payload.setContextId(delta.getContextId());
-        payload.setData(delta.getData());
+    public void queueRetry(final String sourceTopic, long sourceOffset, int attempt, final ChsDelta delta) {
         try {
-            retry.setValue(deserializer.serialize(payload));
+            logInfo("Retry for source message", attempt, sourceTopic, sourceOffset);
+
+            final int nextAttempt = delta.getAttempt() >= getMaxRetryAttempts() ? 0 : delta.getAttempt() + 1;
+            final Message retryMessage = createRetryMessage(delta, nextAttempt);
+
+            consumerGroup.retry(nextAttempt, retryMessage);
+            logInfo("Created retry message", nextAttempt, retryMessage.getTopic(), retryMessage.getOffset());
         }
-        catch (SerializationException e) {
-            logRetryFailure("Failed to create new retry message", e, retry.getTopic(), sourceOffset);
+        catch (ExecutionException e) {
+            logError("Failed to produce message for Retry topic", e, attempt, sourceTopic, sourceOffset);
         }
+        catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logError("Failed to produce message for Retry topic", e, attempt, sourceTopic, sourceOffset);
+        }
+    }
+
+    private Message createRetryMessage(final ChsDelta delta, final Integer nextAttempt) {
+        final Message retry = new Message();
+
+        retry.setValue(marshaller.serialize(new ChsDelta(delta.getData(), nextAttempt, delta.getContextId())));
 
         return retry;
     }

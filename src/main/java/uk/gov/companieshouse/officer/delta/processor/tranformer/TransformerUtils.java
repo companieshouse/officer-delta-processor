@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
-import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
+import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -34,19 +34,17 @@ public class TransformerUtils {
      * @param identifier       the field identifier to provide context in error messages
      * @param s                the string representation of the UTC datetime. Expected to match pattern
      *                         DATETIME_PATTERN.
-     * @param effectivePattern the date pattern to mention in the ProcessException
+     * @param effectivePattern the date pattern to mention in the Exception
      * @return the Instant corresponding to the parsed string (at UTC by definition)
-     * @throws ProcessException if the string cannot be parsed correctly
      */
-    private static Instant convertToInstant(final String identifier, final String s, final String effectivePattern)
-            throws ProcessException {
+    private static Instant convertToInstant(final String identifier, final String s, final String effectivePattern) {
         try {
             return Instant.from(UTC_DATETIME_FORMATTER.parse(s));
         }
         catch (DateTimeParseException e) {
-            throw new ProcessException(String.format("%s: date/time pattern not matched: [%s]",
+            throw new NonRetryableErrorException(String.format("%s: date/time pattern not matched: [%s]",
                     identifier,
-                    effectivePattern), false);
+                    effectivePattern), null);
         }
     }
 
@@ -55,25 +53,22 @@ public class TransformerUtils {
      * Implementation note: Instant conversion requires input level of detail is Seconds, so TIME_START_OF_DAY is
      * appended before conversion.
      *
-     * @param identifier    property name of value (for ProcessException message)
+     * @param identifier    property name of value (for Exception message)
      * @param rawDateString the date string
      * @return the Instant corresponding to the parsed string (at UTC by definition)
-     * @throws ProcessException if the string cannot be parsed correctly
      */
-    public static Instant parseDateString(final String identifier, String rawDateString) throws ProcessException {
+    public static Instant parseDateString(final String identifier, String rawDateString) {
         return convertToInstant(identifier, rawDateString + TIME_START_OF_DAY, DATE_PATTERN);
     }
 
     /**
      * Parse a date string (expected format: DATETIME_PATTERN).
      *
-     * @param identifier        property name of value (for ProcessException message)
+     * @param identifier        property name of value (for sException message)
      * @param rawDateTimeString the date and time string
      * @return the Instant corresponding to the parsed string (at UTC by definition)
-     * @throws ProcessException if the string cannot be parsed correctly
      */
-    public static Instant parseDateTimeString(final String identifier, String rawDateTimeString)
-            throws ProcessException {
+    public static Instant parseDateTimeString(final String identifier, String rawDateTimeString) {
         final String dateTimeString = rawDateTimeString.length() > DATETIME_LENGTH
                 ? rawDateTimeString.substring(0, DATETIME_LENGTH)
                 : rawDateTimeString;
@@ -82,25 +77,24 @@ public class TransformerUtils {
     }
 
     public static String base64Encode(final byte[] bytes) {
-
         return Base64.getUrlEncoder().encodeToString(bytes);
     }
 
-    public static byte[] sha1Digest(final String plain) throws ProcessException {
+    public static byte[] sha1Digest(final String plain) {
 
         MessageDigest md = null;
         try {
             md = MessageDigest.getInstance("SHA-1");
-        } catch (NoSuchAlgorithmException e) {
-            throw new ProcessException("Encode failed.", e, false);
+        }
+        catch (NoSuchAlgorithmException e) {
+            throw new NonRetryableErrorException("Encode failed: no such digest algorithm.", e);
         }
 
         return md.digest((plain + SALT).getBytes(StandardCharsets.UTF_8));
     }
 
-    public static String encode(String plain) throws ProcessException {
-
-        return base64Encode(sha1Digest(plain)).replace("=","");
+    public static String encode(String plain) {
+        return base64Encode(sha1Digest(plain)).replace("=", "");
     }
 
 }

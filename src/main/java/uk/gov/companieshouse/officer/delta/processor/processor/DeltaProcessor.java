@@ -4,15 +4,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
+import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
+import uk.gov.companieshouse.officer.delta.processor.exception.RetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.Officers;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientService;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.AppointmentTransform;
+
+import java.util.List;
 
 @Component
 public class DeltaProcessor implements Processor<ChsDelta> {
@@ -31,22 +36,35 @@ public class DeltaProcessor implements Processor<ChsDelta> {
     }
 
     @Override
-    public void process(ChsDelta delta) throws ProcessException {
+    public void process(ChsDelta delta) {
         logger.infoContext(delta.getContextId(), "Processing", null);
 
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             Officers officers = objectMapper.readValue(delta.getData(), Officers.class);
 
-            for (OfficersItem officer : officers.getOfficers()) {
-                if (officer.getAppointmentDate().endsWith("00")) {
-                    throw ProcessException.nonFatal("Testing retry flow", new RuntimeException("Dummy transient error"));
-                }
+            final List<OfficersItem> officersOfficers = officers.getOfficers();
+
+            for (int i = 0; i < officersOfficers.size(); i++) {
+                final OfficersItem officer = officersOfficers.get(i);
                 AppointmentAPI appointmentAPI = transformer.transform(officer);
                 appointmentAPI.setDeltaAt(officers.getDeltaAt());
 
-                // Should we be making API calls for each officer or should we batch them?
-                apiClientService.putAppointment(officer.getCompanyNumber(), appointmentAPI);
+                final ApiResponse<Void> response =
+                        apiClientService.putAppointment(officer.getCompanyNumber(), appointmentAPI);
+                final HttpStatus httpStatus = HttpStatus.valueOf(response.getStatusCode());
+
+                if (httpStatus.is5xxServerError()) {
+                    final String msg = String.format("Failed to send data for officer[%d], retry", i);
+                    logger.error(msg);
+                    throw new RetryableErrorException("msg", null);
+                }
+                else if (httpStatus.is4xxClientError()) {
+                    final String msg = String.format("Failed to send data for officer[%d]", i);
+
+                    logger.error(msg);
+                    throw new NonRetryableErrorException("msg", null);
+                }
             }
         } catch (JsonProcessingException e) {
             // TODO: figure out how to print exception without dumping sensitive fields
@@ -55,7 +73,7 @@ public class DeltaProcessor implements Processor<ChsDelta> {
                     e,
                     null);
 
-            throw ProcessException.fatal("Unable to JSON parse CHSDelta", e);
+            throw new NonRetryableErrorException("Unable to JSON parse CHSDelta", e);
         }
     }
 }

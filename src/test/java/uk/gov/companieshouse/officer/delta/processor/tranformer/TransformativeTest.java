@@ -29,7 +29,7 @@ class TransformativeTest {
         }
 
         @Override
-        public ZoneId transform(final String source, final ZoneId output) throws ProcessException {
+        public ZoneId transform(final String source, final ZoneId output) {
             return ZoneId.of(source);
         }
     }
@@ -47,7 +47,7 @@ class TransformativeTest {
     }
 
     @Test
-    void transformStringZoneId() throws ProcessException {
+    void transformStringZoneId() {
         final ZoneId zoneId = ZoneId.of("Europe/London");
 
         final ZoneId result = testTransformative.transform(TZ_PHOENIX, zoneId);
@@ -56,12 +56,12 @@ class TransformativeTest {
     }
 
     @Test
-    void testTransformStringDefault() throws ProcessException {
+    void testTransformStringDefault() {
         assertThat(testTransformative.transform(TZ_PHOENIX), is(ZoneId.of(TZ_PHOENIX)));
     }
 
     @Test
-    void testTransformStringCollection() throws ProcessException {
+    void testTransformStringCollection() {
         final List<ZoneId> result = testTransformative.transform(Arrays.asList(TZ_PHOENIX, TZ_BAGHDAD, TZ_TROLL));
 
         assertThat(result, contains(ZoneId.of(TZ_PHOENIX), ZoneId.of(TZ_BAGHDAD), ZoneId.of(TZ_TROLL)));

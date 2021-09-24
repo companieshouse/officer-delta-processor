@@ -38,7 +38,7 @@ class AppointmentTransformTest {
     }
 
     @Test
-    void transformSingle() throws ProcessException {
+    void transformSingle() {
         final OfficersItem item = createOfficer();
         final AppointmentAPI appointmentAPI = testTransform.factory();
         appointmentAPI.setId("internalId");
