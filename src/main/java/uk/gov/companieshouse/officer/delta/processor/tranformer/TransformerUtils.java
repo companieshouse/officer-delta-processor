@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
+import uk.gov.companieshouse.officer.delta.processor.model.enums.OfficerRole;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -97,4 +98,9 @@ public class TransformerUtils {
         return base64Encode(sha1Digest(plain)).replace("=", "");
     }
 
+    public static String lookupOfficeRole(String kind) {
+        OfficerRole officerRole = OfficerRole.valueOf(kind);
+
+        return officerRole.getValue();
+    }
 }
