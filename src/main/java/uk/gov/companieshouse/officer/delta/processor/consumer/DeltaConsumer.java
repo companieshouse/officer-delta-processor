@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.officer.delta.processor.consumer;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.kafka.consumer.resilience.CHConsumerType;
@@ -9,7 +8,6 @@ import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.officer.delta.processor.deserialise.ChsDeltaMarshaller;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
-import uk.gov.companieshouse.officer.delta.processor.exception.RetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.processor.Processor;
 
 import javax.annotation.PreDestroy;
@@ -162,7 +160,7 @@ public class DeltaConsumer {
      * @param attempt      the attempt counter
      * @param delta        the ChsDelta payload to queue
      */
-    public void queueRetry(final String sourceTopic, long sourceOffset, int attempt, final ChsDelta delta) {
+    private void queueRetry(final String sourceTopic, long sourceOffset, int attempt, final ChsDelta delta) {
         try {
             logInfo("Retry for source message", attempt, sourceTopic, sourceOffset);
 

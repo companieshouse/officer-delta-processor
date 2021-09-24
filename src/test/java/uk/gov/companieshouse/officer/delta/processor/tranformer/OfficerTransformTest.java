@@ -18,6 +18,7 @@ import uk.gov.companieshouse.officer.delta.processor.model.Identification;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.OfficerRole;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithDateOfBirth;
+import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupation;
 
 import java.time.Instant;
 import java.util.stream.Stream;

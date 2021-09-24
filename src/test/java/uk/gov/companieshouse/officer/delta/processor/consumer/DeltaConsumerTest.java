@@ -37,7 +37,6 @@ import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableError
 import uk.gov.companieshouse.officer.delta.processor.exception.RetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.processor.Processor;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -318,10 +317,6 @@ class DeltaConsumerTest {
 
     private ChsDelta createDelta(final int attempt) {
         return new ChsDelta("data", attempt, "context_id");
-    }
-
-    @Test
-    void queueRetry() {
     }
 
     @Test

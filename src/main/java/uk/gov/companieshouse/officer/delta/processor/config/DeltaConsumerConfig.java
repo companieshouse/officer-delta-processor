@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.officer.delta.processor.config;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -94,7 +95,7 @@ public class DeltaConsumerConfig {
      * @param consumerConfig the configuration for the consumer
      * @return the consumer group
      */
-    @Bean
+    @Bean("MainConsumerGroup")
     @Profile("!test")
     CHKafkaResilientConsumerGroup mainKafkaConsumerGroup(ConsumerConfig consumerConfig) {
         return new CHKafkaResilientConsumerGroup(consumerConfig, CHConsumerType.MAIN_CONSUMER);
@@ -114,7 +115,7 @@ public class DeltaConsumerConfig {
      */
     @Bean("MainConsumer")
     @Profile("!test")
-    DeltaConsumer mainDeltaConsumer(final CHKafkaResilientConsumerGroup consumerGroup,
+    DeltaConsumer mainDeltaConsumer(@Qualifier("MainConsumerGroup") final CHKafkaResilientConsumerGroup consumerGroup,
             final ChsDeltaMarshaller marshaller, final Processor<ChsDelta> processor, final Logger logger) {
         logger.debug("Creating DeltaConsumer [MAIN ]...");
 
