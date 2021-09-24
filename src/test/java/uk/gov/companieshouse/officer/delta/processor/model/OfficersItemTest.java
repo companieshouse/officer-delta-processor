@@ -84,6 +84,12 @@ class OfficersItemTest {
     }
 
     @Test
+    void setApptDatePrefix() {
+        testItem.setApptDatePrefix(EXPECTED);
+        assertThat(testItem.getApptDatePrefix(), is(EXPECTED));
+    }
+
+    @Test
     void getResignationDate() {
         testItem.setResignationDate(EXPECTED);
         assertThat(testItem.getResignationDate(), is(EXPECTED));
@@ -213,6 +219,7 @@ class OfficersItemTest {
                 allOf(containsString("OfficersItem["),
                         containsString("additionalProperties={}"),
                         containsString("appointmentDate=<null>"),
+                        containsString("apptDatePrefix"),
                         containsString("changedAt=<null>"),
                         containsString("companyNumber=<null>"),
                         containsString("corporateInd=<null>"),
