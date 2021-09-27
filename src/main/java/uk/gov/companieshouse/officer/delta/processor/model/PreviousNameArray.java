@@ -24,7 +24,8 @@ public class PreviousNameArray {
     @JsonProperty("previous_surname")
     private String previousSurname;
 
-    public PreviousNameArray() { }
+    public PreviousNameArray() {
+    }
 
     public PreviousNameArray(String previousForename, String previousSurname) {
         this.previousForename = previousForename;

@@ -30,7 +30,7 @@ public enum RolesWithFormerNames {
 
     public static boolean includes(final String role) {
         return EnumSet.allOf(RolesWithFormerNames.class).stream()
-            .map(r -> r.officerRole.getValue())
-            .anyMatch(role::equals);
+                .map(r -> r.officerRole.getValue())
+                .anyMatch(role::equals);
     }
 }

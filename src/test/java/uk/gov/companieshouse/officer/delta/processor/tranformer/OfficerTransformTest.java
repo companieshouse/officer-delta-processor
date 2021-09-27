@@ -2,6 +2,7 @@ package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -20,7 +21,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
-import uk.gov.companieshouse.api.model.delta.officers.FormerNamesAPI;
 import uk.gov.companieshouse.api.model.delta.officers.IdentificationAPI;
 import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
 import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
@@ -35,21 +35,18 @@ import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupa
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithPre1992Appointment;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.stream.Stream;
-
-import static org.hamcrest.CoreMatchers.notNullValue;
 
 @ExtendWith(MockitoExtension.class)
 class OfficerTransformTest {
-    private static final String CHANGED_AT = "20210909133736012345";
-    private static final Instant CHANGED_INSTANT = Instant.parse("2021-09-09T13:37:36.000Z");
     public static final String VALID_DATE = "20000101";
     public static final String INVALID_DATE = "12345";
-    private static final Instant VALID_DATE_INSTANT = Instant.parse("2000-01-01T00:00:00Z");
     public static final String KIND_OF_OFFICER_ROLE_WITH_DOB = OfficerRole.DIR.name();
-
+    private static final String CHANGED_AT = "20210909133736012345";
+    private static final Instant CHANGED_INSTANT = Instant.parse("2021-09-09T13:37:36.000Z");
+    private static final Instant VALID_DATE_INSTANT = Instant.parse("2000-01-01T00:00:00Z");
     private OfficerTransform testTransform;
 
     @Mock
@@ -62,6 +59,24 @@ class OfficerTransformTest {
     private IdentificationAPI identificationAPI;
     @Mock
     private OfficerAPI officerAPI;
+
+    private static Stream<Arguments> emptyDobsWithDobRoles() {
+        Stream<OfficerRole> requiresDob = Arrays.stream(RolesWithDateOfBirth.values())
+                .map(RolesWithDateOfBirth::getOfficerRole);
+
+        return requiresDob.flatMap(role -> Stream.of(
+                Arguments.of(role, null),
+                Arguments.of(role, "")
+        ));
+    }
+
+    private static Stream<Arguments> provideScenarioParams() {
+        return Stream.of(Arguments.of(CHANGED_AT, true),
+                // changedAt full accuracy, resignation date present
+                Arguments.of(CHANGED_AT.substring(0, DATETIME_LENGTH), false)
+                // changedAt seconds accuracy, resignation date absent
+        );
+    }
 
     @BeforeEach
     void setUp() {
@@ -142,6 +157,22 @@ class OfficerTransformTest {
         }
     }
 
+    @DisplayName("Transformation doesn't fail when no DOB on role which requires it")
+    @ParameterizedTest
+    @MethodSource("emptyDobsWithDobRoles")
+    void transformsWhenNoDob(OfficerRole role, String dob) throws ProcessException {
+        final OfficersItem officer = createOfficer(addressAPI, identification);
+
+        officer.setDateOfBirth(dob);
+        officer.setKind(role.name());
+        officer.setChangedAt(CHANGED_AT);
+        officer.setAppointmentDate(VALID_DATE);
+
+        final OfficerAPI outputOfficer = testTransform.transform(officer);
+
+        assertThat(outputOfficer.getDateOfBirth(), is(nullValue()));
+    }
+
     @DisplayName("Occupation and Nationality is not included when the officers role does not require it")
     @ParameterizedTest
     @EnumSource
@@ -187,7 +218,7 @@ class OfficerTransformTest {
     }
 
     @DisplayName("Set AppointedOn to AppointedBefore when the OfficerRole is included in the roleSet " +
-        "and is Pre1992Appointment")
+            "and is Pre1992Appointment")
     @ParameterizedTest
     @EnumSource
     void onlyRolesWithPre1992AppointmentIncludePre1992Appointment(OfficerRole officerRole) throws ProcessException {
@@ -221,7 +252,7 @@ class OfficerTransformTest {
         officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate(VALID_DATE);
         officer.setPreviousNameArray(Collections.singletonList(
-            new PreviousNameArray("forename", "surname")));
+                new PreviousNameArray("forename", "surname")));
 
         final OfficerAPI outputOfficer = testTransform.transform(officer);
 
@@ -230,14 +261,6 @@ class OfficerTransformTest {
         } else {
             assertThat(outputOfficer.getFormerNameData(), is(nullValue()));
         }
-    }
-
-    private static Stream<Arguments> provideScenarioParams() {
-        return Stream.of(Arguments.of(CHANGED_AT, true),
-                // changedAt full accuracy, resignation date present
-                Arguments.of(CHANGED_AT.substring(0, DATETIME_LENGTH), false)
-                // changedAt seconds accuracy, resignation date absent
-        );
     }
 
     @ParameterizedTest(name = "{index}: changedAt={0}, has resignation_date={1}")
@@ -264,7 +287,7 @@ class OfficerTransformTest {
         }
         assertThat(result.getOfficerRole(), is(officer.getOfficerRole()));
         assertThat(result.isPre1992Appointment(), is(false));
-        assertThat(result.getResignedOn(), is(hasResignationDate ? VALID_DATE_INSTANT: null));
+        assertThat(result.getResignedOn(), is(hasResignationDate ? VALID_DATE_INSTANT : null));
         assertThat(result.getDateOfBirth(), is(VALID_DATE_INSTANT));
         assertThat(result.getCompanyNumber(), is(officer.getCompanyNumber()));
         assertThat(result.getTitle(), is(officer.getTitle()));
@@ -281,7 +304,7 @@ class OfficerTransformTest {
     }
 
     private void verifyProcessException(final OfficerAPI officerAPI, final OfficersItem officer,
-            final String expectedMessage) {
+                                        final String expectedMessage) {
         final ProcessException exception =
                 assertThrows(ProcessException.class, () -> testTransform.transform(officer, officerAPI));
 
