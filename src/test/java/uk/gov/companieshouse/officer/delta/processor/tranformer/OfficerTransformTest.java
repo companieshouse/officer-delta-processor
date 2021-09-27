@@ -26,14 +26,17 @@ import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
 import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
 import uk.gov.companieshouse.officer.delta.processor.model.Identification;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
+import uk.gov.companieshouse.officer.delta.processor.model.PreviousNameArray;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.OfficerRole;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithCountryOfResidence;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithDateOfBirth;
+import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithFormerNames;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupation;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithPre1992Appointment;
 
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
@@ -235,6 +238,28 @@ class OfficerTransformTest {
         } else {
             assertThat(outputOfficer.isPre1992Appointment(), is(false));
             assertThat(outputOfficer.getAppointedOn(), is(VALID_DATE_INSTANT));
+        }
+    }
+
+    @DisplayName("Former Names is not included when the officers role does not require it")
+    @ParameterizedTest
+    @EnumSource
+    void onlyRolesWithFormerNamesIncludeFormerNames(OfficerRole officerRole) throws ProcessException {
+        final OfficersItem officer = createOfficer(addressAPI, identification);
+
+        officer.setDateOfBirth(VALID_DATE);
+        officer.setKind(officerRole.name());
+        officer.setChangedAt(CHANGED_AT);
+        officer.setAppointmentDate(VALID_DATE);
+        officer.setPreviousNameArray(Collections.singletonList(
+                new PreviousNameArray("forename", "surname")));
+
+        final OfficerAPI outputOfficer = testTransform.transform(officer);
+
+        if (RolesWithFormerNames.includes(officerRole)) {
+            assertThat(outputOfficer.getFormerNameData(), is(notNullValue()));
+        } else {
+            assertThat(outputOfficer.getFormerNameData(), is(nullValue()));
         }
     }
 
