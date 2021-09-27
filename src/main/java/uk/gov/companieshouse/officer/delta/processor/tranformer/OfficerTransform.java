@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
 
+import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
@@ -10,6 +11,7 @@ import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithCountr
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithPre1992Appointment;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithDateOfBirth;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupation;
+import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithResidentialAddress;
 
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseDateString;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseDateTimeString;
@@ -78,9 +80,13 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
         officer.setServiceAddress(source.getServiceAddress());
         officer.setServiceAddressSameAsRegisteredOfficeAddress(
                 parseYesOrNo(source.getServiceAddressSameAsRegisteredAddress()));
-        officer.setUsualResidentialAddress(source.getUsualResidentialAddress());
-        officer.setResidentialAddressSameAsServiceAddress(
-                parseYesOrNo(source.getResidentialAddressSameAsServiceAddress()));
+
+        if (RolesWithResidentialAddress.includes(officerRole)) {
+            officer.setUsualResidentialAddress(source.getUsualResidentialAddress());
+            officer.setResidentialAddressSameAsServiceAddress(
+                BooleanUtils.toBooleanObject(source.getResidentialAddressSameAsServiceAddress()));
+            officer.setSecureOfficer(BooleanUtils.toBooleanObject(source.getSecureDirector()));
+        }
 
         if (RolesWithCountryOfResidence.includes(officerRole)) {
             officer.setCountryOfResidence(source.getUsualResidentialCountry());

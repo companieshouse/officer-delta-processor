@@ -27,8 +27,8 @@ public class TransformerUtils {
         // utility class; prevent instantiation
     }
 
-    public static boolean parseYesOrNo(final String serviceAddressSameAsRegisteredAddress) {
-        return "Y".equalsIgnoreCase(serviceAddressSameAsRegisteredAddress);
+    public static boolean parseYesOrNo(final String fieldValue) {
+        return "Y".equalsIgnoreCase(fieldValue);
     }
 
     /**
