@@ -24,6 +24,13 @@ public class PreviousNameArray {
     @JsonProperty("previous_surname")
     private String previousSurname;
 
+    public PreviousNameArray() { }
+
+    public PreviousNameArray(String previousForename, String previousSurname) {
+        this.previousForename = previousForename;
+        this.previousSurname = previousSurname;
+    }
+
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<>();
 
