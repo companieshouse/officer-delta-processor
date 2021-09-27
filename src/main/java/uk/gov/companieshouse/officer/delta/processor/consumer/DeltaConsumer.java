@@ -2,6 +2,7 @@ package uk.gov.companieshouse.officer.delta.processor.consumer;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.util.StopWatch;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.kafka.consumer.resilience.CHConsumerType;
 import uk.gov.companieshouse.kafka.consumer.resilience.CHKafkaResilientConsumerGroup;
@@ -73,7 +74,8 @@ public class DeltaConsumer {
     Optional<Message> getNextDeltaMessage() {
         if (messages.isEmpty()) {
             messages.addAll(consumerGroup.consume());
-            logger.debug(String.format("Polled %d new message(s)", messages.size()));
+            logger.trace(
+                    String.format("[%s] polled %d new message(s)", consumerGroup.getConsumerType(), messages.size()));
         }
 
         return Optional.ofNullable(messages.pollFirst());
@@ -110,14 +112,29 @@ public class DeltaConsumer {
             ChsDelta delta = null;
             int attempt = 0;
             String contextId;
+            StopWatch stopWatch = new StopWatch(consumerGroup.getConsumerType().toString());
 
+            stopWatch.setKeepTaskList(false); // avoid high memory usage for large number (millions) of task intervals
             try {
+                stopWatch.start("Deserialize message");
                 delta = marshaller.deserialize(deltaMessage);
+                stopWatch.stop();
 
                 attempt = delta.getAttempt();
-                contextId = Optional.ofNullable(delta).map(ChsDelta::getContextId).orElse(null);
-                logInfo(contextId, "Consume message", attempt, topic, partition, offset);
+                contextId = delta.getContextId();
+                logInfo(contextId,
+                        String.format("%s (ms): %d", stopWatch.getLastTaskName(), stopWatch.getLastTaskTimeMillis()),
+                        attempt, topic, partition, offset);
+                stopWatch.start("Process message");
+
                 processor.process(delta);
+
+                stopWatch.stop();
+                logInfo(contextId,
+                        String.format("%s (ms): %d", stopWatch.getLastTaskName(), stopWatch.getLastTaskTimeMillis()),
+                        attempt, topic, partition, offset);
+                logInfo(contextId, String.format("Total process (ms): %d", stopWatch.getTotalTimeMillis()), attempt,
+                        topic, partition, offset);
             }
             catch (NonRetryableErrorException e) {
                 contextId = Optional.ofNullable(delta).map(ChsDelta::getContextId).orElse(null);

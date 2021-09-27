@@ -40,7 +40,6 @@ public class DeltaProcessor implements Processor<ChsDelta> {
         ObjectMapper objectMapper = new ObjectMapper();
         final String logContext = delta.getContextId();
 
-        logger.infoContext(logContext, "Processing", null);
         try {
             Officers officers = objectMapper.readValue(delta.getData(), Officers.class);
 
