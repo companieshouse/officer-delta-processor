@@ -38,6 +38,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Stream;
+import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithResidentialAddress;
 
 @ExtendWith(MockitoExtension.class)
 class OfficerTransformTest {
@@ -252,7 +253,7 @@ class OfficerTransformTest {
         officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate(VALID_DATE);
         officer.setPreviousNameArray(Collections.singletonList(
-                new PreviousNameArray("forename", "surname")));
+            new PreviousNameArray("forename", "surname")));
 
         final OfficerAPI outputOfficer = testTransform.transform(officer);
 
@@ -260,6 +261,31 @@ class OfficerTransformTest {
             assertThat(outputOfficer.getFormerNameData(), is(notNullValue()));
         } else {
             assertThat(outputOfficer.getFormerNameData(), is(nullValue()));
+        }
+    }
+
+
+    @DisplayName("URA and secure indicator is not included when the officers role does not require it")
+    @ParameterizedTest
+    @EnumSource
+    void onlyRolesWithResidentialAddressIncludeAddressAndIndicators(OfficerRole officerRole) throws ProcessException {
+        final OfficersItem officer = createOfficer(addressAPI, identification);
+
+        officer.setDateOfBirth(VALID_DATE);
+        officer.setKind(officerRole.name());
+        officer.setChangedAt(CHANGED_AT);
+        officer.setAppointmentDate(VALID_DATE);
+
+        final OfficerAPI outputOfficer = testTransform.transform(officer);
+
+        if (RolesWithResidentialAddress.includes(officerRole)) {
+            assertThat(outputOfficer.getUsualResidentialAddress(), is(notNullValue()));
+            assertThat(outputOfficer.isResidentialAddressSameAsServiceAddress(), is(notNullValue()));
+            assertThat(outputOfficer.secureOfficer(), is(notNullValue()));
+        } else {
+            assertThat(outputOfficer.getUsualResidentialAddress(), is(nullValue()));
+            assertThat(outputOfficer.isResidentialAddressSameAsServiceAddress(), is(nullValue()));
+            assertThat(outputOfficer.secureOfficer(), is(nullValue()));
         }
     }
 
@@ -312,7 +338,7 @@ class OfficerTransformTest {
         assertThat(exception.getCause(), is(nullValue()));
     }
 
-    private OfficersItem createOfficer(final AddressAPI serviceAddress, final Identification identification) {
+    private OfficersItem createOfficer(final AddressAPI address, final Identification identification) {
         final OfficersItem item = new OfficersItem();
 
         item.setCompanyNumber("companyNumber");
@@ -323,11 +349,14 @@ class OfficerTransformTest {
         item.setOccupation("occupation");
         item.setDateOfBirth("dateOfBirth");
         item.setKind(OfficerRole.DIR.name());
+        item.setSecureDirector("N");
         item.setOfficerRole(OfficerRole.DIR.getValue());
         item.setApptDatePrefix("N");
         item.setHonours("honours");
-        item.setServiceAddress(serviceAddress);
+        item.setServiceAddress(address);
+        item.setUsualResidentialAddress(address);
         item.setServiceAddressSameAsRegisteredAddress("Y");
+        item.setResidentialAddressSameAsServiceAddress("Y");
         item.setUsualResidentialCountry("usualResidentialCountry");
         item.setIdentification(identification);
 
