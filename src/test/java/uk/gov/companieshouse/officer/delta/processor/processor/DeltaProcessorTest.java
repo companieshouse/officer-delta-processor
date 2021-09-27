@@ -3,6 +3,7 @@ package uk.gov.companieshouse.officer.delta.processor.processor;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
@@ -94,11 +95,11 @@ class DeltaProcessorTest {
         final String expectedNumber = expectedAppointment.getData().getCompanyNumber();
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.OK.value(), null, null);
 
-        when(apiClientService.putAppointment(expectedNumber, expectedAppointment)).thenReturn(response);
+        when(apiClientService.putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment)).thenReturn(response);
 
         testProcessor.process(delta);
 
-        verify(apiClientService).putAppointment(expectedNumber, expectedAppointment);
+        verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
         verifyNoMoreInteractions(apiClientService);
     }
 
@@ -128,14 +129,14 @@ class DeltaProcessorTest {
         final String expectedNumber = expectedAppointment.getData().getCompanyNumber();
         final ApiResponse<Void> response = new ApiResponse<>(serverErrorStatus.value(), null, null);
 
-        when(apiClientService.putAppointment(expectedNumber, expectedAppointment)).thenReturn(response);
+        when(apiClientService.putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment)).thenReturn(response);
 
         assertThrows(RetryableErrorException.class, () -> testProcessor.process(delta));
 
         final InOrder inOrder = inOrder(logger, apiClientService);
 
-        inOrder.verify(apiClientService).putAppointment(expectedNumber, expectedAppointment);
-        inOrder.verify(logger).error(anyString());
+        inOrder.verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
+        inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), isNull(), isNull());
         inOrder.verifyNoMoreInteractions();
 
     }
@@ -151,14 +152,14 @@ class DeltaProcessorTest {
         final String expectedNumber = expectedAppointment.getData().getCompanyNumber();
         final ApiResponse<Void> response = new ApiResponse<>(serverErrorStatus.value(), null, null);
 
-        when(apiClientService.putAppointment(expectedNumber, expectedAppointment)).thenReturn(response);
+        when(apiClientService.putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment)).thenReturn(response);
 
         assertThrows(NonRetryableErrorException.class, () -> testProcessor.process(delta));
 
         final InOrder inOrder = inOrder(logger, apiClientService);
 
-        inOrder.verify(apiClientService).putAppointment(expectedNumber, expectedAppointment);
-        inOrder.verify(logger).error(anyString());
+        inOrder.verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
+        inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), isNull(), isNull());
         inOrder.verifyNoMoreInteractions();
 
     }

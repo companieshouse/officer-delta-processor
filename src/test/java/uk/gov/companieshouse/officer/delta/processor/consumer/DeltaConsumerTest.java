@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
@@ -49,9 +50,10 @@ import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 class DeltaConsumerTest {
-    public static final Long EXPECTED = 5L;
+    private static final Long EXPECTED = 5L;
     private static final String MAIN_TOPIC = "MAIN";
-    public static final int MSG_COUNT = 3;
+    private static final int MSG_COUNT = 3;
+    private static final String CONTEXT_ID = "context_id";
 
     private DeltaConsumer testConsumer;
 
@@ -187,7 +189,7 @@ class DeltaConsumerTest {
 
         inOrder.verify(consumerGroup).connect();
         inOrder.verify(marshaller).deserialize(nextMessage);
-        inOrder.verify(logger).error(anyString(), anyMap());
+        inOrder.verify(logger).errorContext(isNull(), anyString(), any(Exception.class), anyMap());
         inOrder.verify(consumerGroup, never()).retry(anyInt(), any(Message.class));
         inOrder.verify(consumerGroup).commit();
         inOrder.verifyNoMoreInteractions();
@@ -209,7 +211,7 @@ class DeltaConsumerTest {
         inOrder.verify(consumerGroup).connect();
         inOrder.verify(marshaller).deserialize(nextMessage);
         inOrder.verify(processor).process(delta);
-        inOrder.verify(logger).error(anyString(), anyMap());
+        inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), any(Exception.class), anyMap());
         inOrder.verify(consumerGroup).commit();
         inOrder.verifyNoMoreInteractions();
     }
@@ -235,7 +237,7 @@ class DeltaConsumerTest {
         inOrder.verify(consumerGroup).connect();
         inOrder.verify(marshaller).deserialize(nextMessage);
         inOrder.verify(processor).process(delta);
-        inOrder.verify(logger).error(anyString(), anyMap());
+        inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), any(Exception.class), anyMap());
         inOrder.verify(marshaller).serialize(retry);
         inOrder.verify(consumerGroup).retry(anyInt(), any(Message.class));
         inOrder.verify(consumerGroup).commit();
@@ -269,7 +271,7 @@ class DeltaConsumerTest {
         inOrder.verify(consumerGroup).connect();
         inOrder.verify(marshaller).deserialize(nextMessage);
         inOrder.verify(processor).process(delta);
-        inOrder.verify(logger).error(anyString(), anyMap());
+        inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), any(Exception.class), anyMap());
         inOrder.verify(marshaller).serialize(retry);
         inOrder.verify(consumerGroup).retry(eq(nextAttempt), captor.capture());
         inOrder.verify(consumerGroup).commit();
@@ -306,10 +308,10 @@ class DeltaConsumerTest {
         inOrder.verify(consumerGroup).connect();
         inOrder.verify(marshaller).deserialize(nextMessage);
         inOrder.verify(processor).process(delta);
-        inOrder.verify(logger).error(anyString(), anyMap()); // log process failure
+        inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), any(Exception.class), anyMap()); // log process failure
         inOrder.verify(marshaller).serialize(retry);
         inOrder.verify(consumerGroup).retry(eq(1), captor.capture());
-        inOrder.verify(logger).error(anyString(), anyMap()); // log retry failure
+        inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), any(Exception.class), anyMap()); // log retry failure
         inOrder.verify(consumerGroup).commit();
         inOrder.verifyNoMoreInteractions();
         assertThat(captor.getValue().getValue(), is(messageBytes));

@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.officer.delta.processor.consumer;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.kafka.consumer.resilience.CHConsumerType;
@@ -48,6 +49,7 @@ public class DeltaConsumer {
      */
     @PreDestroy
     public void destroy() {
+        logger.info(String.format("Closing [%s] before service shutdown.", consumerGroup.getConsumerType()));
         consumerGroup.close();
     }
 
@@ -104,50 +106,58 @@ public class DeltaConsumer {
         nextDeltaMessage.ifPresent(deltaMessage -> {
             final String topic = deltaMessage.getTopic();
             final Long offset = deltaMessage.getOffset();
+            final Integer partition = deltaMessage.getPartition();
             ChsDelta delta = null;
             int attempt = 0;
+            String contextId;
 
             try {
                 delta = marshaller.deserialize(deltaMessage);
 
                 attempt = delta.getAttempt();
-                logInfo("Consume message", attempt, topic, offset);
+                contextId = Optional.ofNullable(delta).map(ChsDelta::getContextId).orElse(null);
+                logInfo(contextId, "Consume message", attempt, topic, partition, offset);
                 processor.process(delta);
             }
             catch (NonRetryableErrorException e) {
-                logError("Non-retryable error while processing message", e, attempt, topic, offset);
+                contextId = Optional.ofNullable(delta).map(ChsDelta::getContextId).orElse(null);
+                logError(contextId, e, attempt, topic, partition, offset);
             }
             catch (Exception e) {
                 // includes RetryableErrorException; and assume any other kind of exception is retryable
-                logError("Retryable error while processing message", e, attempt, topic, offset);
-                queueRetry(topic, offset, attempt, delta);
+                contextId = Optional.ofNullable(delta).map(ChsDelta::getContextId).orElse(null);
+                logError(contextId, e, attempt, topic, partition, offset);
+                queueRetry(topic, partition, offset, attempt, delta);
             }
             finally {
-                logInfo("Commit message", attempt, topic, offset);
+                contextId = Optional.ofNullable(delta).map(ChsDelta::getContextId).orElse(null);
+                logInfo(contextId, "Commit message offset", attempt, topic, partition, offset);
                 commitOffset(deltaMessage);
             }
         });
 
     }
 
-    private void logInfo(final String logContext, final Integer attempt, final String topic, final Long offset) {
+    private void logInfo(final String logContext, final String msg, final Integer attempt, final String topic,
+            final Integer partition, final Long offset) {
         final Map<String, Object> logMap = new HashMap<>();
 
         logMap.put("attempt", attempt);
         logMap.put("topic", topic);
+        logMap.put("partition", partition);
         logMap.put("offset", offset);
-        logger.info(logContext, logMap);
+        logger.infoContext(logContext, msg, logMap);
     }
 
-    private void logError(final String logContext, final Throwable cause, final Integer attempt, final String topic,
-            final Long offset) {
+    private void logError(final String logContext, final Exception e, final Integer attempt, final String topic,
+            final Integer partition, final Long offset) {
         final Map<String, Object> logMap = new HashMap<>();
 
-        logMap.put("error", cause);
         logMap.put("attempt", attempt);
         logMap.put("topic", topic);
+        logMap.put("partition", partition);
         logMap.put("sourceOffset", offset);
-        logger.error(logContext, logMap);
+        logger.errorContext(logContext, ExceptionUtils.getRootCauseMessage(e), e, logMap);
     }
 
     /**
@@ -156,26 +166,31 @@ public class DeltaConsumer {
      * - the error topic if retries >= max retries
      *
      * @param sourceTopic  the topic of the originating message
+     * @param partition    the topic partition number
      * @param sourceOffset the offset of the originating message
      * @param attempt      the attempt counter
      * @param delta        the ChsDelta payload to queue
      */
-    private void queueRetry(final String sourceTopic, long sourceOffset, int attempt, final ChsDelta delta) {
+    private void queueRetry(final String sourceTopic, final Integer partition, long sourceOffset, int attempt,
+            final ChsDelta delta) {
+        final String contextId = delta.getContextId();
+
         try {
-            logInfo("Retry for source message", attempt, sourceTopic, sourceOffset);
+            logInfo(contextId, "Retry for source message", attempt, sourceTopic, partition, sourceOffset);
 
             final int nextAttempt = delta.getAttempt() >= getMaxRetryAttempts() ? 0 : delta.getAttempt() + 1;
             final Message retryMessage = createRetryMessage(delta, nextAttempt);
 
             consumerGroup.retry(nextAttempt, retryMessage);
-            logInfo("Created retry message", nextAttempt, retryMessage.getTopic(), retryMessage.getOffset());
+            logInfo(contextId, "Created retry message", nextAttempt, retryMessage.getTopic(), partition,
+                    retryMessage.getOffset());
         }
         catch (ExecutionException e) {
-            logError("Failed to produce message for Retry topic", e, attempt, sourceTopic, sourceOffset);
+            logError(contextId, e, attempt, sourceTopic, partition, sourceOffset);
         }
         catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            logError("Failed to produce message for Retry topic", e, attempt, sourceTopic, sourceOffset);
+            logError(contextId, e, attempt, sourceTopic, partition, sourceOffset);
         }
     }
 

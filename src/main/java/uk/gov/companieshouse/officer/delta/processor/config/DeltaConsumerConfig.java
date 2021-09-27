@@ -117,7 +117,7 @@ public class DeltaConsumerConfig {
     @Profile("!test")
     DeltaConsumer mainDeltaConsumer(@Qualifier("MainConsumerGroup") final CHKafkaResilientConsumerGroup consumerGroup,
             final ChsDeltaMarshaller marshaller, final Processor<ChsDelta> processor, final Logger logger) {
-        logger.debug("Creating DeltaConsumer [MAIN ]...");
+        logger.debug(String.format("Creating [%s]...", consumerGroup.getConsumerType()));
 
         return new DeltaConsumer(consumerGroup, marshaller, processor, logger);
     }

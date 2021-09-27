@@ -17,10 +17,12 @@ public interface ApiClientService {
     /**
      * Apply a Company Appointment delta.
      *
+     *
+     * @param logContext
      * @param companyNumber the company number
      * @param appointment
      * @return the api response
      */
-    ApiResponse<Void> putAppointment(final String companyNumber, final AppointmentAPI appointment);
+    ApiResponse<Void> putAppointment(final String logContext, final String companyNumber, final AppointmentAPI appointment);
 
 }
