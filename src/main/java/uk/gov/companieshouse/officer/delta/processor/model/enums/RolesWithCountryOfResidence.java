@@ -7,7 +7,7 @@ public enum RolesWithCountryOfResidence {
     DIR(OfficerRole.DIR),
     LLPMEM(OfficerRole.LLPMEM),
     LLPDESMEM(OfficerRole.LLPDESMEM),
-    MEMMANORG(OfficerRole.MEMADMORG),
+    MEMMANORG(OfficerRole.MEMMANORG),
     MEMSUPORG(OfficerRole.MEMSUPORG),
     MEMADMORG(OfficerRole.MEMADMORG),
     NOMDIR(OfficerRole.NOMDIR);
