@@ -209,10 +209,14 @@ class OfficerTransformTest {
         officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate(VALID_DATE);
 
+        if (RolesWithCountryOfResidence.includes(officerRole)) {
+            when(addressAPI.getUsualCountryOfResidence()).thenReturn("Wales");
+        }
+
         final OfficerAPI outputOfficer = testTransform.transform(officer);
 
         if (RolesWithCountryOfResidence.includes(officerRole)) {
-            assertThat(outputOfficer.getCountryOfResidence(), is(notNullValue()));
+            assertThat(outputOfficer.getCountryOfResidence(), is("Wales"));
         } else {
             assertThat(outputOfficer.getCountryOfResidence(), is(nullValue()));
         }
@@ -325,7 +329,6 @@ class OfficerTransformTest {
         assertThat(result.getHonours(), is(officer.getHonours()));
         assertThat(result.getServiceAddress(), is(sameInstance(addressAPI)));
         assertThat(result.isServiceAddressSameAsRegisteredOfficeAddress(), is(true));
-        assertThat(result.getCountryOfResidence(), is(officer.getUsualResidentialCountry()));
         assertThat(result.getIdentificationData(), is(sameInstance(identificationAPI)));
     }
 
@@ -357,7 +360,6 @@ class OfficerTransformTest {
         item.setUsualResidentialAddress(address);
         item.setServiceAddressSameAsRegisteredAddress("Y");
         item.setResidentialAddressSameAsServiceAddress("Y");
-        item.setUsualResidentialCountry("usualResidentialCountry");
         item.setIdentification(identification);
 
         return item;
