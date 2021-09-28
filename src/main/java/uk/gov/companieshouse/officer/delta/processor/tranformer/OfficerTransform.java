@@ -98,7 +98,7 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
         }
 
         if (RolesWithCountryOfResidence.includes(officerRole)) {
-            officer.setCountryOfResidence(source.getUsualResidentialCountry());
+            officer.setCountryOfResidence(source.getServiceAddress().getUsualCountryOfResidence());
         }
 
         officer.setIdentificationData(idTransform.transform(source.getIdentification()));

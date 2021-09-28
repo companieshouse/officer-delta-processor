@@ -168,12 +168,6 @@ class OfficersItemTest {
     }
 
     @Test
-    void setUsualResidentialCountry() {
-        testItem.setUsualResidentialCountry(EXPECTED);
-        assertThat(testItem.getUsualResidentialCountry(), is(EXPECTED));
-    }
-
-    @Test
     void setIdentification() {
         final Identification expected = new Identification();
 
@@ -242,7 +236,6 @@ class OfficersItemTest {
                         containsString("serviceAddressSameAsRegisteredAddress=<null>"),
                         containsString("surname=<null>"),
                         containsString("title=<null>"),
-                        containsString("usualResidentialAddress=<null>"),
-                        containsString("usualResidentialCountry=<null>")));
+                        containsString("usualResidentialAddress=<null>")));
     }
 }
