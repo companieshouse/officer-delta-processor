@@ -58,15 +58,15 @@ public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements Ap
     }
 
     @Override
-    public ApiResponse<Void> putAppointment(String companyNumber, AppointmentAPI appointment) {
-        final String uri = String.format("%s/company/%s/appointments/%s", ROOT_URI, companyNumber, appointment.getAppointmentId());
+    public ApiResponse<Void> putAppointment(final String logContext, String companyNumber, AppointmentAPI appointment) {
+        final String uri =
+                String.format("%s/company/%s/appointments/%s", ROOT_URI, companyNumber, appointment.getAppointmentId());
 
-        logger.debug(String.format("PUT %s", uri));
-        logger.debug(String.format("appointment=%s", appointment));
+        logger.debugContext(logContext, String.format("PUT %s", uri), null);
 
-        return executeOp("putCompanyAppointment",
-                uri,
-                getApiClient().privateDeltaCompanyAppointmentResourceHandler().putAppointment().upsert(uri,
-                    appointment));
+        return executeOp(logContext, "putCompanyAppointment", uri,
+                getApiClient().privateDeltaCompanyAppointmentResourceHandler()
+                        .putAppointment()
+                        .upsert(uri, appointment));
     }
 }

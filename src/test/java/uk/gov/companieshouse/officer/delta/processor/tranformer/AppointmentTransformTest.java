@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
 import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
-import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,7 +36,7 @@ class AppointmentTransformTest {
     }
 
     @Test
-    void transformSingle() throws ProcessException {
+    void transformSingle() {
         final OfficersItem item = createOfficer();
         final AppointmentAPI appointmentAPI = testTransform.factory();
         appointmentAPI.setId("internalId");

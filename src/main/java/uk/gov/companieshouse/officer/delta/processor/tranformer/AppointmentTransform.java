@@ -3,7 +3,6 @@ package uk.gov.companieshouse.officer.delta.processor.tranformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
-import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 
 @Component
@@ -21,7 +20,7 @@ public class AppointmentTransform implements Transformative<OfficersItem, Appoin
     }
 
     @Override
-    public AppointmentAPI transform(OfficersItem inputOfficer, AppointmentAPI outputAppointment) throws ProcessException {
+    public AppointmentAPI transform(OfficersItem inputOfficer, AppointmentAPI outputAppointment) {
 
         outputAppointment.setInternalId(inputOfficer.getInternalId());
 

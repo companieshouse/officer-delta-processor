@@ -23,29 +23,31 @@ public abstract class BaseApiClientServiceImpl {
     /**
      * General execution of an SDK endpoint.
      *
+     * @param <T>           type of api response
+     * @param logContext
      * @param operationName name of operation
      * @param uri           uri of sdk being called
      * @param executor      executor to use
-     * @param <T>           type of api response
      * @return the response object
      */
-    public <T> ApiResponse<T> executeOp(final String operationName, final String uri,
-                                        final Executor<ApiResponse<T>> executor) {
+    public <T> ApiResponse<T> executeOp(final String logContext, final String operationName, final String uri,
+            final Executor<ApiResponse<T>> executor) {
         final Map<String, Object> debugMap = new HashMap<>();
 
         debugMap.put("operationName", operationName);
         debugMap.put("requestUri", uri);
         try {
-            logger.debugContext(uri, "SDK request", debugMap);
+            logger.debugContext(logContext, "SDK request", debugMap);
 
             return executor.execute();
 
-        } catch (URIValidationException ex) {
-            logger.errorContext(uri, "SDK exception", ex, debugMap);
+        }
+        catch (URIValidationException ex) {
+            logger.errorContext(logContext, "SDK exception", ex, debugMap);
 
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
         } catch (ApiErrorResponseException ex) {
-            logger.errorContext(uri, "SDK exception", ex, debugMap);
+            logger.errorContext(logContext, "SDK exception", ex, debugMap);
 
             throw new ResponseStatusException(HttpStatus.valueOf(ex.getStatusCode()),
                     ex.getStatusMessage(), ex);

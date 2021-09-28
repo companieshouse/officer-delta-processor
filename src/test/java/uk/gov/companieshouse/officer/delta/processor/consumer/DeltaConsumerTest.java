@@ -1,201 +1,342 @@
 package uk.gov.companieshouse.officer.delta.processor.consumer;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatcher;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
-import uk.gov.companieshouse.delta.ChsDelta;
-import uk.gov.companieshouse.kafka.consumer.resilience.CHKafkaResilientConsumerGroup;
-import uk.gov.companieshouse.kafka.exceptions.DeserializationException;
-import uk.gov.companieshouse.kafka.message.Message;
-import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.officer.delta.processor.deserialise.ChsDeltaDeserializer;
-import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
-import uk.gov.companieshouse.officer.delta.processor.processor.Processor;
-
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.delta.ChsDelta;
+import uk.gov.companieshouse.kafka.consumer.resilience.CHConsumerType;
+import uk.gov.companieshouse.kafka.consumer.resilience.CHKafkaResilientConsumerGroup;
+import uk.gov.companieshouse.kafka.message.Message;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.officer.delta.processor.deserialise.ChsDeltaMarshaller;
+import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
+import uk.gov.companieshouse.officer.delta.processor.exception.RetryableErrorException;
+import uk.gov.companieshouse.officer.delta.processor.processor.Processor;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 class DeltaConsumerTest {
+    private static final Long EXPECTED = 5L;
+    private static final String MAIN_TOPIC = "MAIN";
+    private static final int MSG_COUNT = 3;
+    private static final String CONTEXT_ID = "context_id";
 
+    private DeltaConsumer testConsumer;
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS) // for stubbing chained calls
+    private CHKafkaResilientConsumerGroup consumerGroup;
     @Mock
-    Logger logger;
-
+    private ChsDeltaMarshaller marshaller;
     @Mock
-    ChsDeltaDeserializer deserializer;
-
+    private Processor<ChsDelta> processor;
     @Mock
-    Processor<ChsDelta> processor;
-
+    private Logger logger;
     @Mock
-    CHKafkaResilientConsumerGroup chKafkaConsumerGroup;
+    private Message message;
+    @Captor
+    ArgumentCaptor<Message> captor;
 
-    @Spy
-    @InjectMocks
-    DeltaConsumer consumer;
+    private List<Message> messageList;
 
-    private static <T> Answer<T> processException(boolean fatal) {
-        return invocationOnMock -> {
-            if (fatal) {
-                throw ProcessException.fatal("", null);
-            } else {
-                throw ProcessException.nonFatal("", null);
-            }
-        };
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    private static ArgumentMatcher<Map<String, Object>> hasKey(String key) {
-        return map -> map.containsKey(key);
+    @BeforeEach
+    void setUp() {
+        testConsumer = new DeltaConsumer(consumerGroup, marshaller, processor, logger);
+        messageList = generateMessageList(MAIN_TOPIC, 0, MSG_COUNT);
     }
 
     @Test
-    @DisplayName("Given no messages on the topic, pollKafka shouldn't do anything")
-    void pollKafkaNoMessages() throws InterruptedException {
-        // Given
-        addKafkaMessages(List.of());
-
-        consumer.pollKafka();
-
-        verifyNoInteractions(processor, deserializer);
+    void constructorConnects() {
+        verify(consumerGroup).connect();
     }
 
     @Test
-    @DisplayName("Given a message is on the topic, pollKafka should pass it to the deserializer and processor")
-    void pollKafka() throws DeserializationException, ProcessException, InterruptedException {
-        // Given
-        Message message = new Message();
-        addKafkaMessages(List.of(message));
-        ChsDelta delta = expectDeserializeMessage(message);
+    void commitOffset() {
+        testConsumer.commitOffset(message);
 
-        consumer.pollKafka();
-
-        verify(deserializer).deserialize(message);
-        verify(processor).process(delta);
-        verify(chKafkaConsumerGroup).commit(message);
-        verify(logger).info(contains("committed"), anyMap()); // Ensure commit is logged
+        verify(consumerGroup).commit();
     }
 
     @Test
-    @DisplayName("Given an exception occurs when deserializing, the message is passed to the error topic")
-    void pollKafkaDeserializeException() throws DeserializationException, InterruptedException {
-        // Given
-        Message message = new Message();
-        addKafkaMessages(List.of(message));
-        when(deserializer.deserialize(message)).thenThrow(new DeserializationException("", null));
-
-        consumer.pollKafka();
-
-        verify(deserializer).deserialize(message);
-        verify(consumer).sendMessageToErrorTopic(message);
+    void getPendingMessageCount() {
+        assertThat(testConsumer.getPendingMessageCount(), is(0));
     }
 
     @Test
-    @DisplayName("Given a non-fatal exception occurs when processing, the message is passed to the retry topic")
-    void pollKafkaProcessorNonFatalException() throws DeserializationException, ProcessException, InterruptedException {
-        // Given
-        Message message = new Message();
-        addKafkaMessages(List.of(message));
-        ChsDelta delta = expectDeserializeMessage(message);
-        doAnswer(processException(false)).when(processor).process(delta);
+    void getNextDeltaMessageWhenMessagesEmpty() {
+        when(consumerGroup.consume()).thenReturn(messageList);
 
-        consumer.pollKafka();
+        final Optional<Message> next = testConsumer.getNextDeltaMessage();
 
-        verify(deserializer).deserialize(message);
-        verify(consumer).sendMessageToRetryTopic(message);
+        assertThat(next.isPresent(), is(true));
+        assertThat(next.get().getOffset(), is(0L));
+        assertThat(testConsumer.getPendingMessageCount(), is(MSG_COUNT - 1));
     }
 
     @Test
-    @DisplayName("Given a fatal exception occurs when processing, the message is passed to the error topic")
-    void pollKafkaProcessorFatalException() throws DeserializationException, ProcessException, InterruptedException {
-        // Given
-        Message message = new Message();
-        addKafkaMessages(List.of(message));
-        ChsDelta delta = expectDeserializeMessage(message);
-        doAnswer(processException(true)).when(processor).process(delta);
+    void getNextDeltaMessageWhenMessagesNonEmpty() {
 
-        consumer.pollKafka();
+        when(consumerGroup.consume()).thenReturn(messageList);
+        testConsumer.getNextDeltaMessage();
 
-        verify(deserializer).deserialize(message);
-        verify(consumer).sendMessageToErrorTopic(message);
-    }
+        Optional<Message> next = testConsumer.getNextDeltaMessage();
 
-    private ChsDelta expectDeserializeMessage(Message message) throws DeserializationException {
-        ChsDelta delta = new ChsDelta();
-        when(deserializer.deserialize(message)).thenReturn(delta);
-        return delta;
-    }
-
-    private void addKafkaMessages(List<Message> messages) {
-        when(chKafkaConsumerGroup.consume()).thenReturn(messages);
+        assertThat(next.isPresent(), is(true));
+        assertThat(next.get().getOffset(), is(1L));
+        assertThat(testConsumer.getPendingMessageCount(), is(MSG_COUNT - 2));
     }
 
     @Test
-    @DisplayName("Given a message is sent to the retry topic, the consumer should commit its offset")
-    void sendMessageToRetryTopic() throws ExecutionException, InterruptedException {
-        Message message = new Message();
+    void getRetryThrottle() {
+        when(consumerGroup.getConfig().getRetryThrottle()).thenReturn(EXPECTED);
 
-        consumer.sendMessageToRetryTopic(message);
-
-        verify(chKafkaConsumerGroup).retry(0, message);
-        verify(chKafkaConsumerGroup).commit(message);
-        verify(logger).info(contains("successfully"), anyMap());
+        assertThat(testConsumer.getRetryThrottle(), is(EXPECTED));
     }
 
     @Test
-    @DisplayName("Given a message is unable to be sent to the retry topic, its offset is not committed")
-    void sendMessageToRetryTopicFailure() throws ExecutionException, InterruptedException {
-        Message message = new Message();
-        doThrow(new ExecutionException(null)).when(chKafkaConsumerGroup).retry(0, message);
+    void getMaxRetryAttempts() {
+        when(consumerGroup.getConfig().getMaxRetries()).thenReturn(EXPECTED.intValue());
 
-        consumer.sendMessageToRetryTopic(message);
-
-        verify(chKafkaConsumerGroup, atLeastOnce()).retry(0, message);
-        verify(chKafkaConsumerGroup, never()).commit(message);
-        verify(logger, atLeastOnce()).error(contains("Error"), any(ExecutionException.class),
-                argThat(hasKey("kafkaMessage")));
+        assertThat(testConsumer.getMaxRetryAttempts(), is(EXPECTED.intValue()));
     }
 
     @Test
-    @DisplayName("Given the consumer is interrupted while trying to send a message to the retry topic, it is passed to the caller")
-    void sendMessageToRetryTopicInterrupt() throws ExecutionException, InterruptedException {
-        Message message = new Message();
-        doThrow(new InterruptedException(null)).when(chKafkaConsumerGroup).retry(0, message);
+    void stopAtOffset() {
+        when(consumerGroup.stopAtOffset()).thenReturn(EXPECTED);
 
-        assertThrows(InterruptedException.class, () -> {
-            consumer.sendMessageToRetryTopic(message);
-        });
+        assertThat(testConsumer.stopAtOffset(), is(EXPECTED));
     }
 
     @Test
-    @SuppressWarnings("squid:S2699")
-    void sendMessageToErrorTopic() {
+    void getConsumerType() {
+        when(consumerGroup.getConsumerType()).thenReturn(CHConsumerType.MAIN_CONSUMER);
+        assertThat(testConsumer.getConsumerType(), is(CHConsumerType.MAIN_CONSUMER));
+    }
 
+    @Test
+    void consumeMessageWhenMessagesEmpty() {
+        when(consumerGroup.consume()).thenReturn(Collections.emptyList());
+
+        testConsumer.consumeMessage();
+
+        verify(consumerGroup).connect();
+        verify(consumerGroup).getConsumerType();
+        verifyNoMoreInteractions(consumerGroup);
+        verifyNoInteractions(marshaller, processor);
+    }
+
+    @Test
+    void consumeMessageWhenMessagesNonEmpty() {
+        when(consumerGroup.consume()).thenReturn(new ArrayList<>(messageList));
+
+        final Message nextMessage = messageList.get(0);
+        final ChsDelta delta = createDelta(5);
+        when(marshaller.deserialize(nextMessage)).thenReturn(delta);
+
+        testConsumer.consumeMessage();
+
+        final InOrder inOrder = inOrder(consumerGroup, marshaller, processor);
+
+        inOrder.verify(consumerGroup).connect();
+        inOrder.verify(marshaller).deserialize(nextMessage);
+        inOrder.verify(processor).process(delta);
+        inOrder.verify(consumerGroup).commit();
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void consumeMessageWhenDeserializeFails() throws ExecutionException, InterruptedException {
+        final Message nextMessage = messageList.get(0);
+
+        when(consumerGroup.consume()).thenReturn(new ArrayList<>(messageList));
+        when(marshaller.deserialize(nextMessage)).thenThrow(new NonRetryableErrorException("deserialize() failed", null));
+
+        testConsumer.consumeMessage();
+
+        final InOrder inOrder = inOrder(consumerGroup, marshaller, processor, logger);
+
+        inOrder.verify(consumerGroup).connect();
+        inOrder.verify(marshaller).deserialize(nextMessage);
+        inOrder.verify(logger).errorContext(isNull(), anyString(), any(Exception.class), anyMap());
+        inOrder.verify(consumerGroup, never()).retry(anyInt(), any(Message.class));
+        inOrder.verify(consumerGroup).commit();
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void consumeMessageWhenProcessingNonTransientError() {
+        when(consumerGroup.consume()).thenReturn(new ArrayList<>(messageList));
+
+        final Message nextMessage = messageList.get(0);
+        final ChsDelta delta = createDelta(5);
+        when(marshaller.deserialize(nextMessage)).thenReturn(delta);
+        doThrow(new NonRetryableErrorException("process() failed", null)).when(processor).process(delta);
+
+        testConsumer.consumeMessage();
+
+        final InOrder inOrder = inOrder(consumerGroup, marshaller, processor, logger);
+
+        inOrder.verify(consumerGroup).connect();
+        inOrder.verify(marshaller).deserialize(nextMessage);
+        inOrder.verify(processor).process(delta);
+        inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), any(Exception.class), anyMap());
+        inOrder.verify(consumerGroup).commit();
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void consumeMessageWhenUnexpectedException() throws Exception {
+        when(consumerGroup.getConfig().getMaxRetries()).thenReturn(EXPECTED.intValue());
+        when(consumerGroup.consume()).thenReturn(new ArrayList<>(messageList));
+
+        final Message nextMessage = messageList.get(0);
+        final ChsDelta delta = createDelta(4);
+        final ChsDelta retry = createDelta(5);
+        final byte[] messageBytes = "retry_serialized".getBytes(StandardCharsets.UTF_8);
+
+        when(marshaller.deserialize(nextMessage)).thenReturn(delta);
+        when(marshaller.serialize(retry)).thenReturn(messageBytes);
+        doThrow(new IllegalStateException("unexpected")).when(processor).process(delta);
+
+        testConsumer.consumeMessage();
+
+        final InOrder inOrder = inOrder(consumerGroup, marshaller, processor, logger);
+
+        inOrder.verify(consumerGroup).connect();
+        inOrder.verify(marshaller).deserialize(nextMessage);
+        inOrder.verify(processor).process(delta);
+        inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), any(Exception.class), anyMap());
+        inOrder.verify(marshaller).serialize(retry);
+        inOrder.verify(consumerGroup).retry(anyInt(), any(Message.class));
+        inOrder.verify(consumerGroup).commit();
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    static private Stream<Arguments> provideRetries() {
+        return Stream.of(Arguments.of(4, 5), Arguments.of(5, 0));
+    }
+
+    @ParameterizedTest(name="For max retries = 5, after {0} attempts, next attempt is {1}")
+    @MethodSource("provideRetries")
+    void consumeMessageWhenProcessingTransientError(final int attempt, final int nextAttempt)
+            throws ExecutionException, InterruptedException {
+        when(consumerGroup.getConfig().getMaxRetries()).thenReturn(EXPECTED.intValue());
+        when(consumerGroup.consume()).thenReturn(new ArrayList<>(messageList));
+
+        final Message nextMessage = messageList.get(0);
+        final ChsDelta delta = createDelta(attempt);
+        final ChsDelta retry = createDelta(nextAttempt);
+        final byte[] messageBytes = "retry_serialized".getBytes(StandardCharsets.UTF_8);
+
+        when(marshaller.deserialize(nextMessage)).thenReturn(delta);
+        when(marshaller.serialize(retry)).thenReturn(messageBytes);
+        doThrow(new RetryableErrorException("process() failed", null)).when(processor).process(delta);
+
+        testConsumer.consumeMessage();
+
+        final InOrder inOrder = inOrder(consumerGroup, marshaller, processor, logger);
+
+        inOrder.verify(consumerGroup).connect();
+        inOrder.verify(marshaller).deserialize(nextMessage);
+        inOrder.verify(processor).process(delta);
+        inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), any(Exception.class), anyMap());
+        inOrder.verify(marshaller).serialize(retry);
+        inOrder.verify(consumerGroup).retry(eq(nextAttempt), captor.capture());
+        inOrder.verify(consumerGroup).commit();
+        inOrder.verifyNoMoreInteractions();
+        assertThat(captor.getValue().getValue(), is(messageBytes));
+    }
+
+    private static Stream<Arguments> provideRetryExceptions() {
+        return Stream.of(Arguments.of(new ExecutionException("execution failed", null)),
+                Arguments.of(new InterruptedException("thread interrupted")));
+    }
+
+    @ParameterizedTest(name="queueRetry failure: {0}")
+    @MethodSource("provideRetryExceptions")
+    void consumeMessageWhenProcessingNonTransientErrorThenRetryFailure(final Exception exception)
+            throws ExecutionException, InterruptedException {
+        when(consumerGroup.getConfig().getMaxRetries()).thenReturn(EXPECTED.intValue());
+        when(consumerGroup.consume()).thenReturn(new ArrayList<>(messageList));
+        doThrow(exception).when(consumerGroup).retry(eq(1), any(Message.class));
+
+        final Message nextMessage = messageList.get(0);
+        final ChsDelta delta = createDelta(0);
+        final ChsDelta retry = createDelta(1);
+        final byte[] messageBytes = "retry_serialized".getBytes(StandardCharsets.UTF_8);
+
+        when(marshaller.deserialize(nextMessage)).thenReturn(delta);
+        when(marshaller.serialize(retry)).thenReturn(messageBytes);
+        doThrow(new RetryableErrorException("process() failed", null)).when(processor).process(delta);
+
+        testConsumer.consumeMessage();
+
+        final InOrder inOrder = inOrder(consumerGroup, marshaller, processor, logger);
+
+        inOrder.verify(consumerGroup).connect();
+        inOrder.verify(marshaller).deserialize(nextMessage);
+        inOrder.verify(processor).process(delta);
+        inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), any(Exception.class), anyMap()); // log process failure
+        inOrder.verify(marshaller).serialize(retry);
+        inOrder.verify(consumerGroup).retry(eq(1), captor.capture());
+        inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), any(Exception.class), anyMap()); // log retry failure
+        inOrder.verify(consumerGroup).commit();
+        inOrder.verifyNoMoreInteractions();
+        assertThat(captor.getValue().getValue(), is(messageBytes));
+    }
+
+    private ChsDelta createDelta(final int attempt) {
+        return new ChsDelta("data", attempt, "context_id");
     }
 
     @Test
     void destroy() {
-        consumer.destroy();
-        verify(chKafkaConsumerGroup).close();
+        testConsumer.destroy();
+
+        verify(consumerGroup).close();
+    }
+
+    private List<Message> generateMessageList(final String topic, final int firstOffset, final int lastOffset) {
+        return LongStream.range(firstOffset, lastOffset).mapToObj(i -> {
+            Message m = new Message();
+
+            m.setTopic(topic);
+            m.setOffset(i);
+
+            return m;
+        }).collect(Collectors.toList());
     }
 }

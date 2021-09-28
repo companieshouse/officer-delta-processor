@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.model.delta.officers.FormerNamesAPI;
 import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
-import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithCountryOfResidence;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithDateOfBirth;
@@ -38,7 +37,7 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
     }
 
     @Override
-    public OfficerAPI transform(OfficersItem source, OfficerAPI officer) throws ProcessException {
+    public OfficerAPI transform(OfficersItem source, OfficerAPI officer) {
 
         officer.setUpdatedAt(
                 parseDateTimeString("changedAt", source.getChangedAt()));

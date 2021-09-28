@@ -23,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
 import uk.gov.companieshouse.api.model.delta.officers.IdentificationAPI;
 import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
-import uk.gov.companieshouse.officer.delta.processor.exception.ProcessException;
+import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.Identification;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.model.PreviousNameArray;
@@ -96,7 +96,7 @@ class OfficerTransformTest {
 
         officer.setChangedAt(INVALID_DATE);
 
-        verifyProcessException(officerAPI, officer, "changedAt: date/time pattern not matched: [yyyyMMddHHmmss]");
+        verifyProcessingError(officerAPI, officer, "changedAt: date/time pattern not matched: [yyyyMMddHHmmss]");
     }
 
     @Test
@@ -109,7 +109,7 @@ class OfficerTransformTest {
         officer.setDateOfBirth(VALID_DATE);
         officer.setKind(OfficerRole.DIR.name());
 
-        verifyProcessException(officerAPI, officer, "appointmentDate: date/time pattern not matched: [yyyyMMdd]");
+        verifyProcessingError(officerAPI, officer, "appointmentDate: date/time pattern not matched: [yyyyMMdd]");
     }
 
     @Test
@@ -121,7 +121,7 @@ class OfficerTransformTest {
         officer.setAppointmentDate("20000101");
         officer.setResignationDate(INVALID_DATE);
 
-        verifyProcessException(officerAPI, officer, "resignation_date: date/time pattern not matched: [yyyyMMdd]");
+        verifyProcessingError(officerAPI, officer, "resignation_date: date/time pattern not matched: [yyyyMMdd]");
     }
 
     @Test
@@ -135,13 +135,13 @@ class OfficerTransformTest {
         officer.setDateOfBirth(INVALID_DATE);
         officer.setOfficerRole(KIND_OF_OFFICER_ROLE_WITH_DOB);
 
-        verifyProcessException(officerAPI, officer, "dateOfBirth: date/time pattern not matched: [yyyyMMdd]");
+        verifyProcessingError(officerAPI, officer, "dateOfBirth: date/time pattern not matched: [yyyyMMdd]");
     }
 
     @DisplayName("Date of Birth is not included when the officers role does not require it")
     @ParameterizedTest
     @EnumSource
-    void onlyRolesWithDobIncludeDateOfBirth(OfficerRole officerRole) throws ProcessException {
+    void onlyRolesWithDobIncludeDateOfBirth(OfficerRole officerRole) {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         officer.setDateOfBirth(VALID_DATE);
@@ -161,7 +161,7 @@ class OfficerTransformTest {
     @DisplayName("Transformation doesn't fail when no DOB on role which requires it")
     @ParameterizedTest
     @MethodSource("emptyDobsWithDobRoles")
-    void transformsWhenNoDob(OfficerRole role, String dob) throws ProcessException {
+    void transformsWhenNoDob(OfficerRole role, String dob) {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         officer.setDateOfBirth(dob);
@@ -177,7 +177,7 @@ class OfficerTransformTest {
     @DisplayName("Occupation and Nationality is not included when the officers role does not require it")
     @ParameterizedTest
     @EnumSource
-    void onlyRolesWithOccupationIncludeOccupationAndNationality(OfficerRole officerRole) throws ProcessException {
+    void onlyRolesWithOccupationIncludeOccupationAndNationality(OfficerRole officerRole) {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         officer.setDateOfBirth(VALID_DATE);
@@ -201,7 +201,7 @@ class OfficerTransformTest {
     @DisplayName("Country of Residence is not included when the officers role does not require it")
     @ParameterizedTest
     @EnumSource
-    void onlyRolesWithCountryOfResidenceIncludeCountryOfResidence(OfficerRole officerRole) throws ProcessException {
+    void onlyRolesWithCountryOfResidenceIncludeCountryOfResidence(OfficerRole officerRole) {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         officer.setDateOfBirth(VALID_DATE);
@@ -226,7 +226,7 @@ class OfficerTransformTest {
             "and is Pre1992Appointment")
     @ParameterizedTest
     @EnumSource
-    void onlyRolesWithPre1992AppointmentIncludePre1992Appointment(OfficerRole officerRole) throws ProcessException {
+    void onlyRolesWithPre1992AppointmentIncludePre1992Appointment(OfficerRole officerRole) {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         officer.setDateOfBirth(VALID_DATE);
@@ -249,7 +249,7 @@ class OfficerTransformTest {
     @DisplayName("Former Names is not included when the officers role does not require it")
     @ParameterizedTest
     @EnumSource
-    void onlyRolesWithFormerNamesIncludeFormerNames(OfficerRole officerRole) throws ProcessException {
+    void onlyRolesWithFormerNamesIncludeFormerNames(OfficerRole officerRole) {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         officer.setDateOfBirth(VALID_DATE);
@@ -272,7 +272,7 @@ class OfficerTransformTest {
     @DisplayName("URA and secure indicator is not included when the officers role does not require it")
     @ParameterizedTest
     @EnumSource
-    void onlyRolesWithResidentialAddressIncludeAddressAndIndicators(OfficerRole officerRole) throws ProcessException {
+    void onlyRolesWithResidentialAddressIncludeAddressAndIndicators(OfficerRole officerRole) {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         officer.setDateOfBirth(VALID_DATE);
@@ -295,7 +295,7 @@ class OfficerTransformTest {
 
     @ParameterizedTest(name = "{index}: changedAt={0}, has resignation_date={1}")
     @MethodSource("provideScenarioParams")
-    void verifySuccessfulTransform(final String changedAt, final boolean hasResignationDate) throws ProcessException {
+    void verifySuccessfulTransform(final String changedAt, final boolean hasResignationDate) {
         final OfficerAPI officerAPI = testTransform.factory();
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
@@ -332,10 +332,10 @@ class OfficerTransformTest {
         assertThat(result.getIdentificationData(), is(sameInstance(identificationAPI)));
     }
 
-    private void verifyProcessException(final OfficerAPI officerAPI, final OfficersItem officer,
-                                        final String expectedMessage) {
-        final ProcessException exception =
-                assertThrows(ProcessException.class, () -> testTransform.transform(officer, officerAPI));
+    private void verifyProcessingError(final OfficerAPI officerAPI, final OfficersItem officer,
+            final String expectedMessage) {
+        final NonRetryableErrorException exception =
+                assertThrows(NonRetryableErrorException.class, () -> testTransform.transform(officer, officerAPI));
 
         assertThat(exception.getMessage(), is(expectedMessage));
         assertThat(exception.getCause(), is(nullValue()));
