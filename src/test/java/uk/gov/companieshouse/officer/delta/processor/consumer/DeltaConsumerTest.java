@@ -153,6 +153,7 @@ class DeltaConsumerTest {
         testConsumer.consumeMessage();
 
         verify(consumerGroup).connect();
+        verify(consumerGroup).getConsumerType();
         verifyNoMoreInteractions(consumerGroup);
         verifyNoInteractions(marshaller, processor);
     }

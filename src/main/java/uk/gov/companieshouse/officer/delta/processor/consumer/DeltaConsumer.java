@@ -124,7 +124,7 @@ public class DeltaConsumer {
                 contextId = delta.getContextId();
                 logInfo(contextId,
                         String.format("%s (ms): %d", stopWatch.getLastTaskName(), stopWatch.getLastTaskTimeMillis()),
-                        attempt, topic, partition, offset);
+                        attempt, topic, partition, offset, stopWatch.getLastTaskTimeMillis());
                 stopWatch.start("Process message");
 
                 processor.process(delta);
@@ -132,9 +132,9 @@ public class DeltaConsumer {
                 stopWatch.stop();
                 logInfo(contextId,
                         String.format("%s (ms): %d", stopWatch.getLastTaskName(), stopWatch.getLastTaskTimeMillis()),
-                        attempt, topic, partition, offset);
+                        attempt, topic, partition, offset, stopWatch.getLastTaskTimeMillis());
                 logInfo(contextId, String.format("Total process (ms): %d", stopWatch.getTotalTimeMillis()), attempt,
-                        topic, partition, offset);
+                        topic, partition, offset, stopWatch.getLastTaskTimeMillis());
             }
             catch (NonRetryableErrorException e) {
                 contextId = Optional.ofNullable(delta).map(ChsDelta::getContextId).orElse(null);
@@ -144,7 +144,9 @@ public class DeltaConsumer {
                 // includes RetryableErrorException; and assume any other kind of exception is retryable
                 contextId = Optional.ofNullable(delta).map(ChsDelta::getContextId).orElse(null);
                 logError(contextId, e, attempt, topic, partition, offset);
-                queueRetry(topic, partition, offset, attempt, delta);
+                if (delta != null) {
+                    queueRetry(topic, partition, offset, attempt, delta);
+                }
             }
             finally {
                 contextId = Optional.ofNullable(delta).map(ChsDelta::getContextId).orElse(null);
@@ -157,12 +159,18 @@ public class DeltaConsumer {
 
     private void logInfo(final String logContext, final String msg, final Integer attempt, final String topic,
             final Integer partition, final Long offset) {
+        logInfo(logContext, msg, attempt, topic, partition, offset, null);
+    }
+
+    private void logInfo(final String logContext, final String msg, final Integer attempt, final String topic,
+            final Integer partition, final Long offset, final Long duration) {
         final Map<String, Object> logMap = new HashMap<>();
 
         logMap.put("attempt", attempt);
         logMap.put("topic", topic);
         logMap.put("partition", partition);
         logMap.put("offset", offset);
+        Optional.ofNullable(duration).ifPresent(d -> logMap.put("duration", d));
         logger.infoContext(logContext, msg, logMap);
     }
 

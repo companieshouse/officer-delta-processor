@@ -112,7 +112,6 @@ class DeltaProcessorTest {
 
         final InOrder inOrder = inOrder(logger, apiClientService);
 
-        inOrder.verify(logger).infoContext(anyString(), anyString(), isNull());
         inOrder.verify(logger).errorContext(anyString(), anyString(), any(JsonProcessingException.class), isNull());
         inOrder.verifyNoMoreInteractions();
 
