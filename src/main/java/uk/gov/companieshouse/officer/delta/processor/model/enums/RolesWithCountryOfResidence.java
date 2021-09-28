@@ -5,7 +5,7 @@ import java.util.EnumSet;
 public enum RolesWithCountryOfResidence {
 
     DIR(OfficerRole.DIR),
-    LLPMEM(OfficerRole.LLPDESMEM),
+    LLPMEM(OfficerRole.LLPMEM),
     LLPDESMEM(OfficerRole.LLPDESMEM),
     MEMMANORG(OfficerRole.MEMADMORG),
     MEMSUPORG(OfficerRole.MEMSUPORG),
