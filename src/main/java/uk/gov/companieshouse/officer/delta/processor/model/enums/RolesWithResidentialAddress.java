@@ -2,23 +2,26 @@ package uk.gov.companieshouse.officer.delta.processor.model.enums;
 
 import java.util.EnumSet;
 
-public enum RolesWithDateOfBirth {
+public enum RolesWithResidentialAddress {
+
     DIRECTOR(OfficerRole.DIR),
-    LLP_MEMBER(OfficerRole.LLPMEM),
-    LLP_DESIGNATED_MEMBER(OfficerRole.LLPDESMEM),
+    LLPMEM(OfficerRole.LLPMEM),
+    LLPDESMEM(OfficerRole.LLPDESMEM),
     MEMBER_OF_A_MANAGEMENT_ORGAN(OfficerRole.MEMMANORG),
     MEMBER_OF_A_SUPERVISORY_ORGAN(OfficerRole.MEMSUPORG),
     MEMBER_OF_AN_ADMINISTRATIVE_ORGAN(OfficerRole.MEMADMORG),
-    NOMINEE_DIRECTOR(OfficerRole.NOMDIR);
+    NOMINEE_DIRECTOR(OfficerRole.NOMDIR),
+    PERSAUTHR(OfficerRole.PERSAUTHR),
+    PERSAUTHRA(OfficerRole.PERSAUTHRA);
 
     private final OfficerRole officerRole;
 
-    RolesWithDateOfBirth(OfficerRole officerRole) {
+    RolesWithResidentialAddress(OfficerRole officerRole) {
         this.officerRole = officerRole;
     }
 
-    public OfficerRole getOfficerRole() {
-        return officerRole;
+    public String getOfficerRole() {
+        return officerRole.getValue();
     }
 
     public static boolean includes(final OfficerRole role) {
@@ -26,8 +29,8 @@ public enum RolesWithDateOfBirth {
     }
 
     public static boolean includes(final String role) {
-        return EnumSet.allOf(RolesWithDateOfBirth.class).stream()
-                .map(r -> r.officerRole.getValue())
-                .anyMatch(role::equals);
+        return EnumSet.allOf(RolesWithResidentialAddress.class).stream()
+            .map(r -> r.officerRole.getValue())
+            .anyMatch(role::equals);
     }
 }
