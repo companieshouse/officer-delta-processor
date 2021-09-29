@@ -6,7 +6,10 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.DATETIME_LENGTH;
 
@@ -112,13 +115,27 @@ class OfficerTransformTest {
         verifyProcessingError(officerAPI, officer, "appointmentDate: date/time pattern not matched: [yyyyMMdd]");
     }
 
+    @DisplayName("Identification (optional) is not transformed if not present")
+    @Test
+    void transformIdentificationWhenNotPresent() {
+        final OfficersItem officer = createOfficer(addressAPI, null);
+
+        officer.setChangedAt(CHANGED_AT);
+        officer.setAppointmentDate(VALID_DATE);
+        officer.setDateOfBirth(VALID_DATE);
+
+        testTransform.transform(officer);
+
+        verifyNoInteractions(identificationTransform);
+    }
+
     @Test
     void transformSingleWhenResignationDateInvalid() {
         final OfficerAPI officerAPI = testTransform.factory();
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         officer.setChangedAt(CHANGED_AT);
-        officer.setAppointmentDate("20000101");
+        officer.setAppointmentDate(VALID_DATE);
         officer.setResignationDate(INVALID_DATE);
 
         verifyProcessingError(officerAPI, officer, "resignation_date: date/time pattern not matched: [yyyyMMdd]");
