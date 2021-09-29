@@ -16,10 +16,11 @@ import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithCountr
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithDateOfBirth;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithFormerNames;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupation;
-import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithResidentialAddress;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithPre1992Appointment;
+import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithResidentialAddress;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -92,7 +93,7 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
         if (RolesWithResidentialAddress.includes(officerRole)) {
             officer.setUsualResidentialAddress(source.getUsualResidentialAddress());
             officer.setResidentialAddressSameAsServiceAddress(
-                BooleanUtils.toBooleanObject(source.getResidentialAddressSameAsServiceAddress()));
+                    BooleanUtils.toBooleanObject(source.getResidentialAddressSameAsServiceAddress()));
             officer.setSecureOfficer(BooleanUtils.toBooleanObject(source.getSecureDirector()));
         }
 
@@ -100,7 +101,8 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
             officer.setCountryOfResidence(source.getServiceAddress().getUsualCountryOfResidence());
         }
 
-        officer.setIdentificationData(idTransform.transform(source.getIdentification()));
+        Optional.ofNullable(source.getIdentification())
+                .ifPresent(i -> officer.setIdentificationData(idTransform.transform(i)));
 
         if (RolesWithDateOfBirth.includes(officerRole) && isNotEmpty(source.getDateOfBirth())) {
             officer.setDateOfBirth(parseDateString("dateOfBirth", source.getDateOfBirth()));
