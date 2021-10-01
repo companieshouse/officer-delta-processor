@@ -13,6 +13,21 @@ public class IdentificationTransform implements Transformative<Identification, I
 
     @Override
     public IdentificationAPI transform(Identification source, IdentificationAPI identification) {
-        return new IdentificationAPI(source.getEea());
+
+        if (source.getEea() != null) {
+            identification = new IdentificationAPI(source.getEea());
+            identification.setIdentificationType("eea");
+        } else if (source.getOtherCorporateBodyOrFirm() != null) {
+            identification = new IdentificationAPI(source.getOtherCorporateBodyOrFirm());
+            identification.setIdentificationType("other-corporate-body-or-firm");
+        } else if (source.getNonEeaApi() != null) {
+            identification = new IdentificationAPI(source.getNonEeaApi());
+            identification.setIdentificationType("non-eea");
+        } else if (source.getUKLimitedCompany() != null) {
+            identification = new IdentificationAPI(source.getUKLimitedCompany());
+            identification.setIdentificationType("UK-limited-company");
+        }
+
+        return identification;
     }
 }
