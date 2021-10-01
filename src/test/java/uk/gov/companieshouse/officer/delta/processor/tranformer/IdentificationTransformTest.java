@@ -72,7 +72,7 @@ class IdentificationTransformTest {
     @Test
     void transformUkLimitedCompany() {
         final Identification identification = new Identification();
-        final IdentificationAPI identificationAPI = createIdentificationAPI("UK-limited-company");
+        final IdentificationAPI identificationAPI = createIdentificationAPI("uk-limited-company");
 
         identificationAPI.setAdditionalProperty("additional", "property");
         identification.setUKLimitedCompany(identificationAPI);

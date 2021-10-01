@@ -25,7 +25,7 @@ public class IdentificationTransform implements Transformative<Identification, I
             identification.setIdentificationType("non-eea");
         } else if (source.getUKLimitedCompany() != null) {
             identification = new IdentificationAPI(source.getUKLimitedCompany());
-            identification.setIdentificationType("UK-limited-company");
+            identification.setIdentificationType("uk-limited-company");
         }
 
         return identification;
