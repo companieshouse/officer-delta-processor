@@ -50,7 +50,8 @@ public class DeltaConsumer {
      */
     @PreDestroy
     public void destroy() {
-        logger.info(String.format("Closing [%s] before service shutdown.", consumerGroup.getConsumerType()));
+        logger.info(String.format("The officer-delta-processor is preparing to shutdown. "
+                        + "Closing [%s] before service shutdown.", consumerGroup.getConsumerType()));
         consumerGroup.close();
     }
 
