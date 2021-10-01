@@ -302,11 +302,11 @@ class OfficerTransformTest {
         if (RolesWithResidentialAddress.includes(officerRole)) {
             assertThat(outputOfficer.getUsualResidentialAddress(), is(notNullValue()));
             assertThat(outputOfficer.isResidentialAddressSameAsServiceAddress(), is(notNullValue()));
-            assertThat(outputOfficer.secureOfficer(), is(notNullValue()));
+            assertThat(outputOfficer.isSecureOfficer(), is(notNullValue()));
         } else {
             assertThat(outputOfficer.getUsualResidentialAddress(), is(nullValue()));
             assertThat(outputOfficer.isResidentialAddressSameAsServiceAddress(), is(nullValue()));
-            assertThat(outputOfficer.secureOfficer(), is(nullValue()));
+            assertThat(outputOfficer.isSecureOfficer(), is(nullValue()));
         }
     }
 

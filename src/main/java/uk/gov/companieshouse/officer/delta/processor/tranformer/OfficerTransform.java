@@ -94,7 +94,7 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
             officer.setUsualResidentialAddress(source.getUsualResidentialAddress());
             officer.setResidentialAddressSameAsServiceAddress(
                     BooleanUtils.toBooleanObject(source.getResidentialAddressSameAsServiceAddress()));
-            officer.setSecureOfficer(BooleanUtils.toBooleanObject(source.getSecureDirector()));
+            officer.setIsSecureOfficer(BooleanUtils.toBooleanObject(source.getSecureDirector()));
         }
 
         if (RolesWithCountryOfResidence.includes(officerRole)) {
