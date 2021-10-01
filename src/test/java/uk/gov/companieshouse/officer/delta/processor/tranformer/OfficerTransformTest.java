@@ -349,6 +349,27 @@ class OfficerTransformTest {
         assertThat(result.getIdentificationData(), is(sameInstance(identificationAPI)));
     }
 
+    @DisplayName("Verify data in the Links object is created as expected")
+    @Test
+    void verifyLinksData() {
+        final OfficerAPI officerAPI = testTransform.factory();
+        final OfficersItem officer = createOfficer(addressAPI, identification);
+
+        when(identificationTransform.transform(identification)).thenReturn(identificationAPI);
+        officer.setChangedAt(CHANGED_AT);
+        officer.setAppointmentDate(VALID_DATE);
+        officer.setDateOfBirth(VALID_DATE);
+
+        final OfficerAPI result = testTransform.transform(officer, officerAPI);
+
+        assertThat(result.getLinksData().getSelfLink(),
+            is("/company/companyNumber/appointments/vuIAhYYbRDhqzx9b3e_jd6Uhres"));
+        assertThat(result.getLinksData().getOfficerLinksData().getSelfLink(),
+            is("/officers/vuIAhYYbRDhqzx9b3e_jd6Uhres"));
+        assertThat(result.getLinksData().getOfficerLinksData().getAppointmentsLink(),
+            is("/officers/vuIAhYYbRDhqzx9b3e_jd6Uhres/appointments"));
+    }
+
     private void verifyProcessingError(final OfficerAPI officerAPI, final OfficersItem officer,
             final String expectedMessage) {
         final NonRetryableErrorException exception =
