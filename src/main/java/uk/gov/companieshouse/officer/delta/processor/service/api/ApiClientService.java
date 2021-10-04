@@ -12,7 +12,7 @@ import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
  */
 public interface ApiClientService {
 
-    InternalApiClient getApiClient();
+    InternalApiClient getApiClient(String contextId);
 
     /**
      * Apply a Company Appointment delta.

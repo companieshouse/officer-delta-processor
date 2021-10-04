@@ -17,7 +17,9 @@ import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientService;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.AppointmentTransform;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class DeltaProcessor implements Processor<ChsDelta> {
@@ -55,23 +57,29 @@ public class DeltaProcessor implements Processor<ChsDelta> {
                                 appointmentAPI);
                 final HttpStatus httpStatus = HttpStatus.valueOf(response.getStatusCode());
 
-                if (httpStatus.is5xxServerError()) {
+                final Map<String, Object> logMap = new HashMap<>();
+                logMap.put("company_number", officer.getCompanyNumber());
+                logMap.put("status", httpStatus.toString());
+
+                if(httpStatus.is2xxSuccessful()) {
+                    final String msg = String.format("Data for officer[%d] was sent successfully", i);
+                    logger.infoContext(logContext, msg, logMap);
+                }
+                else if (httpStatus.is5xxServerError()) {
                     final String msg = String.format("Failed to send data for officer[%d], retry", i);
-                    logger.errorContext(logContext, msg, null, null);
+
+                    logger.errorContext(logContext, msg, null, logMap);
                     throw new RetryableErrorException(msg, null);
                 }
                 else if (httpStatus.is4xxClientError()) {
                     final String msg = String.format("Failed to send data for officer[%d]", i);
 
-                    logger.errorContext(logContext, msg, null, null);
+                    logger.errorContext(logContext, msg, null, logMap);
                     throw new NonRetryableErrorException(msg, null);
                 }
             }
         } catch (JsonProcessingException e) {
-            // TODO: figure out how to print exception without dumping sensitive fields
-            logger.errorContext(logContext, "Unable to read JSON from delta: " + ExceptionUtils.getRootCauseMessage(e),
-                    e, null);
-
+            logger.errorContext(logContext, "Unable to JSON parse CHSDelta", e, null);
             throw new NonRetryableErrorException("Unable to JSON parse CHSDelta", e);
         }
     }

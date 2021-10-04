@@ -125,14 +125,14 @@ public class DeltaConsumer {
                 logInfo(contextId,
                         String.format("%s (ms): %d", stopWatch.getLastTaskName(), stopWatch.getLastTaskTimeMillis()),
                         attempt, topic, partition, offset, stopWatch.getLastTaskTimeMillis());
+
                 stopWatch.start("Process message");
-
                 processor.process(delta);
-
                 stopWatch.stop();
                 logInfo(contextId,
                         String.format("%s (ms): %d", stopWatch.getLastTaskName(), stopWatch.getLastTaskTimeMillis()),
                         attempt, topic, partition, offset, stopWatch.getLastTaskTimeMillis());
+
                 logInfo(contextId, String.format("Total process (ms): %d", stopWatch.getTotalTimeMillis()), attempt,
                         topic, partition, offset, stopWatch.getLastTaskTimeMillis());
             }
@@ -170,6 +170,7 @@ public class DeltaConsumer {
         logMap.put("topic", topic);
         logMap.put("partition", partition);
         logMap.put("offset", offset);
+        logMap.put("message", msg);
         Optional.ofNullable(duration).ifPresent(d -> logMap.put("duration", d));
         logger.infoContext(logContext, msg, logMap);
     }
@@ -181,7 +182,7 @@ public class DeltaConsumer {
         logMap.put("attempt", attempt);
         logMap.put("topic", topic);
         logMap.put("partition", partition);
-        logMap.put("sourceOffset", offset);
+        logMap.put("offset", offset);
         logger.errorContext(logContext, ExceptionUtils.getRootCauseMessage(e), e, logMap);
     }
 
