@@ -38,14 +38,14 @@ public class TransformerUtils {
      * @param effectivePattern the date pattern to mention in the Exception
      * @return the Instant corresponding to the parsed string (at UTC by definition)
      */
-    private static Instant convertToInstant(final String identifier, final String s, final String effectivePattern) {
+    private static Instant convertToInstant(final String identifier, final String s, final String effectivePattern)
+            throws NonRetryableErrorException {
         try {
             return Instant.from(UTC_DATETIME_FORMATTER.parse(s));
         }
         catch (DateTimeParseException e) {
-            throw new NonRetryableErrorException(String.format("%s: date/time pattern not matched: [%s]",
-                    identifier,
-                    effectivePattern), null);
+            throw new NonRetryableErrorException(
+                    String.format("%s: date/time pattern not matched: [%s]", identifier, effectivePattern), null);
         }
     }
 
@@ -57,8 +57,10 @@ public class TransformerUtils {
      * @param identifier    property name of value (for Exception message)
      * @param rawDateString the date string
      * @return the Instant corresponding to the parsed string (at UTC by definition)
+     * @throws NonRetryableErrorException if date parsing fails
      */
-    public static Instant parseDateString(final String identifier, String rawDateString) {
+    public static Instant parseDateString(final String identifier, String rawDateString)
+            throws NonRetryableErrorException {
         return convertToInstant(identifier, rawDateString + TIME_START_OF_DAY, DATE_PATTERN);
     }
 
@@ -68,8 +70,10 @@ public class TransformerUtils {
      * @param identifier        property name of value (for sException message)
      * @param rawDateTimeString the date and time string
      * @return the Instant corresponding to the parsed string (at UTC by definition)
+     * @throws NonRetryableErrorException if datetime parsing fails
      */
-    public static Instant parseDateTimeString(final String identifier, String rawDateTimeString) {
+    public static Instant parseDateTimeString(final String identifier, String rawDateTimeString)
+            throws NonRetryableErrorException {
         final String dateTimeString = rawDateTimeString.length() > DATETIME_LENGTH
                 ? rawDateTimeString.substring(0, DATETIME_LENGTH)
                 : rawDateTimeString;
@@ -81,20 +85,18 @@ public class TransformerUtils {
         return Base64.getUrlEncoder().encodeToString(bytes);
     }
 
-    public static byte[] sha1Digest(final String plain) {
+    public static byte[] sha1Digest(final String plain) throws NonRetryableErrorException {
 
-        MessageDigest md = null;
         try {
-            md = MessageDigest.getInstance("SHA-1");
+            return MessageDigest.getInstance("SHA-1").digest((plain + SALT).getBytes(StandardCharsets.UTF_8));
         }
         catch (NoSuchAlgorithmException e) {
             throw new NonRetryableErrorException("Encode failed: no such digest algorithm.", e);
         }
 
-        return md.digest((plain + SALT).getBytes(StandardCharsets.UTF_8));
     }
 
-    public static String encode(String plain) {
+    public static String encode(String plain) throws NonRetryableErrorException {
         return base64Encode(sha1Digest(plain)).replace("=", "");
     }
 

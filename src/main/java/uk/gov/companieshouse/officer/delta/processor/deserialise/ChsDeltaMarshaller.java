@@ -31,8 +31,9 @@ public class ChsDeltaMarshaller {
      *
      * @param kafkaMessage the message from kafka
      * @return the model populated by data from the message
+     * @throws NonRetryableErrorException if deserialization fails
      */
-    public ChsDelta deserialize(Message kafkaMessage) {
+    public ChsDelta deserialize(Message kafkaMessage) throws NonRetryableErrorException {
         try {
             return deserializer.fromBinary(kafkaMessage, ChsDelta.getClassSchema());
         }
@@ -46,8 +47,9 @@ public class ChsDeltaMarshaller {
      *
      * @param delta the ChsDelta
      * @return the bytes representing the data from the ChsDelta
+     * @throws NonRetryableErrorException if serialization fails
      */
-    public byte[] serialize(ChsDelta delta) {
+    public byte[] serialize(ChsDelta delta) throws NonRetryableErrorException {
         try {
             return serializer.toBinary(delta);
         }

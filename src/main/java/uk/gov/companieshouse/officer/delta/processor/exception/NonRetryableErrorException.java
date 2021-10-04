@@ -4,7 +4,7 @@ package uk.gov.companieshouse.officer.delta.processor.exception;
  * Thrown to indicate a non-recoverable error in processing that is futile to be tried again. An example of a
  * non-recoverable error is a data conversion error (e.g. bad date/time value).
  */
-public class NonRetryableErrorException extends RuntimeException {
+public class NonRetryableErrorException extends Exception {
 
     private static final long serialVersionUID = 1L;
 

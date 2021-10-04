@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.model.delta.officers.FormerNamesAPI;
 import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
+import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithCountryOfResidence;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithDateOfBirth;
@@ -20,7 +21,6 @@ import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithPre199
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithResidentialAddress;
 
 import java.time.Instant;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -38,7 +38,7 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
     }
 
     @Override
-    public OfficerAPI transform(OfficersItem source, OfficerAPI officer) {
+    public OfficerAPI transform(OfficersItem source, OfficerAPI officer) throws NonRetryableErrorException {
 
         officer.setUpdatedAt(
                 parseDateTimeString("changedAt", source.getChangedAt()));
@@ -101,8 +101,8 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
             officer.setCountryOfResidence(source.getServiceAddress().getUsualCountryOfResidence());
         }
 
-        Optional.ofNullable(source.getIdentification())
-                .ifPresent(i -> officer.setIdentificationData(idTransform.transform(i)));
+        if (source.getIdentification() != null)
+            officer.setIdentificationData(idTransform.transform(source.getIdentification()));
 
         if (RolesWithDateOfBirth.includes(officerRole) && isNotEmpty(source.getDateOfBirth())) {
             officer.setDateOfBirth(parseDateString("dateOfBirth", source.getDateOfBirth()));

@@ -18,25 +18,26 @@ import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientServic
 import uk.gov.companieshouse.officer.delta.processor.tranformer.AppointmentTransform;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Component
 public class DeltaProcessor implements Processor<ChsDelta> {
+    public static final Pattern PARSE_MESSAGE_PATTERN = Pattern.compile("Source.*line", Pattern.DOTALL);
+
     final Logger logger;
 
     final AppointmentTransform transformer;
     final ApiClientService apiClientService;
 
     @Autowired
-    public DeltaProcessor(Logger logger,
-                          AppointmentTransform transformer,
-                          ApiClientService apiClientService) {
+    public DeltaProcessor(Logger logger, AppointmentTransform transformer, ApiClientService apiClientService) {
         this.logger = logger;
         this.transformer = transformer;
         this.apiClientService = apiClientService;
     }
 
     @Override
-    public void process(ChsDelta delta) {
+    public void process(ChsDelta delta) throws RetryableErrorException, NonRetryableErrorException {
         ObjectMapper objectMapper = new ObjectMapper();
         final String logContext = delta.getContextId();
 
@@ -67,12 +68,25 @@ public class DeltaProcessor implements Processor<ChsDelta> {
                     throw new NonRetryableErrorException(msg, null);
                 }
             }
-        } catch (JsonProcessingException e) {
-            // TODO: figure out how to print exception without dumping sensitive fields
-            logger.errorContext(logContext, "Unable to read JSON from delta: " + ExceptionUtils.getRootCauseMessage(e),
-                    e, null);
+        }
+        catch (JsonProcessingException e) {
+            /* IMPORTANT: do not propagate the original cause as it contains the full source JSON with
+             * potentially sensitive data.
+             */
+            final String cleanMessage = PARSE_MESSAGE_PATTERN.matcher(e.getMessage()).replaceAll("Source line");
+            final NonRetryableErrorException cause = new NonRetryableErrorException(cleanMessage, null);
+            logger.errorContext(logContext,
+                    "Unable to read JSON from delta: " + ExceptionUtils.getRootCauseMessage(cause), cause, null);
 
-            throw new NonRetryableErrorException("Unable to JSON parse CHSDelta", e);
+            throw new NonRetryableErrorException("Unable to JSON parse CHSDelta", cause);
+        }
+        catch (IllegalArgumentException e) {
+            // Workaround. When service is unavailable: "IllegalArgumentException: expected numeric type but got class
+            // uk.gov.companieshouse.api.error.ApiErrorResponse" may be thrown when the SDK parses
+            // ApiErrorResponseException.
+            logger.errorContext(logContext, "Failed to send data for officer: " + ExceptionUtils.getRootCauseMessage(e),
+                    e, null);
+            throw new RetryableErrorException("Failed to send data for officer, retry", e);
         }
     }
 }

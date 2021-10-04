@@ -164,7 +164,8 @@ class DeltaConsumerTest {
 
     @ParameterizedTest
     @EnumSource(value = CHConsumerType.class, names = {"MAIN_CONSUMER", "RETRY_CONSUMER"})
-    void consumeMessageWhenMessagesNonEmpty(final CHConsumerType consumerType) {
+    void consumeMessageWhenMessagesNonEmpty(final CHConsumerType consumerType)
+            throws NonRetryableErrorException, RetryableErrorException {
         when(consumerGroup.getConsumerType()).thenReturn(consumerType);
         when(consumerGroup.consume()).thenReturn(new ArrayList<>(messageList));
 
@@ -187,7 +188,7 @@ class DeltaConsumerTest {
     }
 
     @Test
-    void consumeMainMessageWhenDeltaNull() throws ExecutionException, InterruptedException {
+    void consumeMainMessageWhenDeltaNull() throws ExecutionException, InterruptedException, NonRetryableErrorException {
         when(consumerGroup.getConsumerType()).thenReturn(CHConsumerType.MAIN_CONSUMER);
         when(consumerGroup.consume()).thenReturn(new ArrayList<>(messageList));
 
@@ -207,7 +208,7 @@ class DeltaConsumerTest {
     }
 
     @Test
-    void consumeRetryMessageWhenPauseInterrupted() {
+    void consumeRetryMessageWhenPauseInterrupted() throws NonRetryableErrorException, RetryableErrorException {
         when(consumerGroup.getConsumerType()).thenReturn(CHConsumerType.RETRY_CONSUMER);
         when(consumerGroup.getConfig().getRetryThrottle()).thenReturn(1000L);
         when(consumerGroup.consume()).thenReturn(new ArrayList<>(messageList));
@@ -231,7 +232,8 @@ class DeltaConsumerTest {
     }
 
     @Test
-    void consumeMessageWhenDeserializeFails() throws ExecutionException, InterruptedException {
+    void consumeMessageWhenDeserializeFails()
+            throws ExecutionException, InterruptedException, NonRetryableErrorException {
         final Message nextMessage = messageList.get(0);
 
         when(consumerGroup.consume()).thenReturn(new ArrayList<>(messageList));
@@ -250,7 +252,7 @@ class DeltaConsumerTest {
     }
 
     @Test
-    void consumeMessageWhenProcessingNonTransientError() {
+    void consumeMessageWhenProcessingNonTransientError() throws NonRetryableErrorException, RetryableErrorException {
         when(consumerGroup.consume()).thenReturn(new ArrayList<>(messageList));
 
         final Message nextMessage = messageList.get(0);
@@ -271,8 +273,7 @@ class DeltaConsumerTest {
     }
 
     @Test
-    void consumeMessageWhenUnexpectedException() throws Exception {
-        when(consumerGroup.getConfig().getMaxRetries()).thenReturn(EXPECTED.intValue());
+    void consumeMessageWhenUnexpectedExceptionThenNoRetry() throws Exception {
         when(consumerGroup.consume()).thenReturn(new ArrayList<>(messageList));
 
         final Message nextMessage = messageList.get(0);
@@ -281,7 +282,6 @@ class DeltaConsumerTest {
         final byte[] messageBytes = "retry_serialized".getBytes(StandardCharsets.UTF_8);
 
         when(marshaller.deserialize(nextMessage)).thenReturn(delta);
-        when(marshaller.serialize(retry)).thenReturn(messageBytes);
         doThrow(new IllegalStateException("unexpected")).when(processor).process(delta);
 
         testConsumer.consumeMessage();
@@ -292,8 +292,6 @@ class DeltaConsumerTest {
         inOrder.verify(marshaller).deserialize(nextMessage);
         inOrder.verify(processor).process(delta);
         inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), any(Exception.class), anyMap());
-        inOrder.verify(marshaller).serialize(retry);
-        inOrder.verify(consumerGroup).retry(anyInt(), any(Message.class));
         inOrder.verify(consumerGroup).commit();
         inOrder.verifyNoMoreInteractions();
     }
@@ -305,7 +303,7 @@ class DeltaConsumerTest {
     @ParameterizedTest(name="For max retries = 5, after {0} attempts, next attempt is {1}")
     @MethodSource("provideRetries")
     void consumeMessageWhenProcessingTransientError(final int attempt, final int nextAttempt)
-            throws ExecutionException, InterruptedException {
+            throws ExecutionException, InterruptedException, NonRetryableErrorException, RetryableErrorException {
         when(consumerGroup.getConfig().getMaxRetries()).thenReturn(EXPECTED.intValue());
         when(consumerGroup.consume()).thenReturn(new ArrayList<>(messageList));
 
@@ -341,7 +339,7 @@ class DeltaConsumerTest {
     @ParameterizedTest(name="queueRetry failure: {0}")
     @MethodSource("provideRetryExceptions")
     void consumeMessageWhenProcessingNonTransientErrorThenRetryFailure(final Exception exception)
-            throws ExecutionException, InterruptedException {
+            throws ExecutionException, InterruptedException, NonRetryableErrorException, RetryableErrorException {
         when(consumerGroup.getConfig().getMaxRetries()).thenReturn(EXPECTED.intValue());
         when(consumerGroup.consume()).thenReturn(new ArrayList<>(messageList));
         doThrow(exception).when(consumerGroup).retry(eq(1), any(Message.class));
