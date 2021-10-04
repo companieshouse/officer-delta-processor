@@ -99,7 +99,6 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
             officer.setResidentialAddressSameAsServiceAddress(
                     BooleanUtils.toBooleanObject(source.getResidentialAddressSameAsServiceAddress()));
             officer.setIsSecureOfficer(BooleanUtils.toBooleanObject(source.getSecureDirector()));
-            officer.setSecureOfficer(BooleanUtils.toBooleanObject(source.getSecureDirector()));
 
             //Prevent it from being stored in URA within the appointments collection.
             officer.getUsualResidentialAddress().setUsualCountryOfResidence(null);
