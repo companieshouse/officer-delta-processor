@@ -128,12 +128,7 @@ class DeltaProcessorTest {
     }
 
     private static Stream<HttpStatus> provideRetryableStatuses() {
-        final EnumSet<HttpStatus> retryable =
-                EnumSet.range(HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.NETWORK_AUTHENTICATION_REQUIRED);
-
-        retryable.add(HttpStatus.NOT_FOUND);
-
-        return retryable.stream();
+        return EnumSet.allOf(HttpStatus.class).stream().filter(s -> s.value() > HttpStatus.BAD_REQUEST.value());
     }
 
     @ParameterizedTest
@@ -174,12 +169,7 @@ class DeltaProcessorTest {
     }
 
     private static Stream<HttpStatus> provideNonRetryableStatuses() {
-        final EnumSet<HttpStatus> nonRetryable =
-                EnumSet.range(HttpStatus.BAD_REQUEST, HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS);
-
-        nonRetryable.remove(HttpStatus.NOT_FOUND);
-
-        return nonRetryable.stream();
+        return Stream.of(HttpStatus.BAD_REQUEST);
     }
 
     @ParameterizedTest

@@ -52,27 +52,19 @@ public class DeltaProcessor implements Processor<ChsDelta> {
                 appointmentAPI.setDeltaAt(officers.getDeltaAt());
 
                 final ApiResponse<Void> response =
-                        apiClientService.putAppointment(logContext, officer.getCompanyNumber(),
-                                appointmentAPI);
+                        apiClientService.putAppointment(logContext, officer.getCompanyNumber(), appointmentAPI);
                 final HttpStatus httpStatus = HttpStatus.valueOf(response.getStatusCode());
+                final String msg = String.format("Failed to send data for officer[%d]", i);
 
-                if (httpStatus.is5xxServerError()) {
-                    final String msg = String.format("Failed to send data for officer[%d], retry", i);
-                    logger.errorContext(logContext, msg, null, null);
-                    throw new RetryableErrorException(msg, null);
-                }
-                else if (HttpStatus.NOT_FOUND == httpStatus) {
-                    final String msg = String.format(
-                            "Failed to find data service for officer[%d], retry. Check the destination URL is correct "
-                                    + "and the data service is available.", i);
-                    logger.errorContext(logContext, msg, null, null);
-                    throw new RetryableErrorException(msg, null);
-                }
-                else if (httpStatus.is4xxClientError()) {
-                    final String msg = String.format("Failed to send data for officer[%d]", i);
-
+                if (HttpStatus.BAD_REQUEST == httpStatus) {
+                    // 400 BAD REQUEST status is not retryable
                     logger.errorContext(logContext, msg, null, null);
                     throw new NonRetryableErrorException(msg, null);
+                }
+                else if (httpStatus.is4xxClientError() || httpStatus.is5xxServerError()) {
+                    // any other client or server status is retryable
+                    logger.errorContext(logContext, msg + ", retry", null, null);
+                    throw new RetryableErrorException(msg, null);
                 }
             }
         }
