@@ -354,7 +354,7 @@ class OfficerTransformTest {
 
     @DisplayName("Verify data in the Links object is created as expected")
     @Test
-    void verifyLinksData() {
+    void verifyLinksData() throws NonRetryableErrorException {
         final OfficerAPI officerAPI = testTransform.factory();
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
