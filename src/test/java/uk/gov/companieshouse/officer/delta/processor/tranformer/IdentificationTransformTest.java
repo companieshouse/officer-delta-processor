@@ -28,13 +28,9 @@ class IdentificationTransformTest {
     }
 
     @Test
-    void transformSingle() {
+    void transformEea() {
         final Identification identification = new Identification();
-        final IdentificationAPI identificationAPI = new IdentificationAPI("identificationType",
-                "legalAuthority",
-                "legalForm",
-                "placeRegistered",
-                "registrationNumber");
+        final IdentificationAPI identificationAPI = createIdentificationAPI("eea");
 
         identificationAPI.setAdditionalProperty("additional", "property");
         identification.setEea(identificationAPI);
@@ -43,7 +39,57 @@ class IdentificationTransformTest {
 
         assertThat(result, is(equalTo(identificationAPI)));
         assertThat(result.getAdditionalProperties(), hasEntry("additional", "property"));
+    }
 
+    @Test
+    void transformOtherCorpBody() {
+        final Identification identification = new Identification();
+        final IdentificationAPI identificationAPI = createIdentificationAPI("other-corporate-body-or-firm");
+
+        identificationAPI.setAdditionalProperty("additional", "property");
+        identification.setOtherCorporateBodyOrFirm(identificationAPI);
+
+        final IdentificationAPI result = testTransform.transform(identification, identificationAPI);
+
+        assertThat(result, is(equalTo(identificationAPI)));
+        assertThat(result.getAdditionalProperties(), hasEntry("additional", "property"));
+    }
+
+    @Test
+    void transformNonEea() {
+        final Identification identification = new Identification();
+        final IdentificationAPI identificationAPI = createIdentificationAPI("non-eea");
+
+        identificationAPI.setAdditionalProperty("additional", "property");
+        identification.setNonEeaApi(identificationAPI);
+
+        final IdentificationAPI result = testTransform.transform(identification, identificationAPI);
+
+        assertThat(result, is(equalTo(identificationAPI)));
+        assertThat(result.getAdditionalProperties(), hasEntry("additional", "property"));
+    }
+
+    @Test
+    void transformUkLimitedCompany() {
+        final Identification identification = new Identification();
+        final IdentificationAPI identificationAPI = createIdentificationAPI("uk-limited-company");
+
+        identificationAPI.setAdditionalProperty("additional", "property");
+        identification.setUKLimitedCompany(identificationAPI);
+
+        final IdentificationAPI result = testTransform.transform(identification, identificationAPI);
+
+        assertThat(result, is(equalTo(identificationAPI)));
+        assertThat(result.getAdditionalProperties(), hasEntry("additional", "property"));
+    }
+
+    private IdentificationAPI createIdentificationAPI(String identificationType) {
+
+        return new IdentificationAPI(identificationType,
+                "legalAuthority",
+                "legalForm",
+                "placeRegistered",
+                "registrationNumber");
     }
 
 }
