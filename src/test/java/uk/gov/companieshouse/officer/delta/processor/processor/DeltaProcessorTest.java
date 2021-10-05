@@ -127,12 +127,17 @@ class DeltaProcessorTest {
 
     }
 
-    private static Stream<HttpStatus> provide5xxStatuses() {
-        return EnumSet.range(HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.NETWORK_AUTHENTICATION_REQUIRED).stream();
+    private static Stream<HttpStatus> provideRetryableStatuses() {
+        final EnumSet<HttpStatus> retryable =
+                EnumSet.range(HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.NETWORK_AUTHENTICATION_REQUIRED);
+
+        retryable.add(HttpStatus.NOT_FOUND);
+
+        return retryable.stream();
     }
 
     @ParameterizedTest
-    @MethodSource("provide5xxStatuses")
+    @MethodSource("provideRetryableStatuses")
     void processWhenClientServiceServerError(final HttpStatus serverErrorStatus) {
         final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID);
         final String expectedNumber = expectedAppointment.getData().getCompanyNumber();
@@ -168,12 +173,17 @@ class DeltaProcessorTest {
 
     }
 
-    private static Stream<HttpStatus> provide4xxStatuses() {
-        return EnumSet.range(HttpStatus.BAD_REQUEST, HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS).stream();
+    private static Stream<HttpStatus> provideNonRetryableStatuses() {
+        final EnumSet<HttpStatus> nonRetryable =
+                EnumSet.range(HttpStatus.BAD_REQUEST, HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS);
+
+        nonRetryable.remove(HttpStatus.NOT_FOUND);
+
+        return nonRetryable.stream();
     }
 
     @ParameterizedTest
-    @MethodSource("provide4xxStatuses")
+    @MethodSource("provideNonRetryableStatuses")
     void processWhenClientServiceClientError(final HttpStatus serverErrorStatus) {
         final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID);
         final String expectedNumber = expectedAppointment.getData().getCompanyNumber();
