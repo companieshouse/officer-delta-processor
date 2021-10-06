@@ -19,26 +19,30 @@ import uk.gov.companieshouse.officer.delta.processor.tranformer.AppointmentTrans
 
 import java.util.HashMap;
 import java.util.List;
+<<<<<<< HEAD
 import java.util.Map;
+=======
+import java.util.regex.Pattern;
+>>>>>>> main
 
 @Component
 public class DeltaProcessor implements Processor<ChsDelta> {
+    public static final Pattern PARSE_MESSAGE_PATTERN = Pattern.compile("Source.*line", Pattern.DOTALL);
+
     final Logger logger;
 
     final AppointmentTransform transformer;
     final ApiClientService apiClientService;
 
     @Autowired
-    public DeltaProcessor(Logger logger,
-                          AppointmentTransform transformer,
-                          ApiClientService apiClientService) {
+    public DeltaProcessor(Logger logger, AppointmentTransform transformer, ApiClientService apiClientService) {
         this.logger = logger;
         this.transformer = transformer;
         this.apiClientService = apiClientService;
     }
 
     @Override
-    public void process(ChsDelta delta) {
+    public void process(ChsDelta delta) throws RetryableErrorException, NonRetryableErrorException {
         ObjectMapper objectMapper = new ObjectMapper();
         final String logContext = delta.getContextId();
 
@@ -53,9 +57,9 @@ public class DeltaProcessor implements Processor<ChsDelta> {
                 appointmentAPI.setDeltaAt(officers.getDeltaAt());
 
                 final ApiResponse<Void> response =
-                        apiClientService.putAppointment(logContext, officer.getCompanyNumber(),
-                                appointmentAPI);
+                        apiClientService.putAppointment(logContext, officer.getCompanyNumber(), appointmentAPI);
                 final HttpStatus httpStatus = HttpStatus.valueOf(response.getStatusCode());
+                final String msg = String.format("Failed to send data for officer[%d]", i);
 
                 final Map<String, Object> logMap = new HashMap<>();
                 logMap.put("company_number", officer.getCompanyNumber());
@@ -75,12 +79,44 @@ public class DeltaProcessor implements Processor<ChsDelta> {
                     final String msg = String.format("Failed to send data for officer[%d]", i);
 
                     logger.errorContext(logContext, msg, null, logMap);
+
+                if (HttpStatus.BAD_REQUEST == httpStatus) {
+                    // 400 BAD REQUEST status is not retryable
+                    logger.errorContext(logContext, msg, null, null);
+
                     throw new NonRetryableErrorException(msg, null);
                 }
+                else if (httpStatus.is4xxClientError() || httpStatus.is5xxServerError()) {
+                    // any other client or server status is retryable
+                    logger.errorContext(logContext, msg + ", retry", null, null);
+                    throw new RetryableErrorException(msg, null);
+                }
             }
+<<<<<<< HEAD
         } catch (JsonProcessingException e) {
             logger.errorContext(logContext, "Unable to JSON parse CHSDelta", e, null);
             throw new NonRetryableErrorException("Unable to JSON parse CHSDelta", e);
+=======
+        }
+        catch (JsonProcessingException e) {
+            /* IMPORTANT: do not propagate the original cause as it contains the full source JSON with
+             * potentially sensitive data.
+             */
+            final String cleanMessage = PARSE_MESSAGE_PATTERN.matcher(e.getMessage()).replaceAll("Source line");
+            final NonRetryableErrorException cause = new NonRetryableErrorException(cleanMessage, null);
+            logger.errorContext(logContext,
+                    "Unable to read JSON from delta: " + ExceptionUtils.getRootCauseMessage(cause), cause, null);
+
+            throw new NonRetryableErrorException("Unable to JSON parse CHSDelta", cause);
+        }
+        catch (IllegalArgumentException e) {
+            // Workaround for Docker router. When service is unavailable: "IllegalArgumentException: expected numeric
+            // type but got class uk.gov.companieshouse.api.error.ApiErrorResponse" is thrown when the SDK parses
+            // ApiErrorResponseException.
+            logger.errorContext(logContext, "Failed to send data for officer: " + ExceptionUtils.getRootCauseMessage(e),
+                    e, null);
+            throw new RetryableErrorException("Failed to send data for officer, retry", e);
+>>>>>>> main
         }
     }
 }

@@ -1,10 +1,13 @@
 package uk.gov.companieshouse.officer.delta.processor.processor;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -61,7 +64,7 @@ class DeltaProcessorTest {
     private Logger logger;
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() throws IOException, NonRetryableErrorException {
         final Resource jsonFile = new ClassPathResource("officer_delta_dummy.json");
 
         json = new BufferedReader(new InputStreamReader(jsonFile.getInputStream())).lines()
@@ -72,7 +75,8 @@ class DeltaProcessorTest {
         expectedAppointment = jsonToAppointment(json);
     }
 
-    private static AppointmentAPI jsonToAppointment(final String json) throws JsonProcessingException {
+    private static AppointmentAPI jsonToAppointment(final String json)
+            throws JsonProcessingException, NonRetryableErrorException {
         final ObjectMapper objectMapper = new ObjectMapper();
         final Officers officers = objectMapper.readValue(json, Officers.class);
         final List<OfficersItem> officersOfficers = officers.getOfficers();
@@ -90,7 +94,7 @@ class DeltaProcessorTest {
     }
 
     @Test
-    void process() {
+    void process() throws NonRetryableErrorException, RetryableErrorException {
         final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID);
         final String expectedNumber = expectedAppointment.getData().getCompanyNumber();
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.OK.value(), null, null);
@@ -104,25 +108,31 @@ class DeltaProcessorTest {
     }
 
     @Test
-    void processWhenJsonParseFailure() {
+    void processWhenJsonParseFailureThenContentRedacted() {
         final String badJson = json.replace(":", "-");
         final ChsDelta delta = new ChsDelta(badJson, 0, CONTEXT_ID);
 
-        assertThrows(NonRetryableErrorException.class, () -> testProcessor.process(delta));
+        final NonRetryableErrorException exception =
+                assertThrows(NonRetryableErrorException.class, () -> testProcessor.process(delta));
+        final String redactedMessage = "Unexpected character ('-' (code 45)): was expecting a colon"
+                + " to separate field name and value\n at [Source line: 2, column: 14]";
+
+        assertThat(exception.getMessage(), is("Unable to JSON parse CHSDelta"));
+        assertThat(exception.getCause().getMessage(), is(redactedMessage));
 
         final InOrder inOrder = inOrder(logger, apiClientService);
 
-        inOrder.verify(logger).errorContext(anyString(), anyString(), any(JsonProcessingException.class), isNull());
+        inOrder.verify(logger).errorContext(anyString(), anyString(), any(NonRetryableErrorException.class), isNull());
         inOrder.verifyNoMoreInteractions();
 
     }
 
-    private static Stream<HttpStatus> provide5xxStatuses() {
-        return EnumSet.range(HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.NETWORK_AUTHENTICATION_REQUIRED).stream();
+    private static Stream<HttpStatus> provideRetryableStatuses() {
+        return EnumSet.allOf(HttpStatus.class).stream().filter(s -> s.value() > HttpStatus.BAD_REQUEST.value());
     }
 
     @ParameterizedTest
-    @MethodSource("provide5xxStatuses")
+    @MethodSource("provideRetryableStatuses")
     void processWhenClientServiceServerError(final HttpStatus serverErrorStatus) {
         final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID);
         final String expectedNumber = expectedAppointment.getData().getCompanyNumber();
@@ -140,12 +150,30 @@ class DeltaProcessorTest {
 
     }
 
-    private static Stream<HttpStatus> provide4xxStatuses() {
-        return EnumSet.range(HttpStatus.BAD_REQUEST, HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS).stream();
+    @Test
+    void processWhenClientServiceThrowsIllegalArgumentException() {
+        final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID);
+        final String expectedNumber = expectedAppointment.getData().getCompanyNumber();
+
+        doThrow(new IllegalArgumentException("simulate parsing error in api SDK")).when(apiClientService)
+                .putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
+
+        assertThrows(RetryableErrorException.class, () -> testProcessor.process(delta));
+
+        final InOrder inOrder = inOrder(logger, apiClientService);
+
+        inOrder.verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
+        inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), any(IllegalArgumentException.class), isNull());
+        inOrder.verifyNoMoreInteractions();
+
+    }
+
+    private static Stream<HttpStatus> provideNonRetryableStatuses() {
+        return Stream.of(HttpStatus.BAD_REQUEST);
     }
 
     @ParameterizedTest
-    @MethodSource("provide4xxStatuses")
+    @MethodSource("provideNonRetryableStatuses")
     void processWhenClientServiceClientError(final HttpStatus serverErrorStatus) {
         final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID);
         final String expectedNumber = expectedAppointment.getData().getCompanyNumber();
