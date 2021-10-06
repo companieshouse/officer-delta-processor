@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.officer.delta.processor.consumer;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.StopWatch;
 import uk.gov.companieshouse.delta.ChsDelta;
@@ -24,6 +23,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class DeltaConsumer {
+    private static final String NO_RETRY_MESSAGE = "A non retryable error has occurred";
+    private static final String RETRY_MESSAGE = "A retryable error has occurred";
+
     private final CHKafkaResilientConsumerGroup consumerGroup;
     private final ChsDeltaMarshaller marshaller;
     private final Processor<ChsDelta> processor;
@@ -37,6 +39,10 @@ public class DeltaConsumer {
 
     /**
      * Initialise the consumer by connecting to the consumer group
+     * @param consumerGroup Resilient consumer group
+     * @param marshaller used to serialise and deserialize the kafka messages
+     * @param processor handles message transformation
+     * @param logger the structured logger
      */
     public DeltaConsumer(final CHKafkaResilientConsumerGroup consumerGroup, final ChsDeltaMarshaller marshaller,
             final Processor<ChsDelta> processor, final Logger logger) {
@@ -138,27 +144,23 @@ public class DeltaConsumer {
                 logInfo(contextId,
                         String.format("%s (ms): %d", stopWatch.getLastTaskName(), stopWatch.getLastTaskTimeMillis()),
                         attempt, topic, partition, offset, stopWatch.getLastTaskTimeMillis());
-
-
-                logInfo(contextId, String.format("Total process (ms): %d", stopWatch.getTotalTimeMillis()), attempt,
-                        topic, partition, offset, stopWatch.getLastTaskTimeMillis());
-            }
+}
             catch (RetryableErrorException e) {
                 contextId = delta.getContextId();
-                logError(contextId, e, attempt, topic, partition, offset);
+                logError(contextId, RETRY_MESSAGE, e, attempt, topic, partition, offset);
                 queueRetry(topic, partition, offset, attempt, delta);
             }
             catch (Exception e) {
                 // includes NonRetryableErrorException; assume any other kind of exception is non-retryable
                 contextId = Optional.ofNullable(delta).map(ChsDelta::getContextId).orElse(null);
-                logError(contextId, e, attempt, topic, partition, offset);
+                logError(contextId, NO_RETRY_MESSAGE, e, attempt, topic, partition, offset);
            }
             finally {
                 contextId = Optional.ofNullable(delta).map(ChsDelta::getContextId).orElse(null);
                 if (stopWatch.isRunning()) {
                     stopWatch.stop();
                 }
-                logInfo(contextId, String.format("Total process (ms): %d", stopWatch.getTotalTimeMillis()), attempt,
+                logTrace(contextId, String.format("Total process (ms): %d", stopWatch.getTotalTimeMillis()), attempt,
                         topic, partition, offset, stopWatch.getLastTaskTimeMillis());
                 logInfo(contextId, "Commit message offset", attempt, topic, partition, offset);
                 commitOffset();
@@ -167,13 +169,16 @@ public class DeltaConsumer {
 
     }
 
-    private void logInfo(final String logContext, final String msg, final Integer attempt, final String topic,
-            final Integer partition, final Long offset) {
-        logInfo(logContext, msg, attempt, topic, partition, offset, null);
-    }
-
-    private void logInfo(final String logContext, final String msg, final Integer attempt, final String topic,
-            final Integer partition, final Long offset, final Long duration) {
+    /**
+     * Returns a key value map for the values required by the log message
+     * @param msg the log message
+     * @param attempt number of retry attempts
+     * @param topic name of the topic
+     * @param partition topic partition number
+     * @param offset topic offset position
+     * @return Map
+     */
+    private Map<String, Object> createLogMap(String msg, Integer attempt, String topic, Integer partition, Long offset) {
         final Map<String, Object> logMap = new HashMap<>();
 
         logMap.put("attempt", attempt);
@@ -181,26 +186,84 @@ public class DeltaConsumer {
         logMap.put("partition", partition);
         logMap.put("offset", offset);
         logMap.put("message", msg);
+        return logMap;
+    }
+
+    /**
+     * Create info level log message.
+     * @param logContext the context id
+     * @param msg the log message
+     * @param attempt number of retry attempts
+     * @param topic name of the topic
+     * @param partition topic partition number
+     * @param offset topic offset position
+     */
+    private void logInfo(final String logContext, final String msg, final Integer attempt, final String topic,
+            final Integer partition, final Long offset) {
+        logInfo(logContext, msg, attempt, topic, partition, offset, null);
+    }
+
+    /**
+     * Create info level log message.
+     * @param logContext the context id
+     * @param msg the log message
+     * @param attempt number of retry attempts
+     * @param topic name of the topic
+     * @param partition topic partition number
+     * @param offset topic offset position
+     * @param duration amount of time in milliseconds
+     */
+    private void logInfo(final String logContext, final String msg, final Integer attempt, final String topic,
+            final Integer partition, final Long offset, final Long duration) {
+        final Map<String, Object> logMap = createLogMap(msg, attempt, topic, partition, offset);
+
         Optional.ofNullable(duration).ifPresent(d -> logMap.put("duration", d));
         logger.infoContext(logContext, msg, logMap);
     }
 
-    private void logError(final String logContext, final Exception e, final Integer attempt, final String topic,
+    /**
+     * Create error level log message.
+     * @param logContext the context id
+     * @param msg the log message
+     * @param e the error
+     * @param attempt number of retry attempts
+     * @param topic name of the topic
+     * @param partition topic partition number
+     * @param offset topic offset position
+     */
+    private void logError(final String logContext, final String msg, final Exception e, final Integer attempt, final String topic,
             final Integer partition, final Long offset) {
-        final Map<String, Object> logMap = new HashMap<>();
-
-        logMap.put("attempt", attempt);
-        logMap.put("topic", topic);
-        logMap.put("partition", partition);
-        logMap.put("offset", offset);
-        logger.errorContext(logContext, ExceptionUtils.getRootCauseMessage(e), e, logMap);
+        final Map<String, Object> logMap = createLogMap(msg, attempt, topic, partition, offset);
+        logger.errorContext(logContext, msg, e, logMap);
     }
 
+    /**
+     * Create trace level log message.
+     * @param logContext the context id
+     * @param msg the log message
+     * @param attempt number of retry attempts
+     * @param topic name of the topic
+     * @param partition topic partition number
+     * @param offset topic offset position
+     * @param duration amount of time in milliseconds
+     */
+    private void logTrace(final String logContext, final String msg, final Integer attempt, final String topic,
+                         final Integer partition, final Long offset, final Long duration) {
+        final Map<String, Object> logMap = createLogMap(msg, attempt, topic, partition, offset);
+        Optional.ofNullable(duration).ifPresent(d -> logMap.put("duration", d));
+        logger.traceContext(logContext, msg, logMap);
+    }
+
+    /**
+     * Creates a delay between retry attempts
+     * The delay time is configurable
+     * @param contextId populates the context id for logging
+     */
     @SuppressWarnings("java:S2142")
     private void delayRetry(String contextId) {
         final long retryThrottleSeconds = TimeUnit.MILLISECONDS.toSeconds(getRetryThrottle());
 
-        logger.infoContext(contextId,
+        logger.debugContext(contextId,
                 MessageFormat.format("Pausing thread {0,number,integer} second{0,choice,0#s|1#|1<s} before retrying",
                         retryThrottleSeconds), null);
 
@@ -229,7 +292,7 @@ public class DeltaConsumer {
         final String contextId = delta.getContextId();
 
         try {
-            logInfo(contextId, "Retry for source message", attempt, sourceTopic, partition, sourceOffset);
+            logInfo(contextId, "Adding message to the retry topic", attempt, sourceTopic, partition, sourceOffset);
 
             final int nextAttempt = delta.getAttempt() >= getMaxRetryAttempts() ? 0 : delta.getAttempt() + 1;
             final Message retryMessage = createRetryMessage(delta, nextAttempt);
@@ -239,14 +302,21 @@ public class DeltaConsumer {
                     retryMessage.getOffset());
         }
         catch (ExecutionException | NonRetryableErrorException e) {
-            logError(contextId, e, attempt, sourceTopic, partition, sourceOffset);
+            logError(contextId, NO_RETRY_MESSAGE, e, attempt, sourceTopic, partition, sourceOffset);
         }
         catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            logError(contextId, e, attempt, sourceTopic, partition, sourceOffset);
+            logError(contextId, "Error pausing thread", e, attempt, sourceTopic, partition, sourceOffset);
         }
     }
 
+    /**
+     * Create a message for retry topic with the latest attempt value
+     * @param delta the message schema
+     * @param nextAttempt the retry attempt
+     * @return Message the retry message
+     * @throws NonRetryableErrorException Error is thrown when the message cannot be serialized
+     */
     private Message createRetryMessage(final ChsDelta delta, final Integer nextAttempt)
             throws NonRetryableErrorException {
         final Message retry = new Message();
