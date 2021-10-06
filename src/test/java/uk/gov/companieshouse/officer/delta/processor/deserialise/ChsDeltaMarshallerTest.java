@@ -66,7 +66,7 @@ class ChsDeltaMarshallerTest {
 
     @Test
     @DisplayName("Deserializes messages into ChsDeltas")
-    void deserialize() throws SerializationException {
+    void deserialize() throws SerializationException, NonRetryableErrorException {
         Message message = messageOf(DATA, ATTEMPT, CONTEXT_ID);
 
         ChsDelta delta = testMarshaller.deserialize(message);
@@ -93,7 +93,7 @@ class ChsDeltaMarshallerTest {
 
     @Test
     @DisplayName("Serializes ChsDeltas into byte[] message payload")
-    void serialize() throws SerializationException {
+    void serialize() throws SerializationException, NonRetryableErrorException {
         final ChsDelta delta = deltaOf(DATA, ATTEMPT, CONTEXT_ID);
         final byte[] expected = bytesOf(DATA, ATTEMPT, CONTEXT_ID);
 

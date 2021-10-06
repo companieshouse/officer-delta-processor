@@ -6,9 +6,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.DATETIME_LENGTH;
@@ -36,12 +34,12 @@ import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithDateOf
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithFormerNames;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupation;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithPre1992Appointment;
+import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithResidentialAddress;
 
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Stream;
-import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithResidentialAddress;
 
 @ExtendWith(MockitoExtension.class)
 class OfficerTransformTest {
@@ -117,7 +115,7 @@ class OfficerTransformTest {
 
     @DisplayName("Identification (optional) is not transformed if not present")
     @Test
-    void transformIdentificationWhenNotPresent() {
+    void transformIdentificationWhenNotPresent() throws NonRetryableErrorException {
         final OfficersItem officer = createOfficer(addressAPI, null);
 
         officer.setChangedAt(CHANGED_AT);
@@ -158,7 +156,7 @@ class OfficerTransformTest {
     @DisplayName("Date of Birth is not included when the officers role does not require it")
     @ParameterizedTest
     @EnumSource
-    void onlyRolesWithDobIncludeDateOfBirth(OfficerRole officerRole) {
+    void onlyRolesWithDobIncludeDateOfBirth(OfficerRole officerRole) throws NonRetryableErrorException {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         officer.setDateOfBirth(VALID_DATE);
@@ -178,7 +176,7 @@ class OfficerTransformTest {
     @DisplayName("Transformation doesn't fail when no DOB on role which requires it")
     @ParameterizedTest
     @MethodSource("emptyDobsWithDobRoles")
-    void transformsWhenNoDob(OfficerRole role, String dob) {
+    void transformsWhenNoDob(OfficerRole role, String dob) throws NonRetryableErrorException {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         officer.setDateOfBirth(dob);
@@ -194,7 +192,8 @@ class OfficerTransformTest {
     @DisplayName("Occupation and Nationality is not included when the officers role does not require it")
     @ParameterizedTest
     @EnumSource
-    void onlyRolesWithOccupationIncludeOccupationAndNationality(OfficerRole officerRole) {
+    void onlyRolesWithOccupationIncludeOccupationAndNationality(OfficerRole officerRole)
+            throws NonRetryableErrorException {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         officer.setDateOfBirth(VALID_DATE);
@@ -218,7 +217,8 @@ class OfficerTransformTest {
     @DisplayName("Country of Residence is not included when the officers role does not require it")
     @ParameterizedTest
     @EnumSource
-    void onlyRolesWithCountryOfResidenceIncludeCountryOfResidence(OfficerRole officerRole) {
+    void onlyRolesWithCountryOfResidenceIncludeCountryOfResidence(OfficerRole officerRole)
+            throws NonRetryableErrorException {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         officer.setDateOfBirth(VALID_DATE);
@@ -243,7 +243,8 @@ class OfficerTransformTest {
             "and is Pre1992Appointment")
     @ParameterizedTest
     @EnumSource
-    void onlyRolesWithPre1992AppointmentIncludePre1992Appointment(OfficerRole officerRole) {
+    void onlyRolesWithPre1992AppointmentIncludePre1992Appointment(OfficerRole officerRole)
+            throws NonRetryableErrorException {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         officer.setDateOfBirth(VALID_DATE);
@@ -266,7 +267,7 @@ class OfficerTransformTest {
     @DisplayName("Former Names is not included when the officers role does not require it")
     @ParameterizedTest
     @EnumSource
-    void onlyRolesWithFormerNamesIncludeFormerNames(OfficerRole officerRole) {
+    void onlyRolesWithFormerNamesIncludeFormerNames(OfficerRole officerRole) throws NonRetryableErrorException {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         officer.setDateOfBirth(VALID_DATE);
@@ -289,7 +290,8 @@ class OfficerTransformTest {
     @DisplayName("URA and secure indicator is not included when the officers role does not require it")
     @ParameterizedTest
     @EnumSource
-    void onlyRolesWithResidentialAddressIncludeAddressAndIndicators(OfficerRole officerRole) {
+    void onlyRolesWithResidentialAddressIncludeAddressAndIndicators(OfficerRole officerRole)
+            throws NonRetryableErrorException {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         officer.setDateOfBirth(VALID_DATE);
@@ -312,7 +314,8 @@ class OfficerTransformTest {
 
     @ParameterizedTest(name = "{index}: changedAt={0}, has resignation_date={1}")
     @MethodSource("provideScenarioParams")
-    void verifySuccessfulTransform(final String changedAt, final boolean hasResignationDate) {
+    void verifySuccessfulTransform(final String changedAt, final boolean hasResignationDate)
+            throws NonRetryableErrorException {
         final OfficerAPI officerAPI = testTransform.factory();
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
@@ -351,7 +354,7 @@ class OfficerTransformTest {
 
     @DisplayName("Verify data in the Links object is created as expected")
     @Test
-    void verifyLinksData() {
+    void verifyLinksData() throws NonRetryableErrorException {
         final OfficerAPI officerAPI = testTransform.factory();
         final OfficersItem officer = createOfficer(addressAPI, identification);
 

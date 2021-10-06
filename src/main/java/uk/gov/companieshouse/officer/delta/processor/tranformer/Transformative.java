@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
+import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -33,13 +35,13 @@ public interface Transformative<S, T> {
      */
     T factory();
 
-    default T transform(S source) {
+    default T transform(S source) throws NonRetryableErrorException {
         return transform(source, factory());
     }
 
-    T transform(S source, T output);
+    T transform(S source, T output) throws NonRetryableErrorException;
 
-    default List<T> transform(Collection<S> sources) {
+    default List<T> transform(Collection<S> sources) throws NonRetryableErrorException {
         List<T> list = new ArrayList<>();
         for (S source : sources) {
             T transform = transform(source);
