@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.officer.delta.processor.config;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -24,6 +25,9 @@ import uk.gov.companieshouse.officer.delta.processor.processor.Processor;
  */
 @Configuration
 public class DeltaConsumerConfig {
+    @Value("${kafka.odp.group.name}")
+    public static final String KAFKA_GROUP_NAME = "officer-delta-processor";
+
     /**
      * Create a serializer factory for creating serializers
      *
@@ -65,8 +69,15 @@ public class DeltaConsumerConfig {
      */
     @Bean
     AvroDeserializer<ChsDelta> chsDeltaAvroDeserializer(DeserializerFactory deserializerFactory) {
-        return deserializerFactory
-                .getSpecificRecordDeserializer(ChsDelta.class);
+        return deserializerFactory.getSpecificRecordDeserializer(ChsDelta.class);
+    }
+
+    private ConsumerConfig createConsumerConfig() {
+        ConsumerConfig config = ConsumerConfig.createConfigWithResilience(KAFKA_GROUP_NAME);
+
+        config.setAutoCommit(false);
+
+        return config;
     }
 
     /**
@@ -79,12 +90,26 @@ public class DeltaConsumerConfig {
      */
     @Bean
     @Profile("!test")
-    ConsumerConfig consumerConfig() {
-        ConsumerConfig config = ConsumerConfig.createConfigWithResilience("officer-delta-processor");
+    ConsumerConfig mainConsumerConfig() {
+        return createConsumerConfig();
+    }
 
-        config.setAutoCommit(false);
+    /**
+     * Config used by the ch-kafka library for creating resilient consumers.
+     * It's initialized from environment variables
+     * For testing, where environment variables are not set, a ContextConfiguration is needed to
+     * create this config.
+     *
+     * @return the consumer config initialized from the environment.
+     */
+    @Bean
+    @Profile("!test")
+    ConsumerConfig retryConsumerConfig() {
+        final ConsumerConfig retryConfig = createConsumerConfig();
 
-        return config;
+        retryConfig.setGroupName(String.join("-", retryConfig.getGroupName(), "retry"));
+
+        return retryConfig;
     }
 
     /**
@@ -95,11 +120,35 @@ public class DeltaConsumerConfig {
      * @param consumerConfig the configuration for the consumer
      * @return the consumer group
      */
-    @Bean("MainConsumerGroup")
+    @Bean
     @Profile("!test")
-    CHKafkaResilientConsumerGroup mainKafkaConsumerGroup(ConsumerConfig consumerConfig) {
+    CHKafkaResilientConsumerGroup mainKafkaConsumerGroup(
+            @Qualifier("mainConsumerConfig") ConsumerConfig consumerConfig) {
         return new CHKafkaResilientConsumerGroup(consumerConfig, CHConsumerType.MAIN_CONSUMER);
+    }
 
+    /**
+     * Creates a consumer group with resilience.
+     * Creates its own producer using variables from the environment. For testing a separate
+     * ContextConfiguration is needed as the environment variables are not present to create a producer.
+     *
+     * @param consumerConfig the configuration for the consumer
+     * @return the consumer group
+     */
+    @Bean
+    @Profile("!test")
+    CHKafkaResilientConsumerGroup retryKafkaConsumerGroup(
+            @Qualifier("retryConsumerConfig") ConsumerConfig consumerConfig) {
+        return new CHKafkaResilientConsumerGroup(consumerConfig, CHConsumerType.RETRY_CONSUMER);
+
+    }
+
+    private DeltaConsumer createDeltaConsumer(
+            @Qualifier("retryKafkaConsumerGroup") final CHKafkaResilientConsumerGroup consumerGroup,
+            final ChsDeltaMarshaller marshaller, final Processor<ChsDelta> processor, final Logger logger) {
+        logger.debug(String.format("Creating [%s]...", consumerGroup.getConsumerType()));
+
+        return new DeltaConsumer(consumerGroup, marshaller, processor, logger);
     }
 
     /**
@@ -108,17 +157,35 @@ public class DeltaConsumerConfig {
      * ContextConfiguration is needed as the environment variables are not present to create a producer.
      *
      * @param consumerGroup the {@link CHKafkaResilientConsumerGroup}
-     * @param marshaller  the {@link ChsDeltaMarshaller}
+     * @param marshaller    the {@link ChsDeltaMarshaller}
      * @param processor     the {@link DeltaProcessor}
      * @param logger        the logger
      * @return the DeltaConsumer
      */
-    @Bean("MainConsumer")
+    @Bean
     @Profile("!test")
-    DeltaConsumer mainDeltaConsumer(@Qualifier("MainConsumerGroup") final CHKafkaResilientConsumerGroup consumerGroup,
+    DeltaConsumer mainDeltaConsumer(
+            @Qualifier("mainKafkaConsumerGroup") final CHKafkaResilientConsumerGroup consumerGroup,
             final ChsDeltaMarshaller marshaller, final Processor<ChsDelta> processor, final Logger logger) {
-        logger.debug(String.format("Creating [%s]...", consumerGroup.getConsumerType()));
+        return createDeltaConsumer(consumerGroup, marshaller, processor, logger);
+    }
 
-        return new DeltaConsumer(consumerGroup, marshaller, processor, logger);
+    /**
+     * Creates a DeltaConsumer for the RETRY topic.
+     * Creates its own kafka producer using variables from the environment. For testing a separate
+     * ContextConfiguration is needed as the environment variables are not present to create a producer.
+     *
+     * @param consumerGroup the {@link CHKafkaResilientConsumerGroup}
+     * @param marshaller    the {@link ChsDeltaMarshaller}
+     * @param processor     the {@link DeltaProcessor}
+     * @param logger        the logger
+     * @return the DeltaConsumer
+     */
+    @Bean
+    @Profile("!test")
+    DeltaConsumer retryDeltaConsumer(
+            @Qualifier("retryKafkaConsumerGroup") final CHKafkaResilientConsumerGroup consumerGroup,
+            final ChsDeltaMarshaller marshaller, final Processor<ChsDelta> processor, final Logger logger) {
+        return createDeltaConsumer(consumerGroup, marshaller, processor, logger);
     }
 }

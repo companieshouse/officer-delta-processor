@@ -10,15 +10,18 @@ import uk.gov.companieshouse.kafka.message.Message;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.officer.delta.processor.deserialise.ChsDeltaMarshaller;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
+import uk.gov.companieshouse.officer.delta.processor.exception.RetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.processor.Processor;
 
 import javax.annotation.PreDestroy;
+import java.text.MessageFormat;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class DeltaConsumer {
     private final CHKafkaResilientConsumerGroup consumerGroup;
@@ -30,7 +33,7 @@ public class DeltaConsumer {
      * Deque of messages waiting to be processed.
      * Faster performance of remove first element than ArrayList
      */
-    private Deque<Message> messages = new ArrayDeque<>();
+    private final Deque<Message> messages = new ArrayDeque<>();
 
     /**
      * Initialise the consumer by connecting to the consumer group
@@ -56,19 +59,19 @@ public class DeltaConsumer {
     }
 
     /**
-     * Commits the offset into Kafka for the message.
-     *
-     * @param message the message
+     * Commits the offset into Kafka.
      */
-    public void commitOffset(Message message) {
+    public void commitOffset() {
         consumerGroup.commit();
     }
 
     /**
      * Retrieve an optional message from the message list.<br>
-     * Return the next message from the cache; poll the topic for new
-     * messages if the cache is empty.
-     * If no messages exist, return Optional.empty().
+     * Return the next message from the cache:<br>
+     * <ul>
+     *     <li>if the cache is empty, poll the topic for new messages, store in the cache.</li>
+     *     <li>if no messages exist, return Optional.empty().</li>
+     * </ul>
      *
      * @return message
      */
@@ -121,8 +124,11 @@ public class DeltaConsumer {
                 delta = marshaller.deserialize(deltaMessage);
                 stopWatch.stop();
 
-                attempt = delta.getAttempt();
                 contextId = delta.getContextId();
+                if (CHConsumerType.RETRY_CONSUMER == consumerGroup.getConsumerType()) {
+                    delayRetry(contextId);
+                }
+                attempt = delta.getAttempt();
                 logInfo(contextId,
                         String.format("%s (ms): %d", stopWatch.getLastTaskName(), stopWatch.getLastTaskTimeMillis()),
                         attempt, topic, partition, offset, stopWatch.getLastTaskTimeMillis());
@@ -134,25 +140,26 @@ public class DeltaConsumer {
                 logInfo(contextId,
                         String.format("%s (ms): %d", stopWatch.getLastTaskName(), stopWatch.getLastTaskTimeMillis()),
                         attempt, topic, partition, offset, stopWatch.getLastTaskTimeMillis());
-                logInfo(contextId, String.format("Total process (ms): %d", stopWatch.getTotalTimeMillis()), attempt,
-                        topic, partition, offset, stopWatch.getLastTaskTimeMillis());
             }
-            catch (NonRetryableErrorException e) {
-                contextId = Optional.ofNullable(delta).map(ChsDelta::getContextId).orElse(null);
+            catch (RetryableErrorException e) {
+                contextId = delta.getContextId();
                 logError(contextId, e, attempt, topic, partition, offset);
+                queueRetry(topic, partition, offset, attempt, delta);
             }
             catch (Exception e) {
-                // includes RetryableErrorException; and assume any other kind of exception is retryable
+                // includes NonRetryableErrorException; assume any other kind of exception is non-retryable
                 contextId = Optional.ofNullable(delta).map(ChsDelta::getContextId).orElse(null);
                 logError(contextId, e, attempt, topic, partition, offset);
-                if (delta != null) {
-                    queueRetry(topic, partition, offset, attempt, delta);
-                }
-            }
+           }
             finally {
                 contextId = Optional.ofNullable(delta).map(ChsDelta::getContextId).orElse(null);
+                if (stopWatch.isRunning()) {
+                    stopWatch.stop();
+                }
+                logInfo(contextId, String.format("Total process (ms): %d", stopWatch.getTotalTimeMillis()), attempt,
+                        topic, partition, offset, stopWatch.getLastTaskTimeMillis());
                 logInfo(contextId, "Commit message offset", attempt, topic, partition, offset);
-                commitOffset(deltaMessage);
+                commitOffset();
             }
         });
 
@@ -186,6 +193,23 @@ public class DeltaConsumer {
         logger.errorContext(logContext, ExceptionUtils.getRootCauseMessage(e), e, logMap);
     }
 
+    @SuppressWarnings("java:S2142")
+    private void delayRetry(String contextId) {
+        final long retryThrottleSeconds = TimeUnit.MILLISECONDS.toSeconds(getRetryThrottle());
+
+        logger.infoContext(contextId,
+                MessageFormat.format("Pausing thread {0,number,integer} second{0,choice,0#s|1#|1<s} before retrying",
+                        retryThrottleSeconds), null);
+
+        try {
+            TimeUnit.SECONDS.sleep(retryThrottleSeconds);
+        }
+        catch (InterruptedException e) {
+            // We want to continue processing even if somehow our delay was cut short, so don't re-interrupt the thread
+            logger.errorContext(contextId, "Error pausing thread", e, null);
+        }
+    }
+
     /**
      * Send the message to the appropriate topic because of a transient error:
      * - the retry topic if retries < max retries
@@ -211,7 +235,7 @@ public class DeltaConsumer {
             logInfo(contextId, "Created retry message", nextAttempt, retryMessage.getTopic(), partition,
                     retryMessage.getOffset());
         }
-        catch (ExecutionException e) {
+        catch (ExecutionException | NonRetryableErrorException e) {
             logError(contextId, e, attempt, sourceTopic, partition, sourceOffset);
         }
         catch (InterruptedException e) {
@@ -220,7 +244,8 @@ public class DeltaConsumer {
         }
     }
 
-    private Message createRetryMessage(final ChsDelta delta, final Integer nextAttempt) {
+    private Message createRetryMessage(final ChsDelta delta, final Integer nextAttempt)
+            throws NonRetryableErrorException {
         final Message retry = new Message();
 
         retry.setValue(marshaller.serialize(new ChsDelta(delta.getData(), nextAttempt, delta.getContextId())));

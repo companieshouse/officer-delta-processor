@@ -25,7 +25,6 @@ import uk.gov.companieshouse.officer.delta.processor.processor.Processor;
 
 @ExtendWith(MockitoExtension.class)
 class DeltaConsumerConfigTest {
-
     DeltaConsumerConfig config;
 
     @Mock
@@ -64,24 +63,43 @@ class DeltaConsumerConfigTest {
     }
 
     @Test
-    void consumerConfig() throws Exception {
-        ConsumerConfig consumerConfig = withKafkaEnvironment().execute(() -> config.consumerConfig());
+    void mainConsumerConfig() throws Exception {
+        ConsumerConfig consumerConfig = withKafkaEnvironment().execute(() -> config.mainConsumerConfig());
 
         assertThat(consumerConfig, isA(ConsumerConfig.class));
+        assertThat(consumerConfig.getGroupName(), is("group"));
+    }
+
+    @Test
+    void retryConsumerConfig() throws Exception {
+        ConsumerConfig consumerConfig = withKafkaEnvironment().execute(() -> config.retryConsumerConfig());
+
+        assertThat(consumerConfig, isA(ConsumerConfig.class));
+        assertThat(consumerConfig.getGroupName(), is("group-retry"));
     }
 
     @Test
     void mainKafkaConsumerGroup() throws Exception {
-        CHKafkaResilientConsumerGroup chKafkaConsumerGroup =
-                withKafkaEnvironment().execute(() -> config.mainKafkaConsumerGroup(config.consumerConfig()));
+        CHKafkaResilientConsumerGroup mainConsumerGroup =
+                withKafkaEnvironment().execute(() -> config.mainKafkaConsumerGroup(config.mainConsumerConfig()));
 
-        assertThat(chKafkaConsumerGroup, isA(CHKafkaResilientConsumerGroup.class));
+        assertThat(mainConsumerGroup, isA(CHKafkaResilientConsumerGroup.class));
+        assertThat(mainConsumerGroup.getConsumerType(), is(CHConsumerType.MAIN_CONSUMER));
+    }
+
+    @Test
+    void retryKafkaConsumerGroup() throws Exception {
+        CHKafkaResilientConsumerGroup retryConsumerGroup =
+                withKafkaEnvironment().execute(() -> config.retryKafkaConsumerGroup(config.retryConsumerConfig()));
+
+        assertThat(retryConsumerGroup, isA(CHKafkaResilientConsumerGroup.class));
+        assertThat(retryConsumerGroup.getConsumerType(), is(CHConsumerType.RETRY_CONSUMER));
     }
 
     @Test
     void mainDeltaConsumer() throws Exception {
         CHKafkaResilientConsumerGroup chKafkaConsumerGroup =
-                withKafkaEnvironment().execute(() -> config.mainKafkaConsumerGroup(config.consumerConfig()));
+                withKafkaEnvironment().execute(() -> config.mainKafkaConsumerGroup(config.mainConsumerConfig()));
         final AvroDeserializer<ChsDelta> deserializer = config.chsDeltaAvroDeserializer(config.deserializerFactory());
         final AvroSerializer<ChsDelta> serializer = config.chsDeltaAvroSerializer(config.serializerFactory());
         final ChsDeltaMarshaller marshaller = new ChsDeltaMarshaller(deserializer, serializer);
@@ -91,5 +109,20 @@ class DeltaConsumerConfigTest {
 
         assertThat(mainDeltaConsumer, isA(DeltaConsumer.class));
         assertThat(mainDeltaConsumer.getConsumerType(), is(CHConsumerType.MAIN_CONSUMER));
+    }
+
+    @Test
+    void retryDeltaConsumer() throws Exception {
+        CHKafkaResilientConsumerGroup retryConsumerGroup =
+                withKafkaEnvironment().execute(() -> config.retryKafkaConsumerGroup(config.retryConsumerConfig()));
+        final AvroDeserializer<ChsDelta> deserializer = config.chsDeltaAvroDeserializer(config.deserializerFactory());
+        final AvroSerializer<ChsDelta> serializer = config.chsDeltaAvroSerializer(config.serializerFactory());
+        final ChsDeltaMarshaller marshaller = new ChsDeltaMarshaller(deserializer, serializer);
+
+        final DeltaConsumer retryDeltaConsumer =
+                config.retryDeltaConsumer(retryConsumerGroup, marshaller, processor, logger);
+
+        assertThat(retryDeltaConsumer, isA(DeltaConsumer.class));
+        assertThat(retryDeltaConsumer.getConsumerType(), is(CHConsumerType.RETRY_CONSUMER));
     }
 }

@@ -65,11 +65,11 @@ public class Identification {
         this.nonEeaApi = nonEeaApi;
     }
 
-    public IdentificationAPI getuKLimitedCompany() {
+    public IdentificationAPI getUKLimitedCompany() {
         return uKLimitedCompany;
     }
 
-    public void setuKLimitedCompany(IdentificationAPI uKLimitedCompany) {
+    public void setUKLimitedCompany(IdentificationAPI uKLimitedCompany) {
         this.uKLimitedCompany = uKLimitedCompany;
     }
 
@@ -86,12 +86,12 @@ public class Identification {
                 && Objects.equals(getOtherCorporateBodyOrFirm(),
                 that.getOtherCorporateBodyOrFirm())
                 && Objects.equals(getNonEeaApi(), that.getNonEeaApi())
-                && Objects.equals(getuKLimitedCompany(), that.getuKLimitedCompany());
+                && Objects.equals(getUKLimitedCompany(), that.getUKLimitedCompany());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getEea(), getOtherCorporateBodyOrFirm(), getNonEeaApi(), getuKLimitedCompany());
+        return Objects.hash(getEea(), getOtherCorporateBodyOrFirm(), getNonEeaApi(), getUKLimitedCompany());
     }
 
     @Override

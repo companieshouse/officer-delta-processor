@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
 import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
+import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,7 +37,7 @@ class AppointmentTransformTest {
     }
 
     @Test
-    void transformSingle() {
+    void transformSingle() throws NonRetryableErrorException {
         final OfficersItem item = createOfficer();
         final AppointmentAPI appointmentAPI = testTransform.factory();
         appointmentAPI.setId("internalId");

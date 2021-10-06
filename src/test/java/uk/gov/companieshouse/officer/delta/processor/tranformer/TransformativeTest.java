@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -55,12 +56,12 @@ class TransformativeTest {
     }
 
     @Test
-    void testTransformStringDefault() {
+    void testTransformStringDefault() throws NonRetryableErrorException {
         assertThat(testTransformative.transform(TZ_PHOENIX), is(ZoneId.of(TZ_PHOENIX)));
     }
 
     @Test
-    void testTransformStringCollection() {
+    void testTransformStringCollection() throws NonRetryableErrorException {
         final List<ZoneId> result = testTransformative.transform(Arrays.asList(TZ_PHOENIX, TZ_BAGHDAD, TZ_TROLL));
 
         assertThat(result, contains(ZoneId.of(TZ_PHOENIX), ZoneId.of(TZ_BAGHDAD), ZoneId.of(TZ_TROLL)));
