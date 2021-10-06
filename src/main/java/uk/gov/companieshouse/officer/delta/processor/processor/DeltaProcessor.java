@@ -6,6 +6,7 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
 import uk.gov.companieshouse.delta.ChsDelta;
@@ -47,25 +48,16 @@ public class DeltaProcessor implements Processor<ChsDelta> {
             final List<OfficersItem> officersOfficers = officers.getOfficers();
 
             for (int i = 0; i < officersOfficers.size(); i++) {
+                logger.info(String.format("Process data for officer [%d]", i));
+
                 final OfficersItem officer = officersOfficers.get(i);
                 AppointmentAPI appointmentAPI = transformer.transform(officer);
                 appointmentAPI.setDeltaAt(officers.getDeltaAt());
 
                 final ApiResponse<Void> response =
                         apiClientService.putAppointment(logContext, officer.getCompanyNumber(), appointmentAPI);
-                final HttpStatus httpStatus = HttpStatus.valueOf(response.getStatusCode());
-                final String msg = String.format("Failed to send data for officer[%d]", i);
 
-                if (HttpStatus.BAD_REQUEST == httpStatus) {
-                    // 400 BAD REQUEST status is not retryable
-                    logger.errorContext(logContext, msg, null, null);
-                    throw new NonRetryableErrorException(msg, null);
-                }
-                else if (httpStatus.is4xxClientError() || httpStatus.is5xxServerError()) {
-                    // any other client or server status is retryable
-                    logger.errorContext(logContext, msg + ", retry", null, null);
-                    throw new RetryableErrorException(msg, null);
-                }
+                logger.debugContext(logContext, "Response status:" + response.getStatusCode(), null);
             }
         }
         catch (JsonProcessingException e) {
@@ -78,6 +70,22 @@ public class DeltaProcessor implements Processor<ChsDelta> {
                     "Unable to read JSON from delta: " + ExceptionUtils.getRootCauseMessage(cause), cause, null);
 
             throw new NonRetryableErrorException("Unable to JSON parse CHSDelta", cause);
+        }
+        catch (ResponseStatusException e) {
+            final HttpStatus httpStatus = e.getStatus();
+            final String msg = "Failed to send data";
+
+            if (HttpStatus.BAD_REQUEST == httpStatus) {
+                // 400 BAD REQUEST status is not retryable
+                logger.errorContext(logContext, msg, null, null);
+                throw new NonRetryableErrorException(msg, null);
+            }
+            else if (httpStatus.is4xxClientError() || httpStatus.is5xxServerError()) {
+                // any other client or server status is retryable
+                logger.errorContext(logContext, msg + ", retry", null, null);
+                throw new RetryableErrorException(msg, null);
+            }
+
         }
         catch (IllegalArgumentException e) {
             // Workaround for Docker router. When service is unavailable: "IllegalArgumentException: expected numeric

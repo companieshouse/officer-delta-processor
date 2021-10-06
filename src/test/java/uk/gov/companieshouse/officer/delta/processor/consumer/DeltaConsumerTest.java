@@ -305,6 +305,7 @@ class DeltaConsumerTest {
     void consumeMessageWhenProcessingTransientError(final int attempt, final int nextAttempt)
             throws ExecutionException, InterruptedException, NonRetryableErrorException, RetryableErrorException {
         when(consumerGroup.getConfig().getMaxRetries()).thenReturn(EXPECTED.intValue());
+        when(consumerGroup.getConfig().retryTopic()).thenReturn("retry");
         when(consumerGroup.consume()).thenReturn(new ArrayList<>(messageList));
 
         final Message nextMessage = messageList.get(0);
