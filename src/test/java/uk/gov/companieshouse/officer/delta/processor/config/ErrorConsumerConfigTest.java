@@ -8,14 +8,8 @@ import static uk.gov.companieshouse.officer.delta.processor.Util.withKafkaEnviro
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.kafka.consumer.ConsumerConfig;
-import uk.gov.companieshouse.kafka.deserialization.AvroDeserializer;
-import uk.gov.companieshouse.kafka.serialization.AvroSerializer;
-import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.officer.delta.processor.processor.Processor;
 
 @ExtendWith(MockitoExtension.class)
 class ErrorConsumerConfigTest {
