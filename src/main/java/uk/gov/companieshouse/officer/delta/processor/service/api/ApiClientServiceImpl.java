@@ -11,6 +11,9 @@ import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
 import uk.gov.companieshouse.logging.Logger;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Service that sends REST requests via private SDK.
  */
@@ -41,8 +44,8 @@ public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements Ap
     }
 
     @Override
-    public InternalApiClient getApiClient() {
-        InternalApiClient internalApiClient = new InternalApiClient(getHttpClient());
+    public InternalApiClient getApiClient(String contextId) {
+        InternalApiClient internalApiClient = new InternalApiClient(getHttpClient(contextId));
         internalApiClient.setBasePath(apiUrl);
         internalApiClient.setBasePaymentsPath(paymentsApiUrl);
         internalApiClient.setInternalBasePath(internalApiUrl);
@@ -50,10 +53,9 @@ public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements Ap
         return internalApiClient;
     }
 
-    private HttpClient getHttpClient() {
+    private HttpClient getHttpClient(String contextId) {
         ApiKeyHttpClient httpClient = new ApiKeyHttpClient(chsApiKey);
-        // TODO: find out what the request id is supposed to be.
-        httpClient.setRequestId("Test request id");
+        httpClient.setRequestId(contextId);
         return httpClient;
     }
 
@@ -62,11 +64,20 @@ public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements Ap
         final String uri =
                 String.format("%s/company/%s/appointments/%s", ROOT_URI, companyNumber, appointment.getAppointmentId());
 
-        logger.debugContext(logContext, String.format("PUT %s", uri), null);
+        Map<String,Object> logMap = createLogMap(companyNumber,"PUT", uri);
+        logger.infoContext(logContext, String.format("PUT %s", uri), logMap);
 
         return executeOp(logContext, "putCompanyAppointment", uri,
-                getApiClient().privateDeltaCompanyAppointmentResourceHandler()
+                getApiClient(logContext).privateDeltaCompanyAppointmentResourceHandler()
                         .putAppointment()
                         .upsert(uri, appointment));
+    }
+
+    private Map<String,Object> createLogMap(String companyNumber, String method, String path){
+        final Map<String, Object> logMap = new HashMap<>();
+        logMap.put("company_number", companyNumber);
+        logMap.put("method",method);
+        logMap.put("path", path);
+        return logMap;
     }
 }

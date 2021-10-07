@@ -180,7 +180,7 @@ class DeltaConsumerTest {
         inOrder.verify(consumerGroup).connect();
         inOrder.verify(marshaller).deserialize(nextMessage);
         if (CHConsumerType.RETRY_CONSUMER == consumerType) {
-            inOrder.verify(logger).infoContext(eq(CONTEXT_ID), startsWith("Pausing thread"), isNull());
+            inOrder.verify(logger).debugContext(eq(CONTEXT_ID), startsWith("Pausing thread"), isNull());
         }
         inOrder.verify(processor).process(delta);
         inOrder.verify(consumerGroup).commit();
@@ -224,7 +224,7 @@ class DeltaConsumerTest {
 
         inOrder.verify(consumerGroup).connect();
         inOrder.verify(marshaller).deserialize(nextMessage);
-        inOrder.verify(logger).infoContext(eq(CONTEXT_ID), startsWith("Pausing thread"), isNull());
+        inOrder.verify(logger).debugContext(eq(CONTEXT_ID), startsWith("Pausing thread"), isNull());
         inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), isA(InterruptedException.class), isNull());
         inOrder.verify(processor).process(delta);
         inOrder.verify(consumerGroup).commit();

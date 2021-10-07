@@ -32,22 +32,23 @@ public abstract class BaseApiClientServiceImpl {
      */
     public <T> ApiResponse<T> executeOp(final String logContext, final String operationName, final String uri,
             final Executor<ApiResponse<T>> executor) {
-        final Map<String, Object> debugMap = new HashMap<>();
 
-        debugMap.put("operationName", operationName);
-        debugMap.put("requestUri", uri);
+        final Map<String, Object> logMap = new HashMap<>();
+        logMap.put("operation_name", operationName);
+        logMap.put("path", uri);
+
         try {
-            logger.debugContext(logContext, "SDK request", debugMap);
 
             return executor.execute();
 
         }
         catch (URIValidationException ex) {
-            logger.errorContext(logContext, "SDK exception", ex, debugMap);
+            logger.errorContext(logContext, "SDK exception", ex, logMap);
 
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
         } catch (ApiErrorResponseException ex) {
-            logger.errorContext(logContext, "SDK exception", ex, debugMap);
+            logMap.put("status", HttpStatus.NOT_FOUND.toString());
+            logger.errorContext(logContext, "SDK exception", ex, logMap);
 
             throw new ResponseStatusException(HttpStatus.valueOf(ex.getStatusCode()),
                     ex.getStatusMessage(), ex);
