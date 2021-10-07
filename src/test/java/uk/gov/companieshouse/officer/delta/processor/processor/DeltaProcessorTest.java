@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
@@ -145,7 +146,7 @@ class DeltaProcessorTest {
         final InOrder inOrder = inOrder(logger, apiClientService);
 
         inOrder.verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
-        inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), isNull(), isNull());
+        inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), isNull(), isNotNull());
         inOrder.verifyNoMoreInteractions();
 
     }
@@ -163,7 +164,6 @@ class DeltaProcessorTest {
         final InOrder inOrder = inOrder(logger, apiClientService);
 
         inOrder.verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
-        inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), any(IllegalArgumentException.class), isNull());
         inOrder.verifyNoMoreInteractions();
 
     }
@@ -186,7 +186,7 @@ class DeltaProcessorTest {
         final InOrder inOrder = inOrder(logger, apiClientService);
 
         inOrder.verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
-        inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), isNull(), isNull());
+        inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), isNull(), isNotNull());
         inOrder.verifyNoMoreInteractions();
 
     }

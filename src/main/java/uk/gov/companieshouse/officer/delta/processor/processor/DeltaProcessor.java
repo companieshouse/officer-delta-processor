@@ -17,7 +17,9 @@ import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientService;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.AppointmentTransform;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 @Component
@@ -56,14 +58,18 @@ public class DeltaProcessor implements Processor<ChsDelta> {
                 final HttpStatus httpStatus = HttpStatus.valueOf(response.getStatusCode());
                 final String msg = String.format("Failed to send data for officer[%d]", i);
 
+                final Map<String, Object> logMap = new HashMap<>();
+                logMap.put("company_number", officer.getCompanyNumber());
+                logMap.put("status", httpStatus.toString());
+
                 if (HttpStatus.BAD_REQUEST == httpStatus) {
                     // 400 BAD REQUEST status is not retryable
-                    logger.errorContext(logContext, msg, null, null);
+                    logger.errorContext(logContext, msg, null, logMap);
                     throw new NonRetryableErrorException(msg, null);
                 }
                 else if (httpStatus.is4xxClientError() || httpStatus.is5xxServerError()) {
                     // any other client or server status is retryable
-                    logger.errorContext(logContext, msg + ", retry", null, null);
+                    logger.errorContext(logContext, msg + ", retry", null, logMap);
                     throw new RetryableErrorException(msg, null);
                 }
             }
@@ -83,8 +89,6 @@ public class DeltaProcessor implements Processor<ChsDelta> {
             // Workaround for Docker router. When service is unavailable: "IllegalArgumentException: expected numeric
             // type but got class uk.gov.companieshouse.api.error.ApiErrorResponse" is thrown when the SDK parses
             // ApiErrorResponseException.
-            logger.errorContext(logContext, "Failed to send data for officer: " + ExceptionUtils.getRootCauseMessage(e),
-                    e, null);
             throw new RetryableErrorException("Failed to send data for officer, retry", e);
         }
     }
