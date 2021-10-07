@@ -43,37 +43,26 @@ public class DeltaProcessor implements Processor<ChsDelta> {
     public void process(ChsDelta delta) throws RetryableErrorException, NonRetryableErrorException {
         ObjectMapper objectMapper = new ObjectMapper();
         final String logContext = delta.getContextId();
+        final Map<String, Object> logMap = new HashMap<>();
 
         try {
             Officers officers = objectMapper.readValue(delta.getData(), Officers.class);
-
             final List<OfficersItem> officersOfficers = officers.getOfficers();
 
             for (int i = 0; i < officersOfficers.size(); i++) {
-//                logger.info(String.format("Process data for officer [%d]", i));
-
                 final OfficersItem officer = officersOfficers.get(i);
+
+                logMap.put("company_number", officer.getCompanyNumber());
+                logger.infoContext(logContext, String.format("Process data for officer [%d]", i), logMap);
+
                 AppointmentAPI appointmentAPI = transformer.transform(officer);
                 appointmentAPI.setDeltaAt(officers.getDeltaAt());
 
                 final ApiResponse<Void> response =
                         apiClientService.putAppointment(logContext, officer.getCompanyNumber(), appointmentAPI);
 
-                logger.debugContext(logContext, "Response status:" + response.getStatusCode(), null);
-//                final Map<String, Object> logMap = new HashMap<>();
-//                logMap.put("company_number", officer.getCompanyNumber());
-//                logMap.put("status", httpStatus.toString());
-//
-//                if (HttpStatus.BAD_REQUEST == httpStatus) {
-//                    // 400 BAD REQUEST status is not retryable
-//                    logger.errorContext(logContext, msg, null, logMap);
-//                    throw new NonRetryableErrorException(msg, null);
-//                }
-//                else if (httpStatus.is4xxClientError() || httpStatus.is5xxServerError()) {
-//                    // any other client or server status is retryable
-//                    logger.errorContext(logContext, msg + ", retry", null, logMap);
-//                    throw new RetryableErrorException(msg, null);
-//                }
+                handleResponse(null, HttpStatus.valueOf(response.getStatusCode()), logContext,
+                        "Response from sending officer data", logMap);
             }
         }
         catch (JsonProcessingException e) {
@@ -88,26 +77,32 @@ public class DeltaProcessor implements Processor<ChsDelta> {
             throw new NonRetryableErrorException("Unable to JSON parse CHSDelta", cause);
         }
         catch (ResponseStatusException e) {
-            final HttpStatus httpStatus = e.getStatus();
-            final String msg = "Failed to send data";
-
-            if (HttpStatus.BAD_REQUEST == httpStatus) {
-                // 400 BAD REQUEST status is not retryable
-                logger.errorContext(logContext, msg, null, null);
-                throw new NonRetryableErrorException(msg, null);
-            }
-            else if (httpStatus.is4xxClientError() || httpStatus.is5xxServerError()) {
-                // any other client or server status is retryable
-                logger.errorContext(logContext, msg + ", retry", null, null);
-                throw new RetryableErrorException(msg, null);
-            }
-
+            handleResponse(e, e.getStatus(), logContext, "Sending officer data failed", logMap);
         }
         catch (IllegalArgumentException e) {
             // Workaround for Docker router. When service is unavailable: "IllegalArgumentException: expected numeric
             // type but got class uk.gov.companieshouse.api.error.ApiErrorResponse" is thrown when the SDK parses
             // ApiErrorResponseException.
             throw new RetryableErrorException("Failed to send data for officer, retry", e);
+        }
+    }
+
+    private void handleResponse(final ResponseStatusException ex, final HttpStatus httpStatus, final String logContext,
+            final String msg, final Map<String, Object> logMap)
+            throws NonRetryableErrorException, RetryableErrorException {
+        logMap.put("status", httpStatus.toString());
+        if (HttpStatus.BAD_REQUEST == httpStatus) {
+            // 400 BAD REQUEST status is not retryable
+            logger.errorContext(logContext, msg, null, logMap);
+            throw new NonRetryableErrorException(msg, ex);
+        }
+        else if (httpStatus.is4xxClientError() || httpStatus.is5xxServerError()) {
+            // any other client or server status is retryable
+            logger.errorContext(logContext, msg + ", retry", null, logMap);
+            throw new RetryableErrorException(msg, ex);
+        }
+        else {
+            logger.debugContext(logContext, msg, logMap);
         }
     }
 }

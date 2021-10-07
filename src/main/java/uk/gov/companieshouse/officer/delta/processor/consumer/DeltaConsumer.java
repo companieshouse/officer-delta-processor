@@ -294,7 +294,8 @@ public class DeltaConsumer {
         final String contextId = delta.getContextId();
 
         try {
-            logInfo(contextId, "Next attempt for source message", attempt, sourceTopic, partition, sourceOffset);
+            logInfo(contextId, "Reprocess message", attempt,
+                    sourceTopic, partition, sourceOffset);
 
             final int nextAttempt = delta.getAttempt() >= getMaxRetryAttempts() ? 0 : delta.getAttempt() + 1;
             final Message retryMessage = createRetryMessage(delta, nextAttempt);
