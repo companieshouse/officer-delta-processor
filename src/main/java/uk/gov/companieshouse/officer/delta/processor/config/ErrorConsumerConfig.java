@@ -1,8 +1,9 @@
 package uk.gov.companieshouse.officer.delta.processor.config;
 
+import static uk.gov.companieshouse.officer.delta.processor.config.DeltaConsumerConfig.KAFKA_GROUP_NAME;
+
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -22,10 +23,8 @@ import uk.gov.companieshouse.officer.delta.processor.processor.Processor;
  * Requires configuration beans from KafkaSerializerConfig
  */
 @Configuration
-@ConditionalOnExpression("not '${kafka.error.consumer.mode:false}'.equals('true')") // undefined or not 'true'
-public class DeltaConsumerConfig {
-    @Value("${kafka.odp.group.name}")
-    public static final String KAFKA_GROUP_NAME = "officer-delta-processor";
+@ConditionalOnProperty(value = "kafka.error.consumer.mode", havingValue = "true")
+public class ErrorConsumerConfig {
 
     /**
      * Config used by the ch-kafka library for creating resilient consumers.
@@ -37,29 +36,11 @@ public class DeltaConsumerConfig {
      */
     @Bean
     @Profile("!test")
-    ConsumerConfig mainConsumerConfig() {
+    ConsumerConfig errorTopicConsumerConfig() {
         ConsumerConfig config = ConsumerConfig.createConfigWithResilience(KAFKA_GROUP_NAME);
 
         config.setAutoCommit(false);
-
-        return config;
-    }
-
-    /**
-     * Config used by the ch-kafka library for creating resilient consumers.
-     * It's initialized from environment variables
-     * For testing, where environment variables are not set, a ContextConfiguration is needed to
-     * create this config.
-     *
-     * @return the consumer config initialized from the environment.
-     */
-    @Bean
-    @Profile("!test")
-    ConsumerConfig retryConsumerConfig() {
-        ConsumerConfig config = ConsumerConfig.createConfigWithResilience(KAFKA_GROUP_NAME);
-
-        config.setAutoCommit(false);
-        config.setGroupName(String.join("-", config.getGroupName(), "retry"));
+        config.setGroupName(String.join("-", config.getGroupName(), "error"));
 
         return config;
     }
@@ -74,25 +55,9 @@ public class DeltaConsumerConfig {
      */
     @Bean
     @Profile("!test")
-    CHKafkaResilientConsumerGroup mainKafkaConsumerGroup(
-            @Qualifier("mainConsumerConfig") ConsumerConfig consumerConfig) {
-        return new CHKafkaResilientConsumerGroup(consumerConfig, CHConsumerType.MAIN_CONSUMER);
-    }
-
-    /**
-     * Creates a consumer group with resilience.
-     * Creates its own producer using variables from the environment. For testing a separate
-     * ContextConfiguration is needed as the environment variables are not present to create a producer.
-     *
-     * @param consumerConfig the configuration for the consumer
-     * @return the consumer group
-     */
-    @Bean
-    @Profile("!test")
-    CHKafkaResilientConsumerGroup retryKafkaConsumerGroup(
-            @Qualifier("retryConsumerConfig") ConsumerConfig consumerConfig) {
-        return new CHKafkaResilientConsumerGroup(consumerConfig, CHConsumerType.RETRY_CONSUMER);
-
+    CHKafkaResilientConsumerGroup errorKafkaConsumerGroup(
+            @Qualifier("errorTopicConsumerConfig") ConsumerConfig consumerConfig) {
+        return new CHKafkaResilientConsumerGroup(consumerConfig, CHConsumerType.ERROR_CONSUMER);
     }
 
     private DeltaConsumer createDeltaConsumer(final CHKafkaResilientConsumerGroup consumerGroup,
@@ -103,7 +68,7 @@ public class DeltaConsumerConfig {
     }
 
     /**
-     * Creates a DeltaConsumer for the MAIN topic.
+     * Creates a DeltaConsumer for the ERROR topic.
      * Creates its own kafka producer using variables from the environment. For testing a separate
      * ContextConfiguration is needed as the environment variables are not present to create a producer.
      *
@@ -115,27 +80,8 @@ public class DeltaConsumerConfig {
      */
     @Bean
     @Profile("!test")
-    DeltaConsumer mainDeltaConsumer(
-            @Qualifier("mainKafkaConsumerGroup") final CHKafkaResilientConsumerGroup consumerGroup,
-            final ChsDeltaMarshaller marshaller, final Processor<ChsDelta> processor, final Logger logger) {
-        return createDeltaConsumer(consumerGroup, marshaller, processor, logger);
-    }
-
-    /**
-     * Creates a DeltaConsumer for the RETRY topic.
-     * Creates its own kafka producer using variables from the environment. For testing a separate
-     * ContextConfiguration is needed as the environment variables are not present to create a producer.
-     *
-     * @param consumerGroup the {@link CHKafkaResilientConsumerGroup}
-     * @param marshaller    the {@link ChsDeltaMarshaller}
-     * @param processor     the {@link DeltaProcessor}
-     * @param logger        the logger
-     * @return the DeltaConsumer
-     */
-    @Bean
-    @Profile("!test")
-    DeltaConsumer retryDeltaConsumer(
-            @Qualifier("retryKafkaConsumerGroup") final CHKafkaResilientConsumerGroup consumerGroup,
+    DeltaConsumer errorDeltaConsumer(
+            @Qualifier("errorKafkaConsumerGroup") final CHKafkaResilientConsumerGroup consumerGroup,
             final ChsDeltaMarshaller marshaller, final Processor<ChsDelta> processor, final Logger logger) {
         return createDeltaConsumer(consumerGroup, marshaller, processor, logger);
     }
