@@ -28,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
 import uk.gov.companieshouse.delta.ChsDelta;
@@ -134,12 +135,12 @@ class DeltaProcessorTest {
 
     @ParameterizedTest
     @MethodSource("provideRetryableStatuses")
-    void processWhenClientServiceServerError(final HttpStatus serverErrorStatus) {
+    void processWhenResponseStatusRetryable(final HttpStatus responseStatus) {
         final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID);
         final String expectedNumber = expectedAppointment.getData().getCompanyNumber();
-        final ApiResponse<Void> response = new ApiResponse<>(serverErrorStatus.value(), null, null);
 
-        when(apiClientService.putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment)).thenReturn(response);
+        when(apiClientService.putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment)).thenThrow(
+                new ResponseStatusException(responseStatus));
 
         assertThrows(RetryableErrorException.class, () -> testProcessor.process(delta));
 
@@ -174,12 +175,12 @@ class DeltaProcessorTest {
 
     @ParameterizedTest
     @MethodSource("provideNonRetryableStatuses")
-    void processWhenClientServiceClientError(final HttpStatus serverErrorStatus) {
+    void processWhenResponseStatusNonRetryable(final HttpStatus responseStatus) {
         final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID);
         final String expectedNumber = expectedAppointment.getData().getCompanyNumber();
-        final ApiResponse<Void> response = new ApiResponse<>(serverErrorStatus.value(), null, null);
 
-        when(apiClientService.putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment)).thenReturn(response);
+        when(apiClientService.putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment)).thenThrow(
+                new ResponseStatusException(responseStatus));
 
         assertThrows(NonRetryableErrorException.class, () -> testProcessor.process(delta));
 

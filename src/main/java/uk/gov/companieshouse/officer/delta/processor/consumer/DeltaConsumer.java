@@ -138,14 +138,15 @@ public class DeltaConsumer {
                 logInfo(contextId,
                         String.format("%s (ms): %d", stopWatch.getLastTaskName(), stopWatch.getLastTaskTimeMillis()),
                         attempt, topic, partition, offset, stopWatch.getLastTaskTimeMillis());
-
                 stopWatch.start("Process message");
+
                 processor.process(delta);
+
                 stopWatch.stop();
                 logInfo(contextId,
                         String.format("%s (ms): %d", stopWatch.getLastTaskName(), stopWatch.getLastTaskTimeMillis()),
                         attempt, topic, partition, offset, stopWatch.getLastTaskTimeMillis());
-}
+            }
             catch (RetryableErrorException e) {
                 contextId = delta.getContextId();
                 logError(contextId, RETRY_MESSAGE, e, attempt, topic, partition, offset);
@@ -293,14 +294,18 @@ public class DeltaConsumer {
         final String contextId = delta.getContextId();
 
         try {
-            logInfo(contextId, "Adding message to the retry topic", attempt, sourceTopic, partition, sourceOffset);
+            logInfo(contextId, "Reprocess message", attempt,
+                    sourceTopic, partition, sourceOffset);
 
             final int nextAttempt = delta.getAttempt() >= getMaxRetryAttempts() ? 0 : delta.getAttempt() + 1;
             final Message retryMessage = createRetryMessage(delta, nextAttempt);
 
             consumerGroup.retry(nextAttempt, retryMessage);
-            logInfo(contextId, "Created retry message", nextAttempt, retryMessage.getTopic(), partition,
-                    retryMessage.getOffset());
+
+            final boolean isRetry = consumerGroup.getConfig().retryTopic().equals(retryMessage.getTopic());
+
+            logInfo(contextId, String.format("Produced message for %s topic", isRetry ? "retry" : "error"), nextAttempt,
+                    retryMessage.getTopic(), partition, retryMessage.getOffset());
         }
         catch (ExecutionException | NonRetryableErrorException e) {
             logError(contextId, NO_RETRY_MESSAGE, e, attempt, sourceTopic, partition, sourceOffset);

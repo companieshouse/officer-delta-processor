@@ -24,7 +24,7 @@ public abstract class BaseApiClientServiceImpl {
      * General execution of an SDK endpoint.
      *
      * @param <T>           type of api response
-     * @param logContext
+     * @param logContext    context ID for logging
      * @param operationName name of operation
      * @param uri           uri of sdk being called
      * @param executor      executor to use
@@ -47,7 +47,7 @@ public abstract class BaseApiClientServiceImpl {
 
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
         } catch (ApiErrorResponseException ex) {
-            logMap.put("status", HttpStatus.NOT_FOUND.toString());
+            logMap.put("status", ex.getStatusCode());
             logger.errorContext(logContext, "SDK exception", ex, logMap);
 
             throw new ResponseStatusException(HttpStatus.valueOf(ex.getStatusCode()),
