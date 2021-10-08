@@ -23,7 +23,7 @@ public class Officers {
     private String deltaAt;
 
     @JsonProperty(value = "officers", required = true)
-    private List<OfficersItem> officers;
+    private List<OfficersItem> officerList;
 
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -55,11 +55,11 @@ public class Officers {
     }
 
     public void setOfficers(List<OfficersItem> officers) {
-        this.officers = officers;
+        this.officerList = officers;
     }
 
     public List<OfficersItem> getOfficers() {
-        return officers;
+        return officerList;
     }
 
     @Override
