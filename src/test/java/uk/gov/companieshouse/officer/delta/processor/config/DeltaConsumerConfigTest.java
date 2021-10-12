@@ -15,9 +15,7 @@ import uk.gov.companieshouse.kafka.consumer.ConsumerConfig;
 import uk.gov.companieshouse.kafka.consumer.resilience.CHConsumerType;
 import uk.gov.companieshouse.kafka.consumer.resilience.CHKafkaResilientConsumerGroup;
 import uk.gov.companieshouse.kafka.deserialization.AvroDeserializer;
-import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
 import uk.gov.companieshouse.kafka.serialization.AvroSerializer;
-import uk.gov.companieshouse.kafka.serialization.SerializerFactory;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.officer.delta.processor.consumer.DeltaConsumer;
 import uk.gov.companieshouse.officer.delta.processor.deserialise.ChsDeltaMarshaller;
@@ -28,8 +26,11 @@ class DeltaConsumerConfigTest {
     DeltaConsumerConfig config;
 
     @Mock
+    private AvroDeserializer<ChsDelta> deserializer;
+    @Mock
+    private AvroSerializer<ChsDelta> serializer;
+    @Mock
     private Processor<ChsDelta> processor;
-
     @Mock
     private Logger logger;
 
@@ -39,35 +40,12 @@ class DeltaConsumerConfigTest {
     }
 
     @Test
-    void deserializerFactory() {
-        assertThat(config.deserializerFactory(), isA(DeserializerFactory.class));
-    }
-
-    @Test
-    void serializerFactory() {
-        assertThat(config.serializerFactory(), isA(SerializerFactory.class));
-    }
-
-    @Test
-    void chsAvroDeserializer() {
-        final AvroDeserializer<ChsDelta> deserializer = config.chsDeltaAvroDeserializer(config.deserializerFactory());
-
-        assertThat(deserializer, isA(AvroDeserializer.class));
-    }
-
-    @Test
-    void chsDeltaAvroSerializer() {
-        final AvroSerializer<ChsDelta> serializer = config.chsDeltaAvroSerializer(config.serializerFactory());
-
-        assertThat(serializer, isA(AvroSerializer.class));
-    }
-
-    @Test
     void mainConsumerConfig() throws Exception {
         ConsumerConfig consumerConfig = withKafkaEnvironment().execute(() -> config.mainConsumerConfig());
 
         assertThat(consumerConfig, isA(ConsumerConfig.class));
         assertThat(consumerConfig.getGroupName(), is("group"));
+        assertThat(consumerConfig.isAutoCommit(), is(false));
     }
 
     @Test
@@ -76,6 +54,7 @@ class DeltaConsumerConfigTest {
 
         assertThat(consumerConfig, isA(ConsumerConfig.class));
         assertThat(consumerConfig.getGroupName(), is("group-retry"));
+        assertThat(consumerConfig.isAutoCommit(), is(false));
     }
 
     @Test
@@ -100,8 +79,6 @@ class DeltaConsumerConfigTest {
     void mainDeltaConsumer() throws Exception {
         CHKafkaResilientConsumerGroup chKafkaConsumerGroup =
                 withKafkaEnvironment().execute(() -> config.mainKafkaConsumerGroup(config.mainConsumerConfig()));
-        final AvroDeserializer<ChsDelta> deserializer = config.chsDeltaAvroDeserializer(config.deserializerFactory());
-        final AvroSerializer<ChsDelta> serializer = config.chsDeltaAvroSerializer(config.serializerFactory());
         final ChsDeltaMarshaller marshaller = new ChsDeltaMarshaller(deserializer, serializer);
 
         final DeltaConsumer mainDeltaConsumer =
@@ -115,8 +92,6 @@ class DeltaConsumerConfigTest {
     void retryDeltaConsumer() throws Exception {
         CHKafkaResilientConsumerGroup retryConsumerGroup =
                 withKafkaEnvironment().execute(() -> config.retryKafkaConsumerGroup(config.retryConsumerConfig()));
-        final AvroDeserializer<ChsDelta> deserializer = config.chsDeltaAvroDeserializer(config.deserializerFactory());
-        final AvroSerializer<ChsDelta> serializer = config.chsDeltaAvroSerializer(config.serializerFactory());
         final ChsDeltaMarshaller marshaller = new ChsDeltaMarshaller(deserializer, serializer);
 
         final DeltaConsumer retryDeltaConsumer =
