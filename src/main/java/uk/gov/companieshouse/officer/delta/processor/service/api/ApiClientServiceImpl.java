@@ -62,7 +62,7 @@ public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements Ap
     @Override
     public ApiResponse<Void> putAppointment(final String logContext, String companyNumber, AppointmentAPI appointment) {
         final String uri =
-                String.format("%s/company/%s/appointments/%s", ROOT_URI, companyNumber, appointment.getAppointmentId());
+                String.format("/company/%s/appointments/%s/full_record", companyNumber, appointment.getAppointmentId());
 
         Map<String,Object> logMap = createLogMap(companyNumber,"PUT", uri);
         logger.infoContext(logContext, String.format("PUT %s", uri), logMap);
