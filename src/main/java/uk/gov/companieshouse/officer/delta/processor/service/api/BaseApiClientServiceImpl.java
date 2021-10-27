@@ -12,8 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class BaseApiClientServiceImpl {
-    public static final String ROOT_URI = "/appointments/v2";
-
     protected Logger logger;
 
     protected BaseApiClientServiceImpl(final Logger logger) {
