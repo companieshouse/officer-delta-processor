@@ -53,6 +53,7 @@ class AppointmentTransformTest {
         assertThat(appointmentAPI.getAppointmentId(), is("inamTI4b12taUuJyjgA72RNkYbs"));
         assertThat(appointmentAPI.getOfficerId(), is("6zmr-K93Jh_iDBMbWqRj3GuaQwQ"));
         assertThat(appointmentAPI.getPreviousOfficerId(), is("F_kqEbg83lQRIXkF6yUjxZ-wN9E"));
+        assertThat(appointmentAPI.getCompanyNumber(), is("12345678"));
         verify(officerTransform).transform(item);
         assertThat(appointmentAPI.getData(), is(sameInstance(officerAPI)));
     }
@@ -63,6 +64,7 @@ class AppointmentTransformTest {
         item.setInternalId("internalId");
         item.setOfficerId("officerId");
         item.setPreviousOfficerId("previousOfficerId");
+        item.setCompanyNumber("12345678");
 
         return item;
     }
