@@ -21,7 +21,7 @@ import java.util.Map;
 @Service
 public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements ApiClientService {
 
-    @Value("${chs.api.key}")
+    @Value("${chs.internal.api.key}")
     private String chsApiKey;
 
     @Value("${api.url}")
