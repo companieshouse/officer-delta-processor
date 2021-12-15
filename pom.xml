@@ -26,6 +26,7 @@
 		<structured-logging.version>1.9.10</structured-logging.version>
 		<commons-lang3.version>3.11</commons-lang3.version>
 		<private.sdk.version>2.0.98</private.sdk.version>
+		<log4j-bom.version>2.16.0</log4j-bom.version>
 
 		<!-- Test -->
 		<mockito-junit-jupiter.version>3.8.0</mockito-junit-jupiter.version>
@@ -60,6 +61,15 @@
 	</properties>
 	<dependencyManagement>
 		<dependencies>
+			<!-- Fix for CVE-2021-44228 -->
+			<!-- Required until v2.5.8 springframework & v2.6.2 springboot -->
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-bom</artifactId>
+				<version>${log4j-bom.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
