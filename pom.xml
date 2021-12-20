@@ -23,10 +23,11 @@
 		<avro.version>1.8.1</avro.version>
 		<ch-kafka.version>1.4.4</ch-kafka.version>
 		<kafka-models.version>1.0.25</kafka-models.version>
-		<structured-logging.version>1.9.10</structured-logging.version>
 		<commons-lang3.version>3.11</commons-lang3.version>
 		<private.sdk.version>2.0.98</private.sdk.version>
-		<log4j-bom.version>2.16.0</log4j-bom.version>
+		<!-- Logging -->
+		<log4j-bom.version>2.17.0</log4j-bom.version>
+		<structured-logging.version>1.9.12</structured-logging.version>
 
 		<!-- Test -->
 		<mockito-junit-jupiter.version>3.8.0</mockito-junit-jupiter.version>
@@ -62,6 +63,7 @@
 	<dependencyManagement>
 		<dependencies>
 			<!-- Fix for CVE-2021-44228 -->
+			<!-- Fix for CVE-2021-45105 -->
 			<!-- Required until v2.5.8 springframework & v2.6.2 springboot -->
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
