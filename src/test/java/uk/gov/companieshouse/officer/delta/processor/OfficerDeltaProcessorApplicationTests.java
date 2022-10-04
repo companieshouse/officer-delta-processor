@@ -10,7 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import uk.gov.companieshouse.kafka.consumer.resilience.CHKafkaResilientConsumerGroup;
 import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientService;
 
 @SpringBootTest
@@ -19,14 +18,10 @@ import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientServic
 @TestPropertySource(locations = "classpath:test.properties")
 class OfficerDeltaProcessorApplicationTests {
     @Autowired
-    private CHKafkaResilientConsumerGroup testConsumerGroup;
-
-    @Autowired
     private ApiClientService testApiClientService;
 
     @Test
     void contextLoads() throws Exception {
-        assertThat(testConsumerGroup, is(notNullValue()));
         assertThat(testApiClientService, is(notNullValue()));
     }
 

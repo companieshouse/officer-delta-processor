@@ -14,6 +14,8 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @PropertySource("classpath:logger.properties")
 public class LoggingConfig {
 
+    private static Logger staticLogger;
+
     @SuppressWarnings("unused")
     @Value("${logger.namespace}")
     private String loggerNamespace;
@@ -27,4 +29,9 @@ public class LoggingConfig {
     public Logger logger() {
         return LoggerFactory.getLogger(loggerNamespace);
     }
+
+    public static Logger getLogger() {
+        return staticLogger;
+    }
+
 }
