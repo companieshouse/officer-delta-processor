@@ -29,7 +29,7 @@ public class ChsDeltaSerializer implements Serializer<Object> {
 
         try {
             if (payload == null) {
-                return null;
+                return "".getBytes();
             }
 
             if (payload instanceof byte[]) {
@@ -37,9 +37,9 @@ public class ChsDeltaSerializer implements Serializer<Object> {
             }
 
             if (payload instanceof ChsDelta) {
-                ChsDelta chsDelta = (ChsDelta) payload;
+                var chsDelta = (ChsDelta) payload;
                 DatumWriter<ChsDelta> writer = new SpecificDatumWriter<>();
-                EncoderFactory encoderFactory = EncoderFactory.get();
+                var encoderFactory = EncoderFactory.get();
 
                 AvroSerializer<ChsDelta> avroSerializer =
                         new AvroSerializer<>(writer, encoderFactory);

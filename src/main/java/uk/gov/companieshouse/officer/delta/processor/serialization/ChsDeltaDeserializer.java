@@ -27,7 +27,7 @@ public class ChsDeltaDeserializer implements Deserializer<ChsDelta> {
             logger.trace(String.format("Message picked up from topic: %s", topic));
             Decoder decoder = DecoderFactory.get().binaryDecoder(data, null);
             DatumReader<ChsDelta> reader = new ReflectDatumReader<>(ChsDelta.class);
-            ChsDelta chsDelta = reader.read(null, decoder);
+            var chsDelta = reader.read(null, decoder);
             logger.trace("Message successfully de-serialised into Avro ChsDelta object");
             return chsDelta;
         } catch (Exception ex) {

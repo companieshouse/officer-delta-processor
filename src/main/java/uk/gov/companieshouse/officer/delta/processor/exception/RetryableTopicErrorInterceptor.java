@@ -11,14 +11,19 @@ import static java.lang.String.format;
 import static org.springframework.kafka.support.KafkaHeaders.EXCEPTION_CAUSE_FQCN;
 import static org.springframework.kafka.support.KafkaHeaders.EXCEPTION_STACKTRACE;
 
+/**
+ * Retryable Topic Error Interceptor.
+ */
 public class RetryableTopicErrorInterceptor implements ProducerInterceptor<String, Object> {
 
     @Override
     public ProducerRecord<String, Object> onSend(ProducerRecord<String, Object> kafkaRecord) {
         String nextTopic = kafkaRecord.topic().contains("-error") ? getNextErrorTopic(kafkaRecord)
                 : kafkaRecord.topic();
-        LoggingConfig.getLogger().info(format("Moving record into new topic: %s",
-                nextTopic));
+        if (LoggingConfig.getLogger() != null) {
+            LoggingConfig.getLogger().info(format("Moving record into new topic:",
+                    nextTopic));
+        }
         if (nextTopic.contains("-invalid")) {
             return new ProducerRecord<>(nextTopic, kafkaRecord.key(), kafkaRecord.value());
         }
@@ -48,7 +53,7 @@ public class RetryableTopicErrorInterceptor implements ProducerInterceptor<Strin
                 && new String(header1.value()).contains(NonRetryableErrorException.class.getName()))
                 || (header2 != null
                 && new String(header2.value()).contains(
-                        NonRetryableErrorException.class.getName())))
+                NonRetryableErrorException.class.getName())))
                 ? kafkaRecord.topic().replace("-error", "-invalid") : kafkaRecord.topic();
     }
 }
