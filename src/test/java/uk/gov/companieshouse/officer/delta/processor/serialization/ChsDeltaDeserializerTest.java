@@ -20,7 +20,7 @@ class ChsDeltaDeserializerTest {
     private ChsDeltaDeserializer deserializer;
 
     @BeforeEach
-    public void init() {
+    void init() {
         deserializer = new ChsDeltaDeserializer(logger);
     }
 

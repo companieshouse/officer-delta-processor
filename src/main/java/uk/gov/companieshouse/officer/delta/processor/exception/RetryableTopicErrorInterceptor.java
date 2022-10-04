@@ -21,7 +21,7 @@ public class RetryableTopicErrorInterceptor implements ProducerInterceptor<Strin
         String nextTopic = kafkaRecord.topic().contains("-error") ? getNextErrorTopic(kafkaRecord)
                 : kafkaRecord.topic();
         if (LoggingConfig.getLogger() != null) {
-            LoggingConfig.getLogger().info(format("Moving record into new topic:",
+            LoggingConfig.getLogger().info(format("Moving record into new topic: %s",
                     nextTopic));
         }
         if (nextTopic.contains("-invalid")) {

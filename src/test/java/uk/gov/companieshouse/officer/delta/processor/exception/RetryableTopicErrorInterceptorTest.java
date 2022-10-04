@@ -8,12 +8,12 @@ import uk.gov.companieshouse.officer.delta.processor.Util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class RetryableTopicErrorInterceptorTest {
+class RetryableTopicErrorInterceptorTest {
 
     private RetryableTopicErrorInterceptor interceptor;
 
     @BeforeEach
-    public void setUp(){
+    void setUp(){
         interceptor = new RetryableTopicErrorInterceptor();
     }
 

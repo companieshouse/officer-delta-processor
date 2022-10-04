@@ -4,8 +4,15 @@ import com.github.stefanbirkner.systemlambda.SystemLambda;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.FileCopyUtils;
+import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.kafka.consumer.ConsumerConfig;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -49,4 +56,24 @@ public class Util {
         return record;
     }
 
+    public static Message<ChsDelta> createChsDeltaMessage(String filename) throws IOException {
+        InputStreamReader exampleJsonPayload = new InputStreamReader(
+                ClassLoader.getSystemClassLoader().getResourceAsStream(filename));
+        String data = FileCopyUtils.copyToString(exampleJsonPayload);
+
+        return buildMessage(data);
+    }
+
+    private static Message<ChsDelta> buildMessage(String data) {
+        ChsDelta mockChsDelta = ChsDelta.newBuilder()
+                .setData(data)
+                .setContextId("context_id")
+                .setAttempt(1)
+                .build();
+        return MessageBuilder
+                .withPayload(mockChsDelta)
+                .setHeader(KafkaHeaders.RECEIVED_TOPIC, "test")
+                .setHeader("OFFICER_DELTA_RETRY_COUNT", 1)
+                .build();
+    }
 }

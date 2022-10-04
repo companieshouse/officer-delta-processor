@@ -18,7 +18,7 @@ class ChsDeltaSerializerTest {
     private ChsDeltaSerializer serializer;
 
     @BeforeEach
-    public void init() {
+    void init() {
         serializer = new ChsDeltaSerializer(logger);
     }
 
