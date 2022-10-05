@@ -24,7 +24,7 @@ public class Util {
         final String brokerAddr = Strings.join(Arrays.asList(config.getBrokerAddresses()), ',');
         final String topicString = Strings.join(config.getTopics(), ',');
 
-        return withEnvironmentVariable("KAFKA_BROKER_ADDR", brokerAddr)
+        return withEnvironmentVariable("DATA_SYNC_KAFKA_BROKER_URL", brokerAddr)
                 .and("KAFKA_TOPICS_LIST", topicString)
                 .and("KAFKA_AUTO_COMMIT", Boolean.toString(config.isAutoCommit()))
                 .and("KAFKA_GROUP_NAME", config.getGroupName())
