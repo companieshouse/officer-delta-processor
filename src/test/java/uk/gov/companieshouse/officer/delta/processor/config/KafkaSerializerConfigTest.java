@@ -1,50 +1,65 @@
 package uk.gov.companieshouse.officer.delta.processor.config;
 
-import static org.hamcrest.CoreMatchers.isA;
-import static org.hamcrest.MatcherAssert.assertThat;
-
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.delta.ChsDelta;
-import uk.gov.companieshouse.kafka.deserialization.AvroDeserializer;
-import uk.gov.companieshouse.kafka.deserialization.DeserializerFactory;
-import uk.gov.companieshouse.kafka.serialization.AvroSerializer;
-import uk.gov.companieshouse.kafka.serialization.SerializerFactory;
+import org.mockito.Mock;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 
-@ExtendWith(MockitoExtension.class)
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.officer.delta.processor.serialization.ChsDeltaDeserializer;
+import uk.gov.companieshouse.officer.delta.processor.serialization.ChsDeltaSerializer;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.isA;
+import static org.hamcrest.core.IsNot.not;
+
 class KafkaSerializerConfigTest {
-    private KafkaSerializerConfig testConfig;
+
+    @Mock
+    Logger logger;
+    ChsDeltaDeserializer chsDeltaDeserializer = new ChsDeltaDeserializer(logger);
+    ChsDeltaSerializer chsDeltaSerializer = new ChsDeltaSerializer(logger);
+    KafkaSerializerConfig kafkaConfig;
 
     @BeforeEach
     void setUp() {
-        testConfig = new KafkaSerializerConfig();
+        kafkaConfig = new KafkaSerializerConfig(chsDeltaDeserializer,
+                chsDeltaSerializer,"server",1);
+    }
+    @Test
+    void listenerContainerFactory() {
+        assertThat(kafkaConfig.listenerContainerFactory(), is(not(nullValue())));
+        assertThat(kafkaConfig.listenerContainerFactory(), isA(
+                ConcurrentKafkaListenerContainerFactory.class));
     }
 
     @Test
-    void serializerFactory() {
-        assertThat(testConfig.serializerFactory(), isA(SerializerFactory.class));
+    void producerFactory() {
+        assertThat(kafkaConfig.producerFactory(), is(not(nullValue())));
+        assertThat(kafkaConfig.producerFactory(), isA(ProducerFactory.class));
+        assertThat(kafkaConfig.producerFactory().getConfigurationProperties(),
+                is(not(nullValue())));
     }
 
     @Test
-    void deserializerFactory() {
-        assertThat(testConfig.deserializerFactory(), isA(DeserializerFactory.class));
+    void kafkaConsumerFactory() {
+        assertThat(kafkaConfig.kafkaConsumerFactory(), is(not(nullValue())));
+        assertThat(kafkaConfig.kafkaConsumerFactory(), isA(ConsumerFactory.class));
+        assertThat(kafkaConfig.kafkaConsumerFactory().getConfigurationProperties(),
+                is(not(nullValue())));
+        assertThat(kafkaConfig.kafkaConsumerFactory().getConfigurationProperties()
+                        .get(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG),is("server"));
+        assertThat(kafkaConfig.kafkaConsumerFactory().getConfigurationProperties()
+                .get(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS),
+                is(ChsDeltaDeserializer.class));
+        assertThat(kafkaConfig.kafkaConsumerFactory().getConfigurationProperties()
+                .get(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS),
+                is(StringDeserializer.class));
     }
-
-    @Test
-    void chsAvroDeserializer() {
-        final AvroDeserializer<ChsDelta> deserializer =
-                testConfig.chsDeltaAvroDeserializer(testConfig.deserializerFactory());
-
-        assertThat(deserializer, isA(AvroDeserializer.class));
-    }
-
-    @Test
-    void chsDeltaAvroSerializer() {
-        final AvroSerializer<ChsDelta> serializer = testConfig.chsDeltaAvroSerializer(testConfig.serializerFactory());
-
-        assertThat(serializer, isA(AvroSerializer.class));
-    }
-
 }
