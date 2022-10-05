@@ -19,7 +19,7 @@ import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.core.IsNot.not;
 
-public class KafkaSerializerConfigTest {
+class KafkaSerializerConfigTest {
 
     @Mock
     Logger logger;
