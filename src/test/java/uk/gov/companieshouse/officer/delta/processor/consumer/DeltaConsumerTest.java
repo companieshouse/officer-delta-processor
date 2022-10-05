@@ -47,7 +47,7 @@ class DeltaConsumerTest {
         ChsDelta brokenMessage = message.getPayload();
 
         doThrow(new NonRetryableErrorException(new Exception()))
-                .when(processor).process(eq(brokenMessage));
+                .when(processor).process(brokenMessage);
 
         Assert.assertThrows(Exception.class, ()->consumer
                 .receiveMainMessages(message, "topic", "partition", "offset"));
