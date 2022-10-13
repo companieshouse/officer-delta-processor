@@ -30,14 +30,11 @@ import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.model.PreviousNameArray;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.OfficerRole;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithCountryOfResidence;
-import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithDateOfBirth;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithFormerNames;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupation;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithPre1992Appointment;
-import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithResidentialAddress;
 
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Stream;
 
@@ -61,16 +58,6 @@ class OfficerTransformTest {
     private IdentificationAPI identificationAPI;
     @Mock
     private OfficerAPI officerAPI;
-
-    private static Stream<Arguments> emptyDobsWithDobRoles() {
-        Stream<OfficerRole> requiresDob = Arrays.stream(RolesWithDateOfBirth.values())
-                .map(RolesWithDateOfBirth::getOfficerRole);
-
-        return requiresDob.flatMap(role -> Stream.of(
-                Arguments.of(role, null),
-                Arguments.of(role, "")
-        ));
-    }
 
     private static Stream<Arguments> provideScenarioParams() {
         return Stream.of(Arguments.of(CHANGED_AT, true),
@@ -137,56 +124,6 @@ class OfficerTransformTest {
         officer.setResignationDate(INVALID_DATE);
 
         verifyProcessingError(officerAPI, officer, "resignation_date: date/time pattern not matched: [yyyyMMdd]");
-    }
-
-    @Test
-    void transformSingleWhenDateOfBirthInvalid() {
-        final OfficerAPI officerAPI = testTransform.factory();
-        final OfficersItem officer = createOfficer(addressAPI, identification);
-
-        officer.setChangedAt(CHANGED_AT);
-        officer.setAppointmentDate(VALID_DATE);
-        officer.setAdditionalProperty("resignation_date", VALID_DATE);
-        officer.setDateOfBirth(INVALID_DATE);
-        officer.setOfficerRole(KIND_OF_OFFICER_ROLE_WITH_DOB);
-
-        verifyProcessingError(officerAPI, officer, "dateOfBirth: date/time pattern not matched: [yyyyMMdd]");
-    }
-
-    @DisplayName("Date of Birth is not included when the officers role does not require it")
-    @ParameterizedTest
-    @EnumSource
-    void onlyRolesWithDobIncludeDateOfBirth(OfficerRole officerRole) throws NonRetryableErrorException {
-        final OfficersItem officer = createOfficer(addressAPI, identification);
-
-        officer.setDateOfBirth(VALID_DATE);
-        officer.setKind(officerRole.name());
-        officer.setChangedAt(CHANGED_AT);
-        officer.setAppointmentDate(VALID_DATE);
-
-        final OfficerAPI outputOfficer = testTransform.transform(officer);
-
-        if (RolesWithDateOfBirth.includes(officerRole)) {
-            assertThat(outputOfficer.getDateOfBirth(), is(notNullValue()));
-        } else {
-            assertThat(outputOfficer.getDateOfBirth(), is(nullValue()));
-        }
-    }
-
-    @DisplayName("Transformation doesn't fail when no DOB on role which requires it")
-    @ParameterizedTest
-    @MethodSource("emptyDobsWithDobRoles")
-    void transformsWhenNoDob(OfficerRole role, String dob) throws NonRetryableErrorException {
-        final OfficersItem officer = createOfficer(addressAPI, identification);
-
-        officer.setDateOfBirth(dob);
-        officer.setKind(role.name());
-        officer.setChangedAt(CHANGED_AT);
-        officer.setAppointmentDate(VALID_DATE);
-
-        final OfficerAPI outputOfficer = testTransform.transform(officer);
-
-        assertThat(outputOfficer.getDateOfBirth(), is(nullValue()));
     }
 
     @DisplayName("Occupation and Nationality is not included when the officers role does not require it")
@@ -286,32 +223,6 @@ class OfficerTransformTest {
         }
     }
 
-
-    @DisplayName("URA and secure indicator is not included when the officers role does not require it")
-    @ParameterizedTest
-    @EnumSource
-    void onlyRolesWithResidentialAddressIncludeAddressAndIndicators(OfficerRole officerRole)
-            throws NonRetryableErrorException {
-        final OfficersItem officer = createOfficer(addressAPI, identification);
-
-        officer.setDateOfBirth(VALID_DATE);
-        officer.setKind(officerRole.name());
-        officer.setChangedAt(CHANGED_AT);
-        officer.setAppointmentDate(VALID_DATE);
-
-        final OfficerAPI outputOfficer = testTransform.transform(officer);
-
-        if (RolesWithResidentialAddress.includes(officerRole)) {
-            assertThat(outputOfficer.getUsualResidentialAddress(), is(notNullValue()));
-            assertThat(outputOfficer.isResidentialAddressSameAsServiceAddress(), is(notNullValue()));
-            assertThat(outputOfficer.isSecureOfficer(), is(notNullValue()));
-        } else {
-            assertThat(outputOfficer.getUsualResidentialAddress(), is(nullValue()));
-            assertThat(outputOfficer.isResidentialAddressSameAsServiceAddress(), is(nullValue()));
-            assertThat(outputOfficer.isSecureOfficer(), is(nullValue()));
-        }
-    }
-
     @ParameterizedTest(name = "{index}: changedAt={0}, has resignation_date={1}")
     @MethodSource("provideScenarioParams")
     void verifySuccessfulTransform(final String changedAt, final boolean hasResignationDate)
@@ -332,13 +243,9 @@ class OfficerTransformTest {
         assertThat(result.getUpdatedAt(), is(CHANGED_INSTANT));
         assertThat(result.getAppointedOn(), is(VALID_DATE_INSTANT));
         assertThat(result.getResignedOn(), is(hasResignationDate ? VALID_DATE_INSTANT : null));
-        if (RolesWithDateOfBirth.includes(result.getOfficerRole())) {
-            assertThat(result.getDateOfBirth(), is(VALID_DATE_INSTANT));
-        }
         assertThat(result.getOfficerRole(), is(officer.getOfficerRole()));
         assertThat(result.isPre1992Appointment(), is(false));
         assertThat(result.getResignedOn(), is(hasResignationDate ? VALID_DATE_INSTANT : null));
-        assertThat(result.getDateOfBirth(), is(VALID_DATE_INSTANT));
         assertThat(result.getCompanyNumber(), is(officer.getCompanyNumber()));
         assertThat(result.getTitle(), is(officer.getTitle()));
         assertThat(result.getForename(), is(officer.getForename()));

@@ -41,6 +41,7 @@ import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientServic
 import uk.gov.companieshouse.officer.delta.processor.tranformer.AppointmentTransform;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.IdentificationTransform;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.OfficerTransform;
+import uk.gov.companieshouse.officer.delta.processor.tranformer.SensitiveOfficerTransform;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -73,7 +74,8 @@ class DeltaProcessorTest {
                 .collect(Collectors.joining("\n"));
         IdentificationTransform idTransform = new IdentificationTransform();
         OfficerTransform officerTransform = new OfficerTransform(idTransform);
-        appointmentTransform = new AppointmentTransform(officerTransform);
+        SensitiveOfficerTransform sensitiveOfficerTransform = new SensitiveOfficerTransform();
+        appointmentTransform = new AppointmentTransform(officerTransform, sensitiveOfficerTransform);
         expectedAppointment = jsonToAppointment(json);
     }
 

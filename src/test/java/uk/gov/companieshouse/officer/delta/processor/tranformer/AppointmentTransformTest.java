@@ -24,11 +24,13 @@ class AppointmentTransformTest {
     @Mock
     private OfficerTransform officerTransform;
     @Mock
+    private SensitiveOfficerTransform sensitiveOfficerTransform;
+    @Mock
     private OfficerAPI officerAPI;
 
     @BeforeEach
     void setUp() {
-        testTransform = new AppointmentTransform(officerTransform);
+        testTransform = new AppointmentTransform(officerTransform, sensitiveOfficerTransform);
     }
 
     @Test
