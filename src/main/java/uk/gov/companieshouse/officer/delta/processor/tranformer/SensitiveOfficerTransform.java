@@ -18,6 +18,7 @@ public class SensitiveOfficerTransform implements Transformative<OfficersItem, S
 
     @Autowired
     public SensitiveOfficerTransform() {
+        // empty constructor
     }
 
     @Override
