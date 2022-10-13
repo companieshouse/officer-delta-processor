@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.lookupOfficeRole;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseDateString;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseDateTimeString;
@@ -15,7 +14,6 @@ import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithCountryOfResidence;
-import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithDateOfBirth;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithFormerNames;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupation;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithPre1992Appointment;
@@ -95,13 +93,7 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
                 parseYesOrNo(source.getServiceAddressSameAsRegisteredAddress()));
 
         if (RolesWithResidentialAddress.includes(officerRole)) {
-            officer.setUsualResidentialAddress(source.getUsualResidentialAddress());
-            officer.setResidentialAddressSameAsServiceAddress(
-                    BooleanUtils.toBooleanObject(source.getResidentialAddressSameAsServiceAddress()));
             officer.setIsSecureOfficer(BooleanUtils.toBooleanObject(source.getSecureDirector()));
-
-            //Prevent it from being stored in URA within the appointments collection.
-            officer.getUsualResidentialAddress().setUsualCountryOfResidence(null);
         }
 
         if (RolesWithCountryOfResidence.includes(officerRole)) {
@@ -113,10 +105,6 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
 
         if (source.getIdentification() != null)
             officer.setIdentificationData(idTransform.transform(source.getIdentification()));
-
-        if (RolesWithDateOfBirth.includes(officerRole) && isNotEmpty(source.getDateOfBirth())) {
-            officer.setDateOfBirth(parseDateString("dateOfBirth", source.getDateOfBirth()));
-        }
 
         String selfLink = COMPANY.concat("/")
             .concat(source.getCompanyNumber())

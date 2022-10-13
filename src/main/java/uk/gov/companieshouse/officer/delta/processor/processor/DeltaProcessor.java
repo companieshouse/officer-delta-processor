@@ -2,6 +2,8 @@ package uk.gov.companieshouse.officer.delta.processor.processor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -57,6 +59,8 @@ public class DeltaProcessor implements Processor<ChsDelta> {
 
                 AppointmentAPI appointmentAPI = transformer.transform(officer);
                 appointmentAPI.setDeltaAt(officers.getDeltaAt());
+
+                logger.debugContext(logContext, "API Looks like " + ReflectionToStringBuilder.toString(appointmentAPI), logMap);
 
                 final ApiResponse<Void> response =
                         apiClientService.putAppointment(logContext, officer.getCompanyNumber(), appointmentAPI);

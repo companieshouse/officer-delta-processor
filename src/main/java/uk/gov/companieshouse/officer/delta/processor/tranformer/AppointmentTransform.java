@@ -9,10 +9,13 @@ import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 @Component
 public class AppointmentTransform implements Transformative<OfficersItem, AppointmentAPI> {
     OfficerTransform officerTransform;
+    SensitiveOfficerTransform sensitiveOfficerTransform;
 
     @Autowired
-    public AppointmentTransform(OfficerTransform officerTransform) {
+    public AppointmentTransform(OfficerTransform officerTransform, 
+            SensitiveOfficerTransform sensitiveOfficerTransform) {
         this.officerTransform = officerTransform;
+        this.sensitiveOfficerTransform = sensitiveOfficerTransform;
     }
 
     @Override
@@ -39,6 +42,7 @@ public class AppointmentTransform implements Transformative<OfficersItem, Appoin
         outputAppointment.setCompanyNumber(inputOfficer.getCompanyNumber());
 
         outputAppointment.setData(officerTransform.transform(inputOfficer));
+        outputAppointment.setSensitiveData(sensitiveOfficerTransform.transform(inputOfficer));
 
         return outputAppointment;
     }
