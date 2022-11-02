@@ -40,6 +40,11 @@
 		<maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
 		<maven-failsafe-plugin.version>2.22.2</maven-failsafe-plugin.version>
 		<jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
+		<io-cucumber.version>7.2.3</io-cucumber.version>
+		<skip.integration.tests>false</skip.integration.tests>
+		<skip.unit.tests>false</skip.unit.tests>
+		<assertj-core.version>3.22.0</assertj-core.version>
+		<wiremock.standalone.version>2.32.0</wiremock.standalone.version>
 
 		<!-- Spring -->
 		<spring-boot-dependencies.version>2.6.4</spring-boot-dependencies.version>
@@ -200,6 +205,59 @@
 			<artifactId>system-lambda</artifactId>
 			<version>${system-lambda.version}</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-core</artifactId>
+			<version>${io-cucumber.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-java</artifactId>
+			<version>${io-cucumber.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-junit</artifactId>
+			<version>${io-cucumber.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-spring</artifactId>
+			<version>${io-cucumber.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.github.tomakehurst</groupId>
+			<artifactId>wiremock-jre8</artifactId>
+			<version>${wiremock.standalone.version}</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.conscrypt</groupId>
+					<artifactId>conscrypt-openjdk-uber</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>net.javacrumbs.json-unit</groupId>
+					<artifactId>json-unit-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.github.jknack</groupId>
+					<artifactId>handlebars</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.github.jknack</groupId>
+					<artifactId>handlebars-helpers</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 
