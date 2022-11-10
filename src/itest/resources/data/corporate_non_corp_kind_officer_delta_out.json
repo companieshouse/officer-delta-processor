@@ -1,0 +1,51 @@
+{
+  "id":"ODxi2KP6LfSvwes9xY0O86YliyM",
+  "data":{
+    "linksData":{
+      "officer":{
+        "self":"/officers/gkfq1cddT1bYG4l0NfBY1ExfEOc",
+        "appointments":"/officers/gkfq1cddT1bYG4l0NfBY1ExfEOc/appointments"
+      },
+      "self":"/company/01777777/appointments/ODxi2KP6LfSvwes9xY0O86YliyM"
+    },
+    "identificationData":{
+      "identification_type":"uk-limited-company",
+      "registration_number":"222333"
+    },
+    "pre1992Appointment":false,
+    "service_address":{
+      "address_line_1":"Stonor Street",
+      "country":"England",
+      "locality":"Stoke-On-Trent",
+      "postal_code":"ST6 3JL",
+      "premises":"50"
+    },
+    "service_address_is_same_as_registered_office_address":false,
+    "appointed_on":1667260800.000000000,
+    "is_pre_1992_appointment":false,
+    "links":{
+      "officer":{
+        "self":"/officers/gkfq1cddT1bYG4l0NfBY1ExfEOc",
+        "appointments":"/officers/gkfq1cddT1bYG4l0NfBY1ExfEOc/appointments"
+      },
+      "self":"/company/01777777/appointments/ODxi2KP6LfSvwes9xY0O86YliyM"
+    },
+    "officer_role":"corporate-director",
+    "identification":{
+      "identification_type":"uk-limited-company",
+      "registration_number":"222333"
+    },
+    "surname":"MY TEST COMPANY III LIMITED",
+    "company_number":"01777777",
+    "updated_at":1668000375.000000000
+  },
+  "sensitive_data":{
+
+  },
+  "internal_id":"9001808864",
+  "appointment_id":"ODxi2KP6LfSvwes9xY0O86YliyM",
+  "officer_id":"gkfq1cddT1bYG4l0NfBY1ExfEOc",
+  "previous_officer_id":"gkfq1cddT1bYG4l0NfBY1ExfEOc",
+  "company_number":"01777777",
+  "delta_at":"20221109132615529605"
+}

@@ -28,7 +28,7 @@ public class SensitiveOfficerTransform implements Transformative<OfficersItem, S
 
     @Override
     public SensitiveOfficerAPI transform(OfficersItem source, SensitiveOfficerAPI officer) throws NonRetryableErrorException {
-        final String officerRole = lookupOfficeRole(source.getKind());
+        final String officerRole = lookupOfficeRole(source.getKind(), source.getCorporateInd());
         if (RolesWithResidentialAddress.includes(officerRole)) {
             officer.setUsualResidentialAddress(source.getUsualResidentialAddress());
             officer.setResidentialAddressSameAsServiceAddress(

@@ -58,7 +58,7 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
         officer.setSurname(source.getSurname());
         officer.setHonours(source.getHonours());
 
-        final String officerRole = lookupOfficeRole(source.getKind());
+        final String officerRole = lookupOfficeRole(source.getKind(), source.getCorporateInd());
         officer.setOfficerRole(officerRole);
 
         // Occupation and Nationality are in the same set of Roles
