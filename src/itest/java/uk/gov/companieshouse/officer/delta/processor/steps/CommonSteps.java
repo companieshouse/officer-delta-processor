@@ -42,6 +42,7 @@ public class CommonSteps {
     private Logger logger;
 
     private String type;
+    private String id;
     private String output;
 
     @Given("the application is running")
@@ -49,12 +50,13 @@ public class CommonSteps {
         assertThat(kafkaTemplate).isNotNull();
     }
 
-    @When("^the consumer receives a (.*) officer delta$")
-    public void theConsumerReceivesOfficerDelta(String type) throws Exception {
+    @When("^the consumer receives a (.*) officer delta with id (.*)$")
+    public void theConsumerReceivesOfficerDelta(String type, String id) throws Exception {
         configureWiremock();
-        stubPutAppointment("01777777");
+        stubPutAppointment("01777777", id);
         this.output = TestData.getOutputData(type);
         this.type = type;
+        this.id = id;
 
         ChsDelta delta = new ChsDelta(TestData.getInputData(type), 1, "1");
         kafkaTemplate.send(mainTopic, delta);
@@ -80,7 +82,7 @@ public class CommonSteps {
     @When("^the consumer receives a message but the data api returns a (\\d*)$")
     public void theConsumerReceivesMessageButDataApiReturns(int responseCode) throws Exception{
         configureWiremock();
-        stubPutAppointment("01777777", responseCode);
+        stubPutAppointment("01777777", "EcEKO1YhIKexb0cSDZsn_OHsFw4", responseCode);
 
         ChsDelta delta = new ChsDelta(
                 TestData.getInputData("natural"), 1, "1");
@@ -100,7 +102,7 @@ public class CommonSteps {
 
     @Then("a PUT request is sent to the appointments api with the transformed data")
     public void putRequestIsSentToTheAppointmentsApi() {
-        verify(1, requestMadeFor(new OfficerRequestMatcher(logger, "01777777", output)));
+        verify(1, requestMadeFor(new OfficerRequestMatcher(logger, "01777777", output, id)));
     }
 
     @Then("^the message should be moved to topic (.*)$")
@@ -135,12 +137,12 @@ public class CommonSteps {
         configureFor("localhost", Integer.parseInt(port));
     }
 
-    private void stubPutAppointment(String conumb) {
-        stubPutAppointment(conumb, 200);
+    private void stubPutAppointment(String conumb, String id) {
+        stubPutAppointment(conumb, id, 200);
     }
 
-    private void stubPutAppointment(String conumb, int responseCode) {
-        stubFor(put(urlEqualTo("/company/" + conumb + "/appointments/EcEKO1YhIKexb0cSDZsn_OHsFw4/full_record"))
+    private void stubPutAppointment(String conumb, String id, int responseCode) {
+        stubFor(put(urlEqualTo("/company/" + conumb + "/appointments/"+ id +"/full_record"))
                 .willReturn(aResponse().withStatus(responseCode)));
     }
 

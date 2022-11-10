@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.lookupOfficeRole;
+import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.lookupOfficerRole;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseDateString;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseDateTimeString;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseYesOrNo;
@@ -58,7 +58,7 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
         officer.setSurname(source.getSurname());
         officer.setHonours(source.getHonours());
 
-        final String officerRole = lookupOfficeRole(source.getKind());
+        final String officerRole = lookupOfficerRole(source.getKind(), source.getCorporateInd());
         officer.setOfficerRole(officerRole);
 
         // Occupation and Nationality are in the same set of Roles

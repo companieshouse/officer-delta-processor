@@ -17,12 +17,14 @@ public class OfficerRequestMatcher implements ValueMatcher<Request> {
 
     private String expectedOutput;
     private String conumb;
+    private String id;
     private Logger logger;
 
-    public OfficerRequestMatcher(Logger logger, String conumb, String output) {
+    public OfficerRequestMatcher(Logger logger, String conumb, String output, String id) {
         this.conumb = conumb;
         this.expectedOutput = output;
         this.logger = logger;
+        this.id = id;
     }
 
     @Override
@@ -33,7 +35,7 @@ public class OfficerRequestMatcher implements ValueMatcher<Request> {
     }
 
     private MatchResult matchUrl(String actualUrl) {
-        String expectedUrl = "/company/" + conumb + "/appointments/EcEKO1YhIKexb0cSDZsn_OHsFw4/full_record";
+        String expectedUrl = "/company/" + conumb + "/appointments/" + id + "/full_record";
 
         MatchResult urlResult = MatchResult.of(expectedUrl.equals(actualUrl));
 

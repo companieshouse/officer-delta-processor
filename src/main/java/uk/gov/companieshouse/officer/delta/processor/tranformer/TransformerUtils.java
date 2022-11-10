@@ -100,7 +100,12 @@ public class TransformerUtils {
         return base64Encode(sha1Digest(plain)).replace("=", "");
     }
 
-    public static String lookupOfficeRole(String kind) {
+    public static String lookupOfficerRole(String kind, String corpInd) {
+        if(corpInd != null && !kind.toUpperCase().contains("CORP")
+                && corpInd.equalsIgnoreCase("Y")) {
+            kind += "CORP";
+        }
+
         OfficerRole officerRole = OfficerRole.valueOf(kind);
 
         return officerRole.getValue();

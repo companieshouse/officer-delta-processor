@@ -42,6 +42,8 @@ import java.util.stream.Stream;
 class OfficerTransformTest {
     public static final String VALID_DATE = "20000101";
     public static final String INVALID_DATE = "12345";
+    public static final String CORP_IND_Y = "Y";
+    public static final String CORP_IND_N = "N";
     public static final String KIND_OF_OFFICER_ROLE_WITH_DOB = OfficerRole.DIR.name();
     private static final String CHANGED_AT = "20210909133736012345";
     private static final Instant CHANGED_INSTANT = Instant.parse("2021-09-09T13:37:36.000Z");
@@ -278,6 +280,50 @@ class OfficerTransformTest {
             is("/officers/vuIAhYYbRDhqzx9b3e_jd6Uhres"));
         assertThat(result.getLinksData().getOfficerLinksData().getAppointmentsLink(),
             is("/officers/vuIAhYYbRDhqzx9b3e_jd6Uhres/appointments"));
+    }
+
+    @Test
+    void transformCorporateWhenKindIsDIRandCorpIndisY() {
+        final OfficersItem officer = createOfficer(addressAPI, identification);
+
+        officer.setChangedAt(CHANGED_AT);
+        officer.setAppointmentDate(VALID_DATE);
+        officer.setDateOfBirth(VALID_DATE);
+        officer.setCorporateInd(CORP_IND_Y);
+        officer.setKind(OfficerRole.DIR.name());
+
+        final OfficerAPI outputOfficer = testTransform.transform(officer);
+
+        assertThat(outputOfficer.getOfficerRole(), is("corporate-director"));
+    }
+
+    @Test
+    void transformNautralWhenKindIsDIRandCorpIndisN() {
+        final OfficersItem officer = createOfficer(addressAPI, identification);
+
+        officer.setChangedAt(CHANGED_AT);
+        officer.setAppointmentDate(VALID_DATE);
+        officer.setDateOfBirth(VALID_DATE);
+        officer.setCorporateInd(CORP_IND_N);
+        officer.setKind(OfficerRole.DIR.name());
+
+        final OfficerAPI outputOfficer = testTransform.transform(officer);
+
+        assertThat(outputOfficer.getOfficerRole(), is("director"));
+    }
+
+    @Test
+    void transformNaturalWhenKindIsDIRandCorpIndisMissing() {
+        final OfficersItem officer = createOfficer(addressAPI, identification);
+
+        officer.setChangedAt(CHANGED_AT);
+        officer.setAppointmentDate(VALID_DATE);
+        officer.setDateOfBirth(VALID_DATE);
+        officer.setKind(OfficerRole.DIR.name());
+
+        final OfficerAPI outputOfficer = testTransform.transform(officer);
+
+        assertThat(outputOfficer.getOfficerRole(), is("director"));
     }
 
     private void verifyProcessingError(final OfficerAPI officerAPI, final OfficersItem officer,
