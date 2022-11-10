@@ -1,7 +1,7 @@
 package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.lookupOfficeRole;
+import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.lookupOfficerRole;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseDateString;
 
 import org.apache.commons.lang.BooleanUtils;
@@ -28,7 +28,7 @@ public class SensitiveOfficerTransform implements Transformative<OfficersItem, S
 
     @Override
     public SensitiveOfficerAPI transform(OfficersItem source, SensitiveOfficerAPI officer) throws NonRetryableErrorException {
-        final String officerRole = lookupOfficeRole(source.getKind(), source.getCorporateInd());
+        final String officerRole = lookupOfficerRole(source.getKind(), source.getCorporateInd());
         if (RolesWithResidentialAddress.includes(officerRole)) {
             officer.setUsualResidentialAddress(source.getUsualResidentialAddress());
             officer.setResidentialAddressSameAsServiceAddress(
