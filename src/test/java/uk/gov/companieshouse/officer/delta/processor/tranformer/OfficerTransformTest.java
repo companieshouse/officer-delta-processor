@@ -326,6 +326,21 @@ class OfficerTransformTest {
         assertThat(outputOfficer.getOfficerRole(), is("director"));
     }
 
+    @Test
+    void transformCorporateWhenSpacesInKindName() {
+        final OfficersItem officer = createOfficer(addressAPI, identification);
+
+        officer.setChangedAt(CHANGED_AT);
+        officer.setAppointmentDate(VALID_DATE);
+        officer.setDateOfBirth(VALID_DATE);
+        officer.setCorporateInd(CORP_IND_Y);
+        officer.setKind("D IR ");
+
+        final OfficerAPI outputOfficer = testTransform.transform(officer);
+
+        assertThat(outputOfficer.getOfficerRole(), is("corporate-director"));
+    }
+
     private void verifyProcessingError(final OfficerAPI officerAPI, final OfficersItem officer,
             final String expectedMessage) {
         final NonRetryableErrorException exception =

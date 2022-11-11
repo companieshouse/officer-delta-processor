@@ -101,6 +101,7 @@ public class TransformerUtils {
     }
 
     public static String lookupOfficerRole(String kind, String corpInd) {
+        kind = kind.replace(" ","");
         if(corpInd != null && !kind.toUpperCase().contains("CORP")
                 && corpInd.equalsIgnoreCase("Y")) {
             kind += "CORP";
