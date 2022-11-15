@@ -100,7 +100,7 @@ class DeltaProcessorTest {
     @Test
     void process() throws NonRetryableErrorException, RetryableErrorException {
         final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID);
-        final String expectedNumber = expectedAppointment.getData().getCompanyNumber();
+        final String expectedNumber = expectedAppointment.getCompanyNumber();
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.OK.value(), null, null);
 
         when(apiClientService.putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment)).thenReturn(response);
@@ -139,7 +139,7 @@ class DeltaProcessorTest {
     @MethodSource("provideRetryableStatuses")
     void processWhenResponseStatusRetryable(final HttpStatus responseStatus) {
         final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID);
-        final String expectedNumber = expectedAppointment.getData().getCompanyNumber();
+        final String expectedNumber = expectedAppointment.getCompanyNumber();
 
         when(apiClientService.putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment)).thenThrow(
                 new ResponseStatusException(responseStatus));
@@ -157,7 +157,7 @@ class DeltaProcessorTest {
     @Test
     void processWhenClientServiceThrowsIllegalArgumentException() {
         final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID);
-        final String expectedNumber = expectedAppointment.getData().getCompanyNumber();
+        final String expectedNumber = expectedAppointment.getCompanyNumber();
 
         doThrow(new IllegalArgumentException("simulate parsing error in api SDK")).when(apiClientService)
                 .putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
@@ -179,7 +179,7 @@ class DeltaProcessorTest {
     @MethodSource("provideNonRetryableStatuses")
     void processWhenResponseStatusNonRetryable(final HttpStatus responseStatus) {
         final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID);
-        final String expectedNumber = expectedAppointment.getData().getCompanyNumber();
+        final String expectedNumber = expectedAppointment.getCompanyNumber();
 
         when(apiClientService.putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment)).thenThrow(
                 new ResponseStatusException(responseStatus));
