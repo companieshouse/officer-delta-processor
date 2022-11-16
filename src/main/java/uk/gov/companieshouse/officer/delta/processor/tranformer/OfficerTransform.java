@@ -51,15 +51,21 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
             officer.setResignedOn(
                     parseDateString("resignation_date", source.getResignationDate()));
         }
-        officer.setCompanyNumber(source.getCompanyNumber());
-        officer.setTitle(source.getTitle());
-        officer.setForename(source.getForename());
-        officer.setOtherForenames(source.getMiddleName());
-        officer.setSurname(source.getSurname());
-        officer.setHonours(source.getHonours());
 
         final String officerRole = lookupOfficerRole(source.getKind(), source.getCorporateInd());
         officer.setOfficerRole(officerRole);
+
+        if (source.getCorporateInd().equalsIgnoreCase("Y")) {
+            officer.setCompanyName(source.getSurname());
+        } else {
+            officer.setTitle(source.getTitle());
+            officer.setForename(source.getForename());
+            officer.setOtherForenames(source.getMiddleName());
+            officer.setSurname(source.getSurname());
+            officer.setHonours(source.getHonours());
+        }
+
+        officer.setCompanyNumber(source.getCompanyNumber());
 
         // Occupation and Nationality are in the same set of Roles
         if (RolesWithOccupation.includes(officerRole)) {

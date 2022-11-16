@@ -6,7 +6,9 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.DATETIME_LENGTH;
@@ -248,7 +250,6 @@ class OfficerTransformTest {
         assertThat(result.getOfficerRole(), is(officer.getOfficerRole()));
         assertThat(result.isPre1992Appointment(), is(false));
         assertThat(result.getResignedOn(), is(hasResignationDate ? VALID_DATE_INSTANT : null));
-        assertThat(result.getCompanyNumber(), is(officer.getCompanyNumber()));
         assertThat(result.getTitle(), is(officer.getTitle()));
         assertThat(result.getForename(), is(officer.getForename()));
         assertThat(result.getOtherForenames(), is(officer.getMiddleName()));
@@ -291,14 +292,16 @@ class OfficerTransformTest {
         officer.setDateOfBirth(VALID_DATE);
         officer.setCorporateInd(CORP_IND_Y);
         officer.setKind(OfficerRole.DIR.name());
+        officer.setSurname("Corp Ltd");
 
         final OfficerAPI outputOfficer = testTransform.transform(officer);
 
         assertThat(outputOfficer.getOfficerRole(), is("corporate-director"));
+        assertThat(outputOfficer.getCompanyName(), is("Corp Ltd"));
     }
 
     @Test
-    void transformNautralWhenKindIsDIRandCorpIndisN() {
+    void transformNaturalWhenKindIsDIRandCorpIndisN() {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         officer.setChangedAt(CHANGED_AT);
@@ -306,6 +309,7 @@ class OfficerTransformTest {
         officer.setDateOfBirth(VALID_DATE);
         officer.setCorporateInd(CORP_IND_N);
         officer.setKind(OfficerRole.DIR.name());
+        officer.setCompanyNumber("1111111");
 
         final OfficerAPI outputOfficer = testTransform.transform(officer);
 
@@ -370,6 +374,7 @@ class OfficerTransformTest {
         item.setServiceAddressSameAsRegisteredAddress("Y");
         item.setResidentialAddressSameAsServiceAddress("Y");
         item.setIdentification(identification);
+        item.setCorporateInd("N");
 
         return item;
     }
