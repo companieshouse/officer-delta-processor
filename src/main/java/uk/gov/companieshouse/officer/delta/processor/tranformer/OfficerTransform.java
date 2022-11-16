@@ -56,7 +56,6 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
         officer.setOfficerRole(officerRole);
 
         if (source.getCorporateInd().equalsIgnoreCase("Y")) {
-            officer.setCompanyNumber(source.getCompanyNumber());
             officer.setCompanyName(source.getSurname());
         } else {
             officer.setTitle(source.getTitle());
@@ -65,6 +64,8 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
             officer.setSurname(source.getSurname());
             officer.setHonours(source.getHonours());
         }
+
+        officer.setCompanyNumber(source.getCompanyNumber());
 
         // Occupation and Nationality are in the same set of Roles
         if (RolesWithOccupation.includes(officerRole)) {

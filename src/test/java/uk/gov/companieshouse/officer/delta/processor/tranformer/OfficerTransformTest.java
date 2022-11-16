@@ -314,7 +314,6 @@ class OfficerTransformTest {
         final OfficerAPI outputOfficer = testTransform.transform(officer);
 
         assertThat(outputOfficer.getOfficerRole(), is("director"));
-        assertNull(outputOfficer.getCompanyNumber());
     }
 
     @Test
