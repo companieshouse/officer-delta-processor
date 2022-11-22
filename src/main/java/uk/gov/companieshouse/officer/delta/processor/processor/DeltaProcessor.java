@@ -92,21 +92,22 @@ public class DeltaProcessor implements Processor<ChsDelta> {
     @Override
     public void processDelete(ChsDelta chsDelta) {
         final String logContext = chsDelta.getContextId();
-        final String internalId;
-        final String companyNumber;
+        final Map<String, Object> logMap = new HashMap<>();
 
         var mapper = new ObjectMapper();
         OfficerDeleteDelta officersDelete;
         try {
             officersDelete = mapper.readValue(chsDelta.getData(),
                     OfficerDeleteDelta.class);
+        final String companyNumber = officersDelete.getCompanyNumber();
+        final String internalId = TransformerUtils.encode(officersDelete.getInternalId());
+            apiClientService.deleteAppointment(logContext, internalId, companyNumber);
+        } catch (ResponseStatusException e) {
+            handleResponse(e, e.getStatus(), logContext, "Sending officer delete failed", logMap);
         } catch (Exception ex) {
             throw new NonRetryableErrorException(
                     "Error when extracting officers delete delta", ex);
         }
-        companyNumber = officersDelete.getCompanyNumber();
-        internalId = TransformerUtils.encode(officersDelete.getInternalId());
-        apiClientService.deleteAppointment(logContext, internalId, companyNumber);
     }
 
     private void handleResponse(final ResponseStatusException ex, final HttpStatus httpStatus, final String logContext,
