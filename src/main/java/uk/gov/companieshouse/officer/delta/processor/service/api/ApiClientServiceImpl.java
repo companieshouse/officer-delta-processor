@@ -77,7 +77,7 @@ public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements Ap
     public ApiResponse<Void> deleteAppointment(
             final String log, final String internalId,
             final String companyNumber) {
-        final String uri =
+        final var uri =
                 String.format("/company/%s/appointments/%s/full_record/delete",
                         companyNumber, internalId);
 
