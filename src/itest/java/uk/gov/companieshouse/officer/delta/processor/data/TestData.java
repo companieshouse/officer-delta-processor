@@ -19,6 +19,11 @@ public class TestData {
         return readFile(path).replaceAll("\n", "");
     }
 
+    public static String getDeleteData() {
+        String path = "src/itest/resources/data/delete_delta.json";
+        return readFile(path).replaceAll("\n", "");
+    }
+
     private static String readFile(String path) {
         String data;
         try {

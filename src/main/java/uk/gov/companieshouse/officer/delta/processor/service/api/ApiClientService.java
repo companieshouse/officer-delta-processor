@@ -25,4 +25,14 @@ public interface ApiClientService {
      */
     ApiResponse<Void> putAppointment(final String logContext, final String companyNumber, final AppointmentAPI appointment);
 
+    /**
+     * Delete a Company Appointment.
+     *
+     *
+     * @param logContext
+     * @param internalId the internal Id
+     * @param companyNumber the company number
+     * @return the api response
+     */
+    ApiResponse<Void> deleteAppointment(final String logContext, final String internalId,final String companyNumber);
 }

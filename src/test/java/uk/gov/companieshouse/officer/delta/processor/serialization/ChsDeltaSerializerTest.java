@@ -24,7 +24,7 @@ class ChsDeltaSerializerTest {
 
     @Test
     void When_serialize_Expect_chsDeltaBytes() {
-        ChsDelta chsDelta = new ChsDelta("{\"key\": \"value\"}", 1, "context_id");
+        ChsDelta chsDelta = new ChsDelta("{\"key\": \"value\"}", 1, "context_id", false);
 
         byte[] result = serializer.serialize("", chsDelta);
 

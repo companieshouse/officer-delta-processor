@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import uk.gov.companieshouse.api.delta.OfficerDeleteDelta;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
 import uk.gov.companieshouse.delta.ChsDelta;
@@ -38,10 +40,7 @@ import uk.gov.companieshouse.officer.delta.processor.exception.RetryableErrorExc
 import uk.gov.companieshouse.officer.delta.processor.model.Officers;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientService;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.AppointmentTransform;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.IdentificationTransform;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.OfficerTransform;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.SensitiveOfficerTransform;
+import uk.gov.companieshouse.officer.delta.processor.tranformer.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -68,10 +67,7 @@ class DeltaProcessorTest {
 
     @BeforeAll
     static void beforeAll() throws IOException, NonRetryableErrorException {
-        final Resource jsonFile = new ClassPathResource("officer_delta_dummy.json");
-
-        json = new BufferedReader(new InputStreamReader(jsonFile.getInputStream())).lines()
-                .collect(Collectors.joining("\n"));
+        json = loadJson("officer_delta_dummy.json");
         IdentificationTransform idTransform = new IdentificationTransform();
         OfficerTransform officerTransform = new OfficerTransform(idTransform);
         SensitiveOfficerTransform sensitiveOfficerTransform = new SensitiveOfficerTransform();
@@ -92,6 +88,13 @@ class DeltaProcessorTest {
         return appointmentAPI;
     }
 
+    private static OfficerDeleteDelta jsonToDelete(final String json)
+            throws JsonProcessingException, NonRetryableErrorException {
+        final ObjectMapper objectMapper = new ObjectMapper();
+        final OfficerDeleteDelta officerDelete = objectMapper.readValue(json, OfficerDeleteDelta.class);
+        return officerDelete;
+    }
+
     @BeforeEach
     void setUp() {
         testProcessor = new DeltaProcessor(logger, appointmentTransform, apiClientService);
@@ -99,7 +102,7 @@ class DeltaProcessorTest {
 
     @Test
     void process() throws NonRetryableErrorException, RetryableErrorException {
-        final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID);
+        final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID, false);
         final String expectedNumber = expectedAppointment.getCompanyNumber();
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.OK.value(), null, null);
 
@@ -114,7 +117,7 @@ class DeltaProcessorTest {
     @Test
     void processWhenJsonParseFailureThenContentRedacted() {
         final String badJson = json.replace(":", "-");
-        final ChsDelta delta = new ChsDelta(badJson, 0, CONTEXT_ID);
+        final ChsDelta delta = new ChsDelta(badJson, 0, CONTEXT_ID, false);
 
         final NonRetryableErrorException exception =
                 assertThrows(NonRetryableErrorException.class, () -> testProcessor.process(delta));
@@ -138,7 +141,7 @@ class DeltaProcessorTest {
     @ParameterizedTest
     @MethodSource("provideRetryableStatuses")
     void processWhenResponseStatusRetryable(final HttpStatus responseStatus) {
-        final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID);
+        final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID, false);
         final String expectedNumber = expectedAppointment.getCompanyNumber();
 
         when(apiClientService.putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment)).thenThrow(
@@ -156,7 +159,7 @@ class DeltaProcessorTest {
 
     @Test
     void processWhenClientServiceThrowsIllegalArgumentException() {
-        final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID);
+        final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID, false);
         final String expectedNumber = expectedAppointment.getCompanyNumber();
 
         doThrow(new IllegalArgumentException("simulate parsing error in api SDK")).when(apiClientService)
@@ -178,7 +181,7 @@ class DeltaProcessorTest {
     @ParameterizedTest
     @MethodSource("provideNonRetryableStatuses")
     void processWhenResponseStatusNonRetryable(final HttpStatus responseStatus) {
-        final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID);
+        final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID, false);
         final String expectedNumber = expectedAppointment.getCompanyNumber();
 
         when(apiClientService.putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment)).thenThrow(
@@ -192,6 +195,37 @@ class DeltaProcessorTest {
         inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), isNull(), isNotNull());
         inOrder.verifyNoMoreInteractions();
 
+    }
+
+    @Test
+    void processDelete() throws IOException, NonRetryableErrorException {
+        String deleteJson = loadJson("officer_delete_delta.json");
+        OfficerDeleteDelta expectedDelete = jsonToDelete(deleteJson);
+        final ChsDelta delta = new ChsDelta(deleteJson, 0, CONTEXT_ID, true);
+        final String expectedNumber = expectedDelete.getCompanyNumber();
+        final String expectedInternalId = TransformerUtils.encode(expectedDelete.getInternalId());
+        final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.OK.value(), null, null);
+
+        when(apiClientService.deleteAppointment(CONTEXT_ID, expectedInternalId, expectedNumber)).thenReturn(response);
+
+        testProcessor.processDelete(delta);
+
+        verify(apiClientService).deleteAppointment(CONTEXT_ID, expectedInternalId, expectedNumber);
+        verifyNoMoreInteractions(apiClientService);
+    }
+
+    @Test
+    void brokenDeleteThrowsNonRetryableError() throws IOException, NonRetryableErrorException {
+        String brokendelete = loadJson("broken_delta.json");
+        final ChsDelta delta = new ChsDelta(brokendelete, 0, CONTEXT_ID, true);
+
+        Assert.assertThrows(NonRetryableErrorException.class, ()->testProcessor.processDelete(delta));
+    }
+
+    private static String loadJson(String filename) throws IOException {
+        final Resource jsonFile = new ClassPathResource(filename);
+         return new BufferedReader(new InputStreamReader(jsonFile.getInputStream())).lines()
+                    .collect(Collectors.joining("\n"));
     }
 
 }

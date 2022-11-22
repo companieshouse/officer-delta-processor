@@ -58,7 +58,7 @@ public class CommonSteps {
         this.type = type;
         this.id = id;
 
-        ChsDelta delta = new ChsDelta(TestData.getInputData(type), 1, "1");
+        ChsDelta delta = new ChsDelta(TestData.getInputData(type), 1, "1", false);
         kafkaTemplate.send(mainTopic, delta);
 
         countDown();
@@ -73,7 +73,7 @@ public class CommonSteps {
 
     @When("a message with invalid data is sent")
     public void messageWithInvalidDataIsSent() throws Exception {
-        ChsDelta delta = new ChsDelta("InvalidData", 1, "1");
+        ChsDelta delta = new ChsDelta("InvalidData", 1, "1", false);
         kafkaTemplate.send(mainTopic, delta);
 
         countDown();
@@ -85,7 +85,7 @@ public class CommonSteps {
         stubPutAppointment("01777777", "EcEKO1YhIKexb0cSDZsn_OHsFw4", responseCode);
 
         ChsDelta delta = new ChsDelta(
-                TestData.getInputData("natural"), 1, "1");
+                TestData.getInputData("natural"), 1, "1", false);
         kafkaTemplate.send(mainTopic, delta);
 
         countDown();
@@ -94,7 +94,7 @@ public class CommonSteps {
     @When("the consumer receives a message that causes an error")
     public void theConsumerReceivesMessageThatCausesAnError() throws Exception {
         ChsDelta delta = new ChsDelta(
-                TestData.getInputData("error"), 1, "1");
+                TestData.getInputData("error"), 1, "1", false);
         kafkaTemplate.send(mainTopic, delta);
 
         countDown();
@@ -125,6 +125,22 @@ public class CommonSteps {
         assertThat(errors).isEqualTo(1);
     }
 
+    @When("the consumer receives a delete payload")
+    public void theConsumerReceivesDelete() throws Exception {
+        configureWiremock();
+        stubDeleteOfficer(200);
+        ChsDelta delta = new ChsDelta(TestData.getDeleteData(), 1, "1", true);
+        kafkaTemplate.send(mainTopic, delta);
+
+        countDown();
+    }
+
+    @Then("a DELETE request is sent to the appointments api with the encoded Id and company number")
+    public void deleteRequestIsSent() {
+        verify(1, deleteRequestedFor(urlMatching(
+                "/company/09876543/appointments/N-YqKNwdT_HvetusfTJ0H0jAQbA/full_record/delete")));
+    }
+
     @After
     public void shutdownWiremock(){
         if (wireMockServer != null)
@@ -143,6 +159,11 @@ public class CommonSteps {
 
     private void stubPutAppointment(String conumb, String id, int responseCode) {
         stubFor(put(urlEqualTo("/company/" + conumb + "/appointments/"+ id +"/full_record"))
+                .willReturn(aResponse().withStatus(responseCode)));
+    }
+
+    private void stubDeleteOfficer(int responseCode) {
+        stubFor(delete(urlEqualTo("/company/09876543/appointments/N-YqKNwdT_HvetusfTJ0H0jAQbA/full_record/delete"))
                 .willReturn(aResponse().withStatus(responseCode)));
     }
 

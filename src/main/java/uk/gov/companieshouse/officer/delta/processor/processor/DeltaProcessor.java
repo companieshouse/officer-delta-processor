@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import uk.gov.companieshouse.api.delta.OfficerDeleteDelta;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
 import uk.gov.companieshouse.delta.ChsDelta;
@@ -17,6 +18,7 @@ import uk.gov.companieshouse.officer.delta.processor.model.Officers;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientService;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.AppointmentTransform;
+import uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -85,6 +87,26 @@ public class DeltaProcessor implements Processor<ChsDelta> {
             // ApiErrorResponseException.
             throw new RetryableErrorException("Failed to send data for officer, retry", e);
         }
+    }
+
+    @Override
+    public void processDelete(ChsDelta chsDelta) {
+        final String logContext = chsDelta.getContextId();
+        final String internalId;
+        final String companyNumber;
+
+        ObjectMapper mapper = new ObjectMapper();
+        OfficerDeleteDelta officersDelete;
+        try {
+            officersDelete = mapper.readValue(chsDelta.getData(),
+                    OfficerDeleteDelta.class);
+        } catch (Exception ex) {
+            throw new NonRetryableErrorException(
+                    "Error when extracting officers delete delta", ex);
+        }
+        companyNumber = officersDelete.getCompanyNumber();
+        internalId = TransformerUtils.encode(officersDelete.getInternalId());
+        apiClientService.deleteAppointment(logContext, internalId, companyNumber);
     }
 
     private void handleResponse(final ResponseStatusException ex, final HttpStatus httpStatus, final String logContext,

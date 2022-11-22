@@ -55,14 +55,18 @@ public class DeltaConsumer {
                                     @Header(KafkaHeaders.RECEIVED_PARTITION_ID) String partition,
                                     @Header(KafkaHeaders.OFFSET) String offset) {
         var startTime = Instant.now();
-        var chsDelta = message.getPayload();
+        ChsDelta chsDelta = message.getPayload();
         String contextId = chsDelta.getContextId();
         logger.info(format("A new message successfully picked up from topic: %s, "
                         + "partition: %s and offset: %s with contextId: %s",
                 topic, partition, offset, contextId));
 
         try {
-            processor.process(chsDelta);
+            if (Boolean.TRUE.equals(chsDelta.getIsDelete())) {
+                processor.processDelete(chsDelta);
+            } else {
+                processor.process(chsDelta);
+            }
             logger.info(format("Officer Delta message with contextId: %s is successfully "
                             + "processed in %d milliseconds", contextId,
                     Duration.between(startTime, Instant.now()).toMillis()));

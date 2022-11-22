@@ -73,6 +73,22 @@ public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements Ap
                         .upsert(uri, appointment));
     }
 
+    @Override
+    public ApiResponse<Void> deleteAppointment(
+            final String log, final String internalId,
+            final String companyNumber) {
+        final String uri =
+                String.format("/company/%s/appointments/%s/full_record/delete",
+                        companyNumber, internalId);
+
+        Map<String,Object> logMap = createLogMap(internalId,"DELETE", uri);
+        logger.infoContext(log, String.format("DELETE %s", uri), logMap);
+
+        return executeOp(log, "deleteOfficer", uri,
+                getApiClient(log).privateDisqualificationResourceHandler()
+                        .deleteOfficer(uri));
+    }
+
     private Map<String,Object> createLogMap(String companyNumber, String method, String path){
         final Map<String, Object> logMap = new HashMap<>();
         logMap.put("company_number", companyNumber);
