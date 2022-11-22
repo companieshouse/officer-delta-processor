@@ -95,7 +95,7 @@ public class DeltaProcessor implements Processor<ChsDelta> {
         final String internalId;
         final String companyNumber;
 
-        ObjectMapper mapper = new ObjectMapper();
+        var mapper = new ObjectMapper();
         OfficerDeleteDelta officersDelete;
         try {
             officersDelete = mapper.readValue(chsDelta.getData(),

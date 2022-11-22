@@ -55,7 +55,7 @@ public class DeltaConsumer {
                                     @Header(KafkaHeaders.RECEIVED_PARTITION_ID) String partition,
                                     @Header(KafkaHeaders.OFFSET) String offset) {
         var startTime = Instant.now();
-        ChsDelta chsDelta = message.getPayload();
+        var chsDelta = message.getPayload();
         String contextId = chsDelta.getContextId();
         logger.info(format("A new message successfully picked up from topic: %s, "
                         + "partition: %s and offset: %s with contextId: %s",
