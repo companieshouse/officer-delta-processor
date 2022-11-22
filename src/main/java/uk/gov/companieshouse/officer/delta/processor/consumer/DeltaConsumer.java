@@ -62,7 +62,11 @@ public class DeltaConsumer {
                 topic, partition, offset, contextId));
 
         try {
-            processor.process(chsDelta);
+            if (Boolean.TRUE.equals(chsDelta.getIsDelete())) {
+                processor.processDelete(chsDelta);
+            } else {
+                processor.process(chsDelta);
+            }
             logger.info(format("Officer Delta message with contextId: %s is successfully "
                             + "processed in %d milliseconds", contextId,
                     Duration.between(startTime, Instant.now()).toMillis()));

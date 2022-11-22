@@ -61,7 +61,7 @@ public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements Ap
 
     @Override
     public ApiResponse<Void> putAppointment(final String logContext, String companyNumber, AppointmentAPI appointment) {
-        final String uri =
+        final var uri =
                 String.format("/company/%s/appointments/%s/full_record", companyNumber, appointment.getAppointmentId());
 
         Map<String,Object> logMap = createLogMap(companyNumber,"PUT", uri);
@@ -71,6 +71,22 @@ public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements Ap
                 getApiClient(logContext).privateDeltaCompanyAppointmentResourceHandler()
                         .putAppointment()
                         .upsert(uri, appointment));
+    }
+
+    @Override
+    public ApiResponse<Void> deleteAppointment(
+            final String log, final String internalId,
+            final String companyNumber) {
+        final var uri =
+                String.format("/company/%s/appointments/%s/full_record/delete",
+                        companyNumber, internalId);
+
+        Map<String,Object> logMap = createLogMap(internalId,"DELETE", uri);
+        logger.infoContext(log, String.format("DELETE %s", uri), logMap);
+
+        return executeOp(log, "deleteOfficer", uri,
+                getApiClient(log).privateDisqualificationResourceHandler()
+                        .deleteOfficer(uri));
     }
 
     private Map<String,Object> createLogMap(String companyNumber, String method, String path){

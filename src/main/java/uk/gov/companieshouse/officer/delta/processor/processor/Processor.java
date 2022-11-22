@@ -5,4 +5,5 @@ import uk.gov.companieshouse.officer.delta.processor.exception.RetryableErrorExc
 
 public interface Processor<I> {
     void process(I delta) throws RetryableErrorException, NonRetryableErrorException;
+    void processDelete(I delta) throws NonRetryableErrorException;
 }

@@ -35,15 +35,23 @@ class DeltaConsumerTest {
 
     @Test
     void When_consumer_receives_valid_payload_process_is_called() throws IOException {
-        Message<ChsDelta> message = Util.createChsDeltaMessage("officer_delta_example.json");
+        Message<ChsDelta> message = Util.createChsDeltaMessage("officer_delta_example.json", false);
         consumer.receiveMainMessages(message, "topic", "partition", "offset");
 
         verify(processor).process(any());
     }
 
     @Test
+    void When_consumer_receives_valid_delete_payload_processDelete_is_called() throws IOException {
+        Message<ChsDelta> message = Util.createChsDeltaMessage("officer_delete_delta.json", true);
+        consumer.receiveMainMessages(message, "topic", "partition", "offset");
+
+        verify(processor).processDelete(any());
+    }
+
+    @Test
     void When_processor_throws_exception_consumer_throws_exception() throws IOException {
-        Message<ChsDelta> message = Util.createChsDeltaMessage("broken_delta.json");
+        Message<ChsDelta> message = Util.createChsDeltaMessage("broken_delta.json", false);
         ChsDelta brokenMessage = message.getPayload();
 
         doThrow(new NonRetryableErrorException(new Exception()))

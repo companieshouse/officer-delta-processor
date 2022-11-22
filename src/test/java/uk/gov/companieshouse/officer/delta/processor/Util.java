@@ -56,19 +56,20 @@ public class Util {
         return record;
     }
 
-    public static Message<ChsDelta> createChsDeltaMessage(String filename) throws IOException {
+    public static Message<ChsDelta> createChsDeltaMessage(String filename, boolean isDelete) throws IOException {
         InputStreamReader exampleJsonPayload = new InputStreamReader(
                 ClassLoader.getSystemClassLoader().getResourceAsStream(filename));
         String data = FileCopyUtils.copyToString(exampleJsonPayload);
 
-        return buildMessage(data);
+        return buildMessage(data, isDelete);
     }
 
-    private static Message<ChsDelta> buildMessage(String data) {
+    private static Message<ChsDelta> buildMessage(String data, boolean isDelete) {
         ChsDelta mockChsDelta = ChsDelta.newBuilder()
                 .setData(data)
                 .setContextId("context_id")
                 .setAttempt(1)
+                .setIsDelete(isDelete)
                 .build();
         return MessageBuilder
                 .withPayload(mockChsDelta)
