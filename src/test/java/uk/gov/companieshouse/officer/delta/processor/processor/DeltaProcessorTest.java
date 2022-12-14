@@ -35,6 +35,7 @@ import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.officer.delta.processor.config.OfficerRoleConfig;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.exception.RetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.Officers;
@@ -75,7 +76,8 @@ class DeltaProcessorTest {
         IdentificationTransform idTransform = new IdentificationTransform();
         OfficerTransform officerTransform = new OfficerTransform(idTransform);
         SensitiveOfficerTransform sensitiveOfficerTransform = new SensitiveOfficerTransform();
-        appointmentTransform = new AppointmentTransform(officerTransform, sensitiveOfficerTransform);
+        OfficerRoleConfig officerRoleConfig = new OfficerRoleConfig(null, null);
+        appointmentTransform = new AppointmentTransform(officerTransform, sensitiveOfficerTransform, officerRoleConfig);
         expectedAppointment = jsonToAppointment(json);
     }
 

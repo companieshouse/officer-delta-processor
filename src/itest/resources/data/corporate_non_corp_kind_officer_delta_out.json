@@ -47,5 +47,6 @@
   "officer_id":"gkfq1cddT1bYG4l0NfBY1ExfEOc",
   "previous_officer_id":"gkfq1cddT1bYG4l0NfBY1ExfEOc",
   "company_number":"01777777",
-  "delta_at":"20221109132615529605"
+  "delta_at":"20221109132615529605",
+  "officer_role_sort_order":20
 }

@@ -71,6 +71,7 @@ public class DeltaConsumer {
                             + "processed in %d milliseconds", contextId,
                     Duration.between(startTime, Instant.now()).toMillis()));
         } catch (Exception exception) {
+            logger.info(exception.getMessage());
             logger.errorContext(contextId, format("Exception occurred while processing "
                     + "message on the topic: %s", topic), exception, null);
             throw exception;

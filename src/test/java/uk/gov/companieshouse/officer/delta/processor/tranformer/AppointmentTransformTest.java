@@ -7,13 +7,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
 import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
+import uk.gov.companieshouse.officer.delta.processor.config.OfficerRoleConfig;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 
@@ -27,10 +31,12 @@ class AppointmentTransformTest {
     private SensitiveOfficerTransform sensitiveOfficerTransform;
     @Mock
     private OfficerAPI officerAPI;
+    @Mock
+    private OfficerRoleConfig officerRoleConfig;
 
     @BeforeEach
     void setUp() {
-        testTransform = new AppointmentTransform(officerTransform, sensitiveOfficerTransform);
+        testTransform = new AppointmentTransform(officerTransform, sensitiveOfficerTransform, officerRoleConfig);
     }
 
     @Test
@@ -44,8 +50,12 @@ class AppointmentTransformTest {
         final AppointmentAPI appointmentAPI = testTransform.factory();
         appointmentAPI.setId("internalId");
         appointmentAPI.setAppointmentId("internalId");
+        HashMap<String, Integer> nonResigned = new HashMap<>();
+        nonResigned.put("secretary", 10);
 
         when(officerTransform.transform(item)).thenReturn(officerAPI);
+        when(officerRoleConfig.getNonResigned()).thenReturn(nonResigned);
+        when(officerAPI.getOfficerRole()).thenReturn("secretary");
 
         final AppointmentAPI result = testTransform.transform(item, appointmentAPI);
 
@@ -58,6 +68,7 @@ class AppointmentTransformTest {
         assertThat(appointmentAPI.getCompanyNumber(), is("12345678"));
         verify(officerTransform).transform(item);
         assertThat(appointmentAPI.getData(), is(sameInstance(officerAPI)));
+        assertThat(appointmentAPI.getOfficerRoleSortOrder(), is(10));
     }
 
     private OfficersItem createOfficer() {
