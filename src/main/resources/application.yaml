@@ -1,3 +1,4 @@
+---
 officer-role-ordinal:
   nonResigned:
     # Company
@@ -31,7 +32,6 @@ officer-role-ordinal:
     receiver-and-manager: 50
     cic-manager: 50
 
-    
   resigned:
     secretary: 100
     nominee-secretary: 100

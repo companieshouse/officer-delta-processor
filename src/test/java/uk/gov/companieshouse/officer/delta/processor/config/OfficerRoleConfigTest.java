@@ -8,7 +8,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class OfficerRoleConfigTest {
+class OfficerRoleConfigTest {
 
     private static final Map<String, Integer> nonResigned = new HashMap<>();
     private static final Map<String, Integer> resigned = new HashMap<>();
