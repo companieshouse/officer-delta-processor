@@ -71,7 +71,6 @@ public class DeltaProcessor implements Processor<ChsDelta> {
             /* IMPORTANT: do not propagate the original cause as it contains the full source JSON with
              * potentially sensitive data.
              */
-            logger.info(e.getMessage());
             final String cleanMessage = PARSE_MESSAGE_PATTERN.matcher(e.getMessage()).replaceAll("Source line");
             final NonRetryableErrorException cause = new NonRetryableErrorException(cleanMessage, null);
             logger.errorContext(logContext,
@@ -80,14 +79,12 @@ public class DeltaProcessor implements Processor<ChsDelta> {
             throw new NonRetryableErrorException("Unable to JSON parse CHSDelta", cause);
         }
         catch (ResponseStatusException e) {
-            logger.info(e.getMessage());
             handleResponse(e, e.getStatus(), logContext, "Sending officer data failed", logMap);
         }
         catch (IllegalArgumentException e) {
             // Workaround for Docker router. When service is unavailable: "IllegalArgumentException: expected numeric
             // type but got class uk.gov.companieshouse.api.error.ApiErrorResponse" is thrown when the SDK parses
             // ApiErrorResponseException.
-            logger.info(e.getMessage());
             throw new RetryableErrorException("Failed to send data for officer, retry", e);
         }
     }
