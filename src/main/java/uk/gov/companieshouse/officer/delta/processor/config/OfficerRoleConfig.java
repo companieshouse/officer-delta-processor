@@ -17,18 +17,20 @@ public class OfficerRoleConfig {
         this.resigned = resigned;
     }
 
+    public Map<String, Integer> getNonResigned() {
+        return nonResigned;
+    }
+
     public void setNonResigned(Map<String, Integer> nonResigned) {
         this.nonResigned = nonResigned;
+    }
+
+    public Map<String, Integer> getResigned() {
+        return resigned;
     }
 
     public void setResigned(Map<String, Integer> resigned) {
         this.resigned = resigned;
     }
 
-    public Map<String, Integer> getNonResigned() {
-        return nonResigned;
-    }
-    public Map<String, Integer> getResigned() {
-        return resigned;
-    }
 }
