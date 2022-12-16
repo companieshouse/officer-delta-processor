@@ -2,7 +2,9 @@ package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
+import uk.gov.companieshouse.officer.delta.processor.config.OfficerRoleConfig;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 
@@ -10,12 +12,15 @@ import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 public class AppointmentTransform implements Transformative<OfficersItem, AppointmentAPI> {
     OfficerTransform officerTransform;
     SensitiveOfficerTransform sensitiveOfficerTransform;
+    OfficerRoleConfig officerRoleConfig;
 
     @Autowired
     public AppointmentTransform(OfficerTransform officerTransform, 
-            SensitiveOfficerTransform sensitiveOfficerTransform) {
+            SensitiveOfficerTransform sensitiveOfficerTransform,
+            OfficerRoleConfig officerRoleConfig) {
         this.officerTransform = officerTransform;
         this.sensitiveOfficerTransform = sensitiveOfficerTransform;
+        this.officerRoleConfig = officerRoleConfig;
     }
 
     @Override
@@ -43,7 +48,16 @@ public class AppointmentTransform implements Transformative<OfficersItem, Appoin
 
         outputAppointment.setData(officerTransform.transform(inputOfficer));
         outputAppointment.setSensitiveData(sensitiveOfficerTransform.transform(inputOfficer));
-
+        
+        outputAppointment.setOfficerRoleSortOrder(getOfficerSortOrder(outputAppointment));
         return outputAppointment;
+    }
+
+    private int getOfficerSortOrder(AppointmentAPI outputAppointment) {
+        String officerRole = outputAppointment.getData().getOfficerRole();
+        Integer order = outputAppointment.getData().getResignedOn() == null ? 
+                officerRoleConfig.getNonResigned().get(officerRole) : 
+                officerRoleConfig.getResigned().get(officerRole);
+        return order.intValue();
     }
 }

@@ -1,0 +1,64 @@
+---
+officer-role-ordinal:
+  nonResigned:
+    # Company
+    secretary: 10
+    nominee-secretary: 10
+    managing-officer: 2
+    corporate-secretary: 10
+    corporate-nominee-secretary: 10
+    corporate-managing-officer: 2
+    director: 20
+    nominee-director: 20
+    corporate-director: 20
+    corporate-nominee-director: 20
+
+    # LLP
+    llp-designated-member: 10
+    corporate-llp-designated-member: 10
+    llp-member: 20
+    corporate-llp-member: 20
+
+    # SE (European)
+    member-of-an-administrative-organ: 10
+    corporate-member-of-an-administrative-organ: 10
+    member-of-a-management-organ: 20
+    corporate-member-of-a-management-organ: 20
+    member-of-a-supervisory-organ: 30
+    corporate-member-of-a-supervisory-organ: 30
+
+    # Place at the end of the sort
+    judicial-factor: 50
+    receiver-and-manager: 50
+    cic-manager: 50
+
+  resigned:
+    secretary: 100
+    nominee-secretary: 100
+    managing-officer: 2
+    corporate-secretary: 100
+    corporate-nominee-secretary: 100
+    corporate-managing-officer: 2
+    director: 200
+    nominee-director: 200
+    corporate-director: 200
+    corporate-nominee-director: 200
+
+    # resigned LLP
+    llp-designated-member: 100
+    corporate-llp-designated-member: 100
+    llp-member: 200
+    corporate-llp-member: 200
+
+    # resigned SE (European)
+    member-of-an-administrative-organ: 100
+    corporate-member-of-an-administrative-organ: 100
+    member-of-a-management-organ: 200
+    corporate-member-of-a-management-organ: 200
+    member-of-a-supervisory-organ: 300
+    corporate-member-of-a-supervisory-organ: 300
+
+    # resigned Place at the end of the sort
+    judicial-factor: 500
+    receiver-and-manager: 500
+    cic-manager: 500
