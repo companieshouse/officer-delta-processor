@@ -51,6 +51,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -76,7 +77,9 @@ class DeltaProcessorTest {
         IdentificationTransform idTransform = new IdentificationTransform();
         OfficerTransform officerTransform = new OfficerTransform(idTransform);
         SensitiveOfficerTransform sensitiveOfficerTransform = new SensitiveOfficerTransform();
-        OfficerRoleConfig officerRoleConfig = new OfficerRoleConfig(null, null);
+        HashMap<String, Integer> resigned = new HashMap<>();
+        resigned.put("director", 200);
+        OfficerRoleConfig officerRoleConfig = new OfficerRoleConfig(new HashMap<>(), resigned);
         appointmentTransform = new AppointmentTransform(officerTransform, sensitiveOfficerTransform, officerRoleConfig);
         expectedAppointment = jsonToAppointment(json);
     }
