@@ -53,9 +53,11 @@ public class AppointmentTransform implements Transformative<OfficersItem, Appoin
         return outputAppointment;
     }
 
-    private int getOfficerSortOrder(AppointmentAPI outputAppointment){
+    private int getOfficerSortOrder(AppointmentAPI outputAppointment) {
         String officerRole = outputAppointment.getData().getOfficerRole();
-        Integer order = outputAppointment.getData().getResignedOn() == null ? officerRoleConfig.getNonResigned().get(officerRole) : officerRoleConfig.getResigned().get(officerRole);
+        Integer order = outputAppointment.getData().getResignedOn() == null ? 
+                officerRoleConfig.getNonResigned().get(officerRole) : 
+                officerRoleConfig.getResigned().get(officerRole);
         return order.intValue();
     }
 }
