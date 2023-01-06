@@ -90,6 +90,9 @@ public class OfficersItem {
     @JsonProperty("surname")
     private String surname;
 
+    @JsonProperty("person_number")
+    private String personNumber;
+
     @JsonProperty(value = "secure_director", required = true)
     private String secureDirector;
 
@@ -326,6 +329,10 @@ public class OfficersItem {
         this.previousNameArray = previousNameArray;
     }
 
+    public String getPersonNumber() { return personNumber; }
+
+    public void setPersonNumber(String personNumber) { this.personNumber = personNumber; }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -366,6 +373,7 @@ public class OfficersItem {
                 && Objects.equals(getIdentification(), that.getIdentification())
                 && Objects.equals(getNationality(), that.getNationality())
                 && Objects.equals(getSurname(), that.getSurname())
+                && Objects.equals(getPersonNumber(), that.getPersonNumber())
                 && Objects.equals(getSecureDirector(), that.getSecureDirector())
                 && Objects.equals(getPreviousNameArray(), that.getPreviousNameArray())
                 && Objects.equals(getAdditionalProperties(), that.getAdditionalProperties());
@@ -398,6 +406,7 @@ public class OfficersItem {
                 getIdentification(),
                 getNationality(),
                 getSurname(),
+                getPersonNumber(),
                 getSecureDirector(),
                 getPreviousNameArray(),
                 getAdditionalProperties());

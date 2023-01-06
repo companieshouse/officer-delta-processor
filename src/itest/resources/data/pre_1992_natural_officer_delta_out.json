@@ -17,6 +17,7 @@
     },
     "secureOfficer":false,
     "pre1992Appointment":true,
+    "person_number": "1234567890",
     "service_address":{
       "address_line_1":"1 Crown Way",
       "address_line_2":"Pavement",

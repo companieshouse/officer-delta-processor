@@ -66,6 +66,12 @@ class OfficersItemTest {
     }
 
     @Test
+    void setPersonNumber() {
+        testItem.setPersonNumber(EXPECTED);
+        assertThat(testItem.getPersonNumber(), is(EXPECTED));
+    }
+
+    @Test
     void setServiceAddressSameAsRegisteredAddress() {
         testItem.setServiceAddressSameAsRegisteredAddress(EXPECTED);
         assertThat(testItem.getServiceAddressSameAsRegisteredAddress(), is(EXPECTED));
@@ -217,6 +223,7 @@ class OfficersItemTest {
                         containsString("changedAt=<null>"),
                         containsString("companyNumber=<null>"),
                         containsString("corporateInd=<null>"),
+                        containsString("personNumber=<null>"),
                         containsString("dateOfBirth=<null>"),
                         containsString("forename=<null>"),
                         containsString("honours=<null>"),
