@@ -257,6 +257,7 @@ class OfficerTransformTest {
         assertThat(result.getNationality(), is(officer.getNationality()));
         assertThat(result.getOccupation(), is(officer.getOccupation()));
         assertThat(result.getHonours(), is(officer.getHonours()));
+        assertThat(result.getPersonNumber(), is(officer.getPersonNumber()));
         assertThat(result.getServiceAddress(), is(sameInstance(addressAPI)));
         assertThat(result.isServiceAddressSameAsRegisteredOfficeAddress(), is(true));
         assertThat(result.getIdentificationData(), is(sameInstance(identificationAPI)));
@@ -375,6 +376,7 @@ class OfficerTransformTest {
         item.setResidentialAddressSameAsServiceAddress("Y");
         item.setIdentification(identification);
         item.setCorporateInd("N");
+        item.setPersonNumber("1234567890");
 
         return item;
     }
