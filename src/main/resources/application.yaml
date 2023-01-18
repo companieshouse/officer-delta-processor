@@ -31,6 +31,8 @@ officer-role-ordinal:
     judicial-factor: 50
     receiver-and-manager: 50
     cic-manager: 50
+    person-authorised-to-represent: 50
+    person-authorised-to-represent-and-accept: 50
 
   resigned:
     secretary: 100
@@ -62,3 +64,5 @@ officer-role-ordinal:
     judicial-factor: 500
     receiver-and-manager: 500
     cic-manager: 500
+    person-authorised-to-represent: 500
+    person-authorised-to-represent-and-accept: 500
