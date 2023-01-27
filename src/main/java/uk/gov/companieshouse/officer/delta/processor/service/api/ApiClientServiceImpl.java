@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.InternalApiClient;
+import uk.gov.companieshouse.api.appointment.FullRecordCompanyOfficerApi;
 import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
 import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
@@ -60,9 +61,9 @@ public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements Ap
     }
 
     @Override
-    public ApiResponse<Void> putAppointment(final String logContext, String companyNumber, AppointmentAPI appointment) {
+    public ApiResponse<Void> putAppointment(final String logContext, String companyNumber, FullRecordCompanyOfficerApi appointment) {
         final var uri =
-                String.format("/company/%s/appointments/%s/full_record", companyNumber, appointment.getAppointmentId());
+                String.format("/company/%s/appointments/%s/full_record", companyNumber, appointment.getExternalData().getAppointmentId());
 
         Map<String,Object> logMap = createLogMap(companyNumber,"PUT", uri);
         logger.infoContext(logContext, String.format("PUT %s", uri), logMap);

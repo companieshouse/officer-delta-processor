@@ -6,6 +6,8 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,8 +19,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.api.appointment.SensitiveData;
+import uk.gov.companieshouse.api.appointment.UsualResidentialAddress;
 import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
-import uk.gov.companieshouse.api.model.delta.officers.SensitiveOfficerAPI;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.Identification;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
@@ -26,7 +29,6 @@ import uk.gov.companieshouse.officer.delta.processor.model.enums.OfficerRole;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithDateOfBirth;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithResidentialAddress;
 
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -35,14 +37,15 @@ class SensitiveOfficerTransformTest {
     public static final String VALID_DATE = "20000101";
     public static final String INVALID_DATE = "12345";
     public static final String KIND_OF_OFFICER_ROLE_WITH_DOB = OfficerRole.DIR.name();
-    private static final Instant VALID_DATE_INSTANT = Instant.parse("2000-01-01T00:00:00Z");
     private SensitiveOfficerTransform testTransform;
     @Mock
     private AddressAPI addressAPI;
     @Mock
     private Identification identification;
     @Mock
-    private SensitiveOfficerAPI officerAPI;
+    private UsualResidentialAddressTransform usualResidentialAddressTransform;
+    @Mock
+    private UsualResidentialAddress usualResidentialAddress;
 
     private static Stream<Arguments> emptyDobsWithDobRoles() {
         Stream<OfficerRole> requiresDob = Arrays.stream(RolesWithDateOfBirth.values())
@@ -56,44 +59,49 @@ class SensitiveOfficerTransformTest {
 
     @BeforeEach
     void setUp() {
-        testTransform = new SensitiveOfficerTransform();
+        testTransform = new SensitiveOfficerTransform(usualResidentialAddressTransform);
     }
 
     @Test
     void factory() {
-        assertThat(testTransform.factory(), is(instanceOf(SensitiveOfficerAPI.class)));
+        assertThat(testTransform.factory(), is(instanceOf(SensitiveData.class)));
     }
 
     @Test
     void transformSingleWhenDateOfBirthInvalid() {
-        final SensitiveOfficerAPI officerAPI = testTransform.factory();
+        final SensitiveData officerAPI = testTransform.factory();
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         officer.setAppointmentDate(VALID_DATE);
         officer.setAdditionalProperty("resignation_date", VALID_DATE);
         officer.setDateOfBirth(INVALID_DATE);
         officer.setOfficerRole(KIND_OF_OFFICER_ROLE_WITH_DOB);
-
         verifyProcessingError(officerAPI, officer, "dateOfBirth: date/time pattern not matched: [yyyyMMdd]");
     }
 
     @Test
     void verifySuccessfulTransform()
             throws NonRetryableErrorException {
-        final SensitiveOfficerAPI officerAPI = testTransform.factory();
+        final SensitiveData officerAPI = testTransform.factory();
         final OfficersItem officer = createOfficer(addressAPI, identification);
+
+        when(usualResidentialAddressTransform.transform(addressAPI)).thenReturn(usualResidentialAddress);
 
         officer.setUsualResidentialAddress(addressAPI);;
         officer.setAppointmentDate(VALID_DATE);
         officer.setDateOfBirth(VALID_DATE);
 
-        final SensitiveOfficerAPI result = testTransform.transform(officer, officerAPI);
+        final SensitiveData result = testTransform.transform(officer, officerAPI);
 
-        assertThat(result.getUsualResidentialAddress(), is(addressAPI));
+        assertThat(result.getUsualResidentialAddress(), is(usualResidentialAddress));
         if (RolesWithDateOfBirth.includes(officer.getOfficerRole())) {
-            assertThat(result.getDateOfBirth(), is(VALID_DATE_INSTANT));
+            assertThat(result.getDateOfBirth().getDay(), is(1));
+            assertThat(result.getDateOfBirth().getMonth(), is(1));
+            assertThat(result.getDateOfBirth().getYear(), is(2000));
         }
-        assertThat(result.getDateOfBirth(), is(VALID_DATE_INSTANT));
+        assertThat(result.getDateOfBirth().getDay(), is(1));
+        assertThat(result.getDateOfBirth().getMonth(), is(1));
+        assertThat(result.getDateOfBirth().getYear(), is(2000));
     }
 
     @DisplayName("Date of Birth is not included when the officers role does not require it")
@@ -106,7 +114,7 @@ class SensitiveOfficerTransformTest {
         officer.setKind(officerRole.name());
         officer.setAppointmentDate(VALID_DATE);
 
-        final SensitiveOfficerAPI outputOfficer = testTransform.transform(officer);
+        final SensitiveData outputOfficer = testTransform.transform(officer);
 
         if (RolesWithDateOfBirth.includes(officerRole)) {
             assertThat(outputOfficer.getDateOfBirth(), is(notNullValue()));
@@ -125,7 +133,7 @@ class SensitiveOfficerTransformTest {
         officer.setKind(role.name());
         officer.setAppointmentDate(VALID_DATE);
 
-        final SensitiveOfficerAPI outputOfficer = testTransform.transform(officer);
+        final SensitiveData outputOfficer = testTransform.transform(officer);
 
         assertThat(outputOfficer.getDateOfBirth(), is(nullValue()));
     }
@@ -138,22 +146,24 @@ class SensitiveOfficerTransformTest {
             throws NonRetryableErrorException {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
+        lenient().when(usualResidentialAddressTransform.transform(addressAPI)).thenReturn(usualResidentialAddress);
+
         officer.setDateOfBirth(VALID_DATE);
         officer.setKind(officerRole.name());
         officer.setAppointmentDate(VALID_DATE);
 
-        final SensitiveOfficerAPI outputOfficer = testTransform.transform(officer);
+        final SensitiveData outputOfficer = testTransform.transform(officer);
 
         if (RolesWithResidentialAddress.includes(officerRole)) {
             assertThat(outputOfficer.getUsualResidentialAddress(), is(notNullValue()));
-            assertThat(outputOfficer.isResidentialAddressSameAsServiceAddress(), is(true));
+            assertThat(outputOfficer.getResidentialAddressSameAsServiceAddress(), is(true));
         } else {
             assertThat(outputOfficer.getUsualResidentialAddress(), is(nullValue()));
-            assertThat(outputOfficer.isResidentialAddressSameAsServiceAddress(), is(nullValue()));
+            assertThat(outputOfficer.getResidentialAddressSameAsServiceAddress(), is(nullValue()));
         }
     }
 
-    private void verifyProcessingError(final SensitiveOfficerAPI officerAPI, final OfficersItem officer,
+    private void verifyProcessingError(final SensitiveData officerAPI, final OfficersItem officer,
             final String expectedMessage) {
         final NonRetryableErrorException exception =
                 assertThrows(NonRetryableErrorException.class, () -> testTransform.transform(officer, officerAPI));
