@@ -107,10 +107,10 @@ public class TransformerUtils {
             throws NonRetryableErrorException {
         try {
             DateTimeFormatter df = DateTimeFormatter.ofPattern(effectivePattern);
-            OffsetDateTime offsetDateTime = LocalDateTime.parse(s, df)
+            return LocalDateTime.parse(s, df)
                     .atZone(ZoneId.of("Europe/London"))
                     .toOffsetDateTime();
-            return offsetDateTime;
+
         }
         catch (DateTimeParseException e) {
             throw new NonRetryableErrorException(String.format("%s: date/time pattern not matched: [%s]", identifier, effectivePattern), null);

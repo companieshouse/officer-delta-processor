@@ -36,8 +36,6 @@ class AppointmentTransformTest {
     @Mock
     private SensitiveOfficerTransform sensitiveOfficerTransform;
     @Mock
-    private OfficerAPI officerAPI;
-    @Mock
     private Data data;
     @Mock
     private ExternalData externalData;
