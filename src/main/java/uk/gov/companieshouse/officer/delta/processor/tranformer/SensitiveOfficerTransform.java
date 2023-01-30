@@ -17,6 +17,7 @@ import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithReside
 public class SensitiveOfficerTransform implements Transformative<OfficersItem, SensitiveData> {
 
     UsualResidentialAddressTransform usualResidentialAddressTransform;
+    private static final String DOB_IDENTIFIER = "dateOfBirth";
 
     @Autowired
     public SensitiveOfficerTransform(UsualResidentialAddressTransform usualResidentialAddressTransform) {
@@ -35,18 +36,14 @@ public class SensitiveOfficerTransform implements Transformative<OfficersItem, S
         officer.setUsualResidentialAddress(usualResidentialAddressTransform.transform(source.getUsualResidentialAddress()));
             officer.setResidentialAddressSameAsServiceAddress(
                     BooleanUtils.toBooleanObject(source.getResidentialAddressSameAsServiceAddress()));
-
-            //Prevent it from being stored in URA within the appointments collection.
-            //UPDATE no UsualCountryOfResidence field in SensitiveData
-            //officer.getUsualResidentialAddress().setUsualCountryOfResidence(null);
          }
 
         if (RolesWithDateOfBirth.includes(officerRole) && isNotEmpty(source.getDateOfBirth())) {
-            DateOfBirth dateOfBirth = new DateOfBirth();
+            var dateOfBirth = new DateOfBirth();
 
-            String year = String.valueOf((parseLocalDate("dateOfBirth", source.getDateOfBirth())).getYear());
-            String month = String.valueOf((parseLocalDate("dateOfBirth", source.getDateOfBirth())).getMonthValue());
-            String day = String.valueOf((parseLocalDate("dateOfBirth", source.getDateOfBirth())).getDayOfMonth());
+            var year = String.valueOf((parseLocalDate(DOB_IDENTIFIER, source.getDateOfBirth())).getYear());
+            var month = String.valueOf((parseLocalDate(DOB_IDENTIFIER, source.getDateOfBirth())).getMonthValue());
+            var day = String.valueOf((parseLocalDate(DOB_IDENTIFIER, source.getDateOfBirth())).getDayOfMonth());
 
             dateOfBirth.setYear(Integer.parseInt(year));
             dateOfBirth.setMonth(Integer.parseInt(month));

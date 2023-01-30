@@ -36,8 +36,8 @@ public class AppointmentTransform implements Transformative<OfficersItem, FullRe
     public FullRecordCompanyOfficerApi transform(OfficersItem inputOfficer, FullRecordCompanyOfficerApi outputAppointment)
             throws NonRetryableErrorException {
 
-        ExternalData externalData = new ExternalData();
-        InternalData internalData = new InternalData();
+        var externalData = new ExternalData();
+        var internalData = new InternalData();
 
         externalData.setInternalId(inputOfficer.getInternalId());
 
@@ -56,7 +56,6 @@ public class AppointmentTransform implements Transformative<OfficersItem, FullRe
         externalData.setSensitiveData(sensitiveOfficerTransform.transform(inputOfficer));
 
         internalData.setOfficerRoleSortOrder(getOfficerSortOrder(outputAppointment, externalData));
-        //UpdatedAt is in LocalDate format, should it be in LocalDateTime?
         internalData.setUpdatedAt(parseLocalDateTime("changedAt", inputOfficer.getChangedAt()));
 
         outputAppointment.setExternalData(externalData);
@@ -68,7 +67,7 @@ public class AppointmentTransform implements Transformative<OfficersItem, FullRe
     private int getOfficerSortOrder(FullRecordCompanyOfficerApi outputAppointment, ExternalData externalData) {
         outputAppointment.setExternalData(externalData);
 
-        String officerRole = outputAppointment.getExternalData().getData().getOfficerRole().toString();
+        var officerRole = outputAppointment.getExternalData().getData().getOfficerRole().toString();
         Integer order = outputAppointment.getExternalData().getData().getResignedOn() == null ?
                 officerRoleConfig.getNonResigned().get(officerRole) : 
                 officerRoleConfig.getResigned().get(officerRole);

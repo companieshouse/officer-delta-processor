@@ -9,7 +9,6 @@ import uk.gov.companieshouse.api.appointment.FullRecordCompanyOfficerApi;
 import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
 import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
 import uk.gov.companieshouse.logging.Logger;
 
 import java.util.HashMap;

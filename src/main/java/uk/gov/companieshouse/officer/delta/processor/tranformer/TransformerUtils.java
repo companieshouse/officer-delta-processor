@@ -106,7 +106,7 @@ public class TransformerUtils {
     private static OffsetDateTime convertToOffsetDateTime(final String identifier, final String s, final String effectivePattern)
             throws NonRetryableErrorException {
         try {
-            DateTimeFormatter df = DateTimeFormatter.ofPattern(effectivePattern);
+            var df = DateTimeFormatter.ofPattern(effectivePattern);
             return LocalDateTime.parse(s, df)
                     .atZone(ZoneId.of("Europe/London"))
                     .toOffsetDateTime();

@@ -16,7 +16,6 @@ import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupa
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithPre1992Appointment;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithResidentialAddress;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
@@ -80,19 +79,18 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
                     .map(formerNameTransform::transform).collect(Collectors.toList()));
         }
 
-        final LocalDate appointmentDate = parseLocalDate(
+        final var appointmentDate = parseLocalDate(
                 "appointmentDate", source.getAppointmentDate());
 
         if (RolesWithPre1992Appointment.includes(officerRole)) {
             officer.setIsPre1992Appointment(parseYesOrNo(source.getApptDatePrefix()));
-            if (officer.getIsPre1992Appointment()) {
+            if (Boolean.TRUE.equals(officer.getIsPre1992Appointment())) {
                 officer.setAppointedOn(null);
                 officer.setAppointedBefore(appointmentDate);
             } else {
                 officer.setAppointedOn(appointmentDate);
             }
         } else {
-            //setPre1992Appointment to false because previous default value (boolean) is false but new default value (Boolean) is null
             officer.setIsPre1992Appointment(false);
             officer.setAppointedOn(appointmentDate);
         }
@@ -109,10 +107,6 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
             officer.setCountryOfResidence(source.getServiceAddress().getUsualCountryOfResidence());
         }
 
-        //Prevent it from being stored in URA within the appointments collection.
-        //UPDATED: Commented out for tests, does this need to be here?
-        //officer.setCountryOfResidence(null);
-
         if (source.getIdentification() != null)
             officer.setIdentification(idTransform.transform(source.getIdentification()));
 
@@ -128,8 +122,8 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
             .concat(TransformerUtils.encode(source.getOfficerId()))
             .concat(APPOINTMENTS);
 
-        ItemLinkTypes itemLinkTypes = new ItemLinkTypes();
-        OfficerLinkTypes officerLinkTypes = new OfficerLinkTypes();
+        var itemLinkTypes = new ItemLinkTypes();
+        var officerLinkTypes = new OfficerLinkTypes();
 
         itemLinkTypes.setSelf(selfLink);
         itemLinkTypes.setOfficer(officerLinkTypes);
