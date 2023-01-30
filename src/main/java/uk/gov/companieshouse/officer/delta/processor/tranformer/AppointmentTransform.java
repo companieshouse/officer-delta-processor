@@ -39,6 +39,9 @@ public class AppointmentTransform implements Transformative<OfficersItem, FullRe
         var externalData = new ExternalData();
         var internalData = new InternalData();
 
+        outputAppointment.setExternalData(externalData);
+        outputAppointment.setInternalData(internalData);
+
         externalData.setInternalId(inputOfficer.getInternalId());
 
         final String encodedInternalId = TransformerUtils.encode(inputOfficer.getInternalId());
@@ -55,17 +58,13 @@ public class AppointmentTransform implements Transformative<OfficersItem, FullRe
         externalData.setData(officerTransform.transform(inputOfficer));
         externalData.setSensitiveData(sensitiveOfficerTransform.transform(inputOfficer));
 
-        internalData.setOfficerRoleSortOrder(getOfficerSortOrder(outputAppointment, externalData));
+        internalData.setOfficerRoleSortOrder(getOfficerSortOrder(outputAppointment));
         internalData.setUpdatedAt(parseLocalDateTime("changedAt", inputOfficer.getChangedAt()));
-
-        outputAppointment.setExternalData(externalData);
-        outputAppointment.setInternalData(internalData);
 
         return outputAppointment;
     }
 
-    private int getOfficerSortOrder(FullRecordCompanyOfficerApi outputAppointment, ExternalData externalData) {
-        outputAppointment.setExternalData(externalData);
+    private int getOfficerSortOrder(FullRecordCompanyOfficerApi outputAppointment) {
 
         var officerRole = outputAppointment.getExternalData().getData().getOfficerRole().toString();
         Integer order = outputAppointment.getExternalData().getData().getResignedOn() == null ?
