@@ -8,10 +8,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.companieshouse.api.appointment.ExternalData;
+import uk.gov.companieshouse.api.appointment.FullRecordCompanyOfficerApi;
 import uk.gov.companieshouse.api.handler.delta.company.appointment.request.PrivateOfficerDelete;
 import uk.gov.companieshouse.api.handler.delta.company.appointment.request.PrivateOfficersUpsert;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
 import uk.gov.companieshouse.logging.Logger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,8 +43,10 @@ class ApiClientServiceImplTest {
         doReturn(expectedResponse).when(apiClientServiceSpy).executeOp(anyString(), anyString(),
                 anyString(),
                 any(PrivateOfficersUpsert.class));
-        var appointmentApi = new AppointmentAPI();
-        appointmentApi.setAppointmentId("3102598777");
+        var appointmentApi = new FullRecordCompanyOfficerApi();
+        ExternalData externalData = new ExternalData();
+        appointmentApi.setExternalData(externalData);
+        appointmentApi.getExternalData().setAppointmentId("3102598777");
         ApiResponse<Void> response = apiClientServiceSpy.putAppointment("context_id",
                 "09876543",
                 appointmentApi);

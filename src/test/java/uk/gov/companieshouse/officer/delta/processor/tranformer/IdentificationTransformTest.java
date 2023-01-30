@@ -4,13 +4,11 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasEntry;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.model.delta.officers.IdentificationAPI;
 import uk.gov.companieshouse.officer.delta.processor.model.Identification;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,72 +22,69 @@ class IdentificationTransformTest {
 
     @Test
     void factory() {
-        assertThat(testTransform.factory(), is(instanceOf(IdentificationAPI.class)));
+        assertThat(testTransform.factory(), is(instanceOf(uk.gov.companieshouse.api.appointment.Identification.class)));
     }
 
     @Test
     void transformEea() {
         final Identification identification = new Identification();
-        final IdentificationAPI identificationAPI = createIdentificationAPI("eea");
+        final uk.gov.companieshouse.api.appointment.Identification identificationAPI = createIdentificationAPI("eea");
 
-        identificationAPI.setAdditionalProperty("additional", "property");
         identification.setEea(identificationAPI);
 
-        final IdentificationAPI result = testTransform.transform(identification, identificationAPI);
+        final uk.gov.companieshouse.api.appointment.Identification result = testTransform.transform(identification, identificationAPI);
 
         assertThat(result, is(equalTo(identificationAPI)));
-        assertThat(result.getAdditionalProperties(), hasEntry("additional", "property"));
     }
 
     @Test
     void transformOtherCorpBody() {
         final Identification identification = new Identification();
-        final IdentificationAPI identificationAPI = createIdentificationAPI("other-corporate-body-or-firm");
+        final uk.gov.companieshouse.api.appointment.Identification identificationAPI = createIdentificationAPI("other-corporate-body-or-firm");
 
-        identificationAPI.setAdditionalProperty("additional", "property");
         identification.setOtherCorporateBodyOrFirm(identificationAPI);
 
-        final IdentificationAPI result = testTransform.transform(identification, identificationAPI);
+        final uk.gov.companieshouse.api.appointment.Identification result = testTransform.transform(identification, identificationAPI);
 
         assertThat(result, is(equalTo(identificationAPI)));
-        assertThat(result.getAdditionalProperties(), hasEntry("additional", "property"));
     }
 
     @Test
     void transformNonEea() {
         final Identification identification = new Identification();
-        final IdentificationAPI identificationAPI = createIdentificationAPI("non-eea");
+        final uk.gov.companieshouse.api.appointment.Identification identificationAPI = createIdentificationAPI("non-eea");
 
-        identificationAPI.setAdditionalProperty("additional", "property");
         identification.setNonEeaApi(identificationAPI);
 
-        final IdentificationAPI result = testTransform.transform(identification, identificationAPI);
+        final uk.gov.companieshouse.api.appointment.Identification result = testTransform.transform(identification, identificationAPI);
 
         assertThat(result, is(equalTo(identificationAPI)));
-        assertThat(result.getAdditionalProperties(), hasEntry("additional", "property"));
     }
 
     @Test
     void transformUkLimitedCompany() {
         final Identification identification = new Identification();
-        final IdentificationAPI identificationAPI = createIdentificationAPI("uk-limited-company");
+        //changed uk-limited-company to uk-limited
+        final uk.gov.companieshouse.api.appointment.Identification identificationAPI = createIdentificationAPI("uk-limited");
 
-        identificationAPI.setAdditionalProperty("additional", "property");
         identification.setUKLimitedCompany(identificationAPI);
 
-        final IdentificationAPI result = testTransform.transform(identification, identificationAPI);
+        final uk.gov.companieshouse.api.appointment.Identification result = testTransform.transform(identification, identificationAPI);
 
         assertThat(result, is(equalTo(identificationAPI)));
-        assertThat(result.getAdditionalProperties(), hasEntry("additional", "property"));
     }
 
-    private IdentificationAPI createIdentificationAPI(String identificationType) {
+    private uk.gov.companieshouse.api.appointment.Identification createIdentificationAPI(String identificationType) {
 
-        return new IdentificationAPI(identificationType,
-                "legalAuthority",
-                "legalForm",
-                "placeRegistered",
-                "registrationNumber");
+        uk.gov.companieshouse.api.appointment.Identification identification = new uk.gov.companieshouse.api.appointment.Identification();
+
+        identification.setIdentificationType(uk.gov.companieshouse.api.appointment.Identification.IdentificationTypeEnum.fromValue(identificationType));
+        identification.setLegalAuthority("legalAuthority");
+        identification.setLegalForm("legalForm");
+        identification.setPlaceRegistered("placeRegistered");
+        identification.setRegistrationNumber("registrationNumber");
+
+        return identification;
     }
 
 }

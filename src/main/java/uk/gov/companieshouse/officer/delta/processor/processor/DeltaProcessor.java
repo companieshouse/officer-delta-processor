@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import uk.gov.companieshouse.api.appointment.FullRecordCompanyOfficerApi;
 import uk.gov.companieshouse.api.delta.OfficerDeleteDelta;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
@@ -24,6 +24,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseOffsetDateTime;
+
 
 @Component
 public class DeltaProcessor implements Processor<ChsDelta> {
@@ -57,8 +60,8 @@ public class DeltaProcessor implements Processor<ChsDelta> {
                 logMap.put("company_number", officer.getCompanyNumber());
                 logger.infoContext(logContext, String.format("Process data for officer [%d]", i), logMap);
 
-                AppointmentAPI appointmentAPI = transformer.transform(officer);
-                appointmentAPI.setDeltaAt(officers.getDeltaAt());
+                FullRecordCompanyOfficerApi appointmentAPI = transformer.transform(officer);
+                appointmentAPI.getInternalData().setDeltaAt(parseOffsetDateTime("deltaAt", officers.getDeltaAt()));
 
                 final ApiResponse<Void> response =
                         apiClientService.putAppointment(logContext, officer.getCompanyNumber(), appointmentAPI);

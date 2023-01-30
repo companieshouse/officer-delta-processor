@@ -6,9 +6,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.DATETIME_LENGTH;
@@ -23,9 +21,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.api.appointment.Data;
+import uk.gov.companieshouse.api.appointment.ServiceAddress;
 import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
-import uk.gov.companieshouse.api.model.delta.officers.IdentificationAPI;
-import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.Identification;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
@@ -36,7 +34,7 @@ import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithFormer
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupation;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithPre1992Appointment;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.stream.Stream;
 
@@ -46,22 +44,26 @@ class OfficerTransformTest {
     public static final String INVALID_DATE = "12345";
     public static final String CORP_IND_Y = "Y";
     public static final String CORP_IND_N = "N";
-    public static final String KIND_OF_OFFICER_ROLE_WITH_DOB = OfficerRole.DIR.name();
     private static final String CHANGED_AT = "20210909133736012345";
-    private static final Instant CHANGED_INSTANT = Instant.parse("2021-09-09T13:37:36.000Z");
-    private static final Instant VALID_DATE_INSTANT = Instant.parse("2000-01-01T00:00:00Z");
+    private static final LocalDate VALID_LOCAL_DATE = LocalDate.of(2000,01,01);
     private OfficerTransform testTransform;
 
     @Mock
     private IdentificationTransform identificationTransform;
     @Mock
+    private ServiceAddressTransform serviceAddressTransform;
+    @Mock
+    private FormerNameTransform formerNameTransform;
+    @Mock
     private AddressAPI addressAPI;
     @Mock
     private Identification identification;
     @Mock
-    private IdentificationAPI identificationAPI;
+    private uk.gov.companieshouse.api.appointment.Identification identificationAPI;
     @Mock
-    private OfficerAPI officerAPI;
+    private ServiceAddress serviceAddress;
+    @Mock
+    private Data data;
 
     private static Stream<Arguments> provideScenarioParams() {
         return Stream.of(Arguments.of(CHANGED_AT, true),
@@ -73,35 +75,24 @@ class OfficerTransformTest {
 
     @BeforeEach
     void setUp() {
-        testTransform = new OfficerTransform(identificationTransform);
+        testTransform = new OfficerTransform(identificationTransform, serviceAddressTransform, formerNameTransform);
     }
 
     @Test
     void factory() {
-        assertThat(testTransform.factory(), is(instanceOf(OfficerAPI.class)));
-    }
-
-    @Test
-    void transformSingleWhenChangedAtInvalid() {
-        final OfficerAPI officerAPI = testTransform.factory();
-        final OfficersItem officer = createOfficer(addressAPI, identification);
-
-        officer.setChangedAt(INVALID_DATE);
-
-        verifyProcessingError(officerAPI, officer, "changedAt: date/time pattern not matched: [yyyyMMddHHmmss]");
+        assertThat(testTransform.factory(), is(instanceOf(Data.class)));
     }
 
     @Test
     void transformSingleWhenAppointmentDateInvalid() {
-        final OfficerAPI officerAPI = testTransform.factory();
+        final Data data = testTransform.factory();
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
-        officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate(INVALID_DATE);
         officer.setDateOfBirth(VALID_DATE);
         officer.setKind(OfficerRole.DIR.name());
 
-        verifyProcessingError(officerAPI, officer, "appointmentDate: date/time pattern not matched: [yyyyMMdd]");
+        verifyProcessingError(data, officer, "appointmentDate: date/time pattern not matched: [yyyyMMdd]");
     }
 
     @DisplayName("Identification (optional) is not transformed if not present")
@@ -109,7 +100,6 @@ class OfficerTransformTest {
     void transformIdentificationWhenNotPresent() throws NonRetryableErrorException {
         final OfficersItem officer = createOfficer(addressAPI, null);
 
-        officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate(VALID_DATE);
         officer.setDateOfBirth(VALID_DATE);
 
@@ -120,14 +110,13 @@ class OfficerTransformTest {
 
     @Test
     void transformSingleWhenResignationDateInvalid() {
-        final OfficerAPI officerAPI = testTransform.factory();
+        final Data data = testTransform.factory();
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
-        officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate(VALID_DATE);
         officer.setResignationDate(INVALID_DATE);
 
-        verifyProcessingError(officerAPI, officer, "resignation_date: date/time pattern not matched: [yyyyMMdd]");
+        verifyProcessingError(data, officer, "resignation_date: date/time pattern not matched: [yyyyMMdd]");
     }
 
     @DisplayName("Occupation and Nationality is not included when the officers role does not require it")
@@ -139,12 +128,11 @@ class OfficerTransformTest {
 
         officer.setDateOfBirth(VALID_DATE);
         officer.setKind(officerRole.name());
-        officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate(VALID_DATE);
         officer.setOccupation("Super Hero");
         officer.setNationality("Krypton");
 
-        final OfficerAPI outputOfficer = testTransform.transform(officer);
+        final Data outputOfficer = testTransform.transform(officer);
 
         if (RolesWithOccupation.includes(officerRole)) {
             assertThat(outputOfficer.getOccupation(), is(notNullValue()));
@@ -164,14 +152,13 @@ class OfficerTransformTest {
 
         officer.setDateOfBirth(VALID_DATE);
         officer.setKind(officerRole.name());
-        officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate(VALID_DATE);
 
         if (RolesWithCountryOfResidence.includes(officerRole)) {
             when(addressAPI.getUsualCountryOfResidence()).thenReturn("Wales");
         }
 
-        final OfficerAPI outputOfficer = testTransform.transform(officer);
+        final Data outputOfficer = testTransform.transform(officer);
 
         if (RolesWithCountryOfResidence.includes(officerRole)) {
             assertThat(outputOfficer.getCountryOfResidence(), is("Wales"));
@@ -190,18 +177,17 @@ class OfficerTransformTest {
 
         officer.setDateOfBirth(VALID_DATE);
         officer.setKind(officerRole.name());
-        officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate(VALID_DATE);
         officer.setApptDatePrefix("Y");
 
-        final OfficerAPI outputOfficer = testTransform.transform(officer);
+        final Data outputOfficer = testTransform.transform(officer);
 
         if (RolesWithPre1992Appointment.includes(officerRole)) {
-            assertThat(outputOfficer.isPre1992Appointment(), is(true));
-            assertThat(outputOfficer.getAppointedBefore(), is(VALID_DATE_INSTANT));
+            assertThat(outputOfficer.getIsPre1992Appointment(), is(true));
+            assertThat(outputOfficer.getAppointedBefore(), is(VALID_LOCAL_DATE));
         } else {
-            assertThat(outputOfficer.isPre1992Appointment(), is(false));
-            assertThat(outputOfficer.getAppointedOn(), is(VALID_DATE_INSTANT));
+            assertThat(outputOfficer.getIsPre1992Appointment(), is(false));
+            assertThat(outputOfficer.getAppointedOn(), is(VALID_LOCAL_DATE));
         }
     }
 
@@ -213,17 +199,16 @@ class OfficerTransformTest {
 
         officer.setDateOfBirth(VALID_DATE);
         officer.setKind(officerRole.name());
-        officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate(VALID_DATE);
         officer.setPreviousNameArray(Collections.singletonList(
             new PreviousNameArray("forename", "surname")));
 
-        final OfficerAPI outputOfficer = testTransform.transform(officer);
+        final Data outputOfficer = testTransform.transform(officer);
 
         if (RolesWithFormerNames.includes(officerRole)) {
-            assertThat(outputOfficer.getFormerNameData(), is(notNullValue()));
+            assertThat(outputOfficer.getFormerNames(), is(notNullValue()));
         } else {
-            assertThat(outputOfficer.getFormerNameData(), is(nullValue()));
+            assertThat(outputOfficer.getFormerNames(), is(nullValue()));
         }
     }
 
@@ -231,25 +216,25 @@ class OfficerTransformTest {
     @MethodSource("provideScenarioParams")
     void verifySuccessfulTransform(final String changedAt, final boolean hasResignationDate)
             throws NonRetryableErrorException {
-        final OfficerAPI officerAPI = testTransform.factory();
+        final Data officerAPI = testTransform.factory();
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         when(identificationTransform.transform(identification)).thenReturn(identificationAPI);
-        officer.setChangedAt(changedAt);
+        when(serviceAddressTransform.transform(addressAPI)).thenReturn(serviceAddress);
+
         officer.setAppointmentDate(VALID_DATE);
         officer.setDateOfBirth(VALID_DATE);
         if (hasResignationDate) {
             officer.setResignationDate(VALID_DATE);
         }
 
-        final OfficerAPI result = testTransform.transform(officer, officerAPI);
+        final Data result = testTransform.transform(officer, officerAPI);
 
-        assertThat(result.getUpdatedAt(), is(CHANGED_INSTANT));
-        assertThat(result.getAppointedOn(), is(VALID_DATE_INSTANT));
-        assertThat(result.getResignedOn(), is(hasResignationDate ? VALID_DATE_INSTANT : null));
-        assertThat(result.getOfficerRole(), is(officer.getOfficerRole()));
-        assertThat(result.isPre1992Appointment(), is(false));
-        assertThat(result.getResignedOn(), is(hasResignationDate ? VALID_DATE_INSTANT : null));
+        assertThat(result.getAppointedOn(), is(VALID_LOCAL_DATE));
+        assertThat(result.getResignedOn(), is(hasResignationDate ? VALID_LOCAL_DATE : null));
+        assertThat(result.getOfficerRole(), is(Data.OfficerRoleEnum.fromValue(officer.getOfficerRole())));
+        assertThat(result.getIsPre1992Appointment(), is(false));
+        assertThat(result.getResignedOn(), is(hasResignationDate ? VALID_LOCAL_DATE : null));
         assertThat(result.getTitle(), is(officer.getTitle()));
         assertThat(result.getForename(), is(officer.getForename()));
         assertThat(result.getOtherForenames(), is(officer.getMiddleName()));
@@ -258,29 +243,29 @@ class OfficerTransformTest {
         assertThat(result.getOccupation(), is(officer.getOccupation()));
         assertThat(result.getHonours(), is(officer.getHonours()));
         assertThat(result.getPersonNumber(), is(officer.getPersonNumber()));
-        assertThat(result.getServiceAddress(), is(sameInstance(addressAPI)));
-        assertThat(result.isServiceAddressSameAsRegisteredOfficeAddress(), is(true));
-        assertThat(result.getIdentificationData(), is(sameInstance(identificationAPI)));
+        assertThat(result.getServiceAddress(), is(sameInstance(serviceAddress)));
+        assertThat(result.getServiceAddressSameAsRegisteredOfficeAddress(), is(true));
+        assertThat(result.getIdentification(), is(sameInstance(identificationAPI)));
     }
 
     @DisplayName("Verify data in the Links object is created as expected")
     @Test
     void verifyLinksData() throws NonRetryableErrorException {
-        final OfficerAPI officerAPI = testTransform.factory();
+        final Data officerAPI = testTransform.factory();
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
         when(identificationTransform.transform(identification)).thenReturn(identificationAPI);
-        officer.setChangedAt(CHANGED_AT);
+
         officer.setAppointmentDate(VALID_DATE);
         officer.setDateOfBirth(VALID_DATE);
 
-        final OfficerAPI result = testTransform.transform(officer, officerAPI);
+        final Data result = testTransform.transform(officer, officerAPI);
 
-        assertThat(result.getLinksData().getSelfLink(),
+        assertThat(result.getLinks().get(0).getSelf(),
             is("/company/companyNumber/appointments/vuIAhYYbRDhqzx9b3e_jd6Uhres"));
-        assertThat(result.getLinksData().getOfficerLinksData().getSelfLink(),
+        assertThat(result.getLinks().get(0).getOfficer().getSelf(),
             is("/officers/vuIAhYYbRDhqzx9b3e_jd6Uhres"));
-        assertThat(result.getLinksData().getOfficerLinksData().getAppointmentsLink(),
+        assertThat(result.getLinks().get(0).getOfficer().getAppointments(),
             is("/officers/vuIAhYYbRDhqzx9b3e_jd6Uhres/appointments"));
     }
 
@@ -288,16 +273,15 @@ class OfficerTransformTest {
     void transformCorporateWhenKindIsDIRandCorpIndisY() {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
-        officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate(VALID_DATE);
         officer.setDateOfBirth(VALID_DATE);
         officer.setCorporateInd(CORP_IND_Y);
         officer.setKind(OfficerRole.DIR.name());
         officer.setSurname("Corp Ltd");
 
-        final OfficerAPI outputOfficer = testTransform.transform(officer);
+        final Data outputOfficer = testTransform.transform(officer);
 
-        assertThat(outputOfficer.getOfficerRole(), is("corporate-director"));
+        assertThat(outputOfficer.getOfficerRole(), is(Data.OfficerRoleEnum.CORPORATE_DIRECTOR));
         assertThat(outputOfficer.getCompanyName(), is("Corp Ltd"));
     }
 
@@ -305,51 +289,49 @@ class OfficerTransformTest {
     void transformNaturalWhenKindIsDIRandCorpIndisN() {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
-        officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate(VALID_DATE);
         officer.setDateOfBirth(VALID_DATE);
         officer.setCorporateInd(CORP_IND_N);
         officer.setKind(OfficerRole.DIR.name());
         officer.setCompanyNumber("1111111");
 
-        final OfficerAPI outputOfficer = testTransform.transform(officer);
+        final Data outputOfficer = testTransform.transform(officer);
 
-        assertThat(outputOfficer.getOfficerRole(), is("director"));
+        assertThat(outputOfficer.getOfficerRole(), is(Data.OfficerRoleEnum.DIRECTOR));
     }
 
     @Test
     void transformNaturalWhenKindIsDIRandCorpIndisMissing() {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
-        officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate(VALID_DATE);
         officer.setDateOfBirth(VALID_DATE);
         officer.setKind(OfficerRole.DIR.name());
 
-        final OfficerAPI outputOfficer = testTransform.transform(officer);
+        final Data outputOfficer = testTransform.transform(officer);
 
-        assertThat(outputOfficer.getOfficerRole(), is("director"));
+        assertThat(outputOfficer.getOfficerRole(), is(Data.OfficerRoleEnum.DIRECTOR));
     }
 
     @Test
     void transformCorporateWhenSpacesInKindName() {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 
-        officer.setChangedAt(CHANGED_AT);
         officer.setAppointmentDate(VALID_DATE);
         officer.setDateOfBirth(VALID_DATE);
         officer.setCorporateInd(CORP_IND_Y);
         officer.setKind("D IR ");
 
-        final OfficerAPI outputOfficer = testTransform.transform(officer);
+        final Data outputOfficer = testTransform.transform(officer);
 
-        assertThat(outputOfficer.getOfficerRole(), is("corporate-director"));
+        assertThat(outputOfficer.getOfficerRole(), is(Data.OfficerRoleEnum.CORPORATE_DIRECTOR));
     }
 
-    private void verifyProcessingError(final OfficerAPI officerAPI, final OfficersItem officer,
+    private void verifyProcessingError(final Data data, final OfficersItem officer,
             final String expectedMessage) {
+
         final NonRetryableErrorException exception =
-                assertThrows(NonRetryableErrorException.class, () -> testTransform.transform(officer, officerAPI));
+                assertThrows(NonRetryableErrorException.class, () -> testTransform.transform(officer, data));
 
         assertThat(exception.getMessage(), is(expectedMessage));
         assertThat(exception.getCause(), is(nullValue()));

@@ -3,13 +3,17 @@ package uk.gov.companieshouse.officer.delta.processor.tranformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
+import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseLocalDateTime;
+
+import uk.gov.companieshouse.api.appointment.ExternalData;
+import uk.gov.companieshouse.api.appointment.FullRecordCompanyOfficerApi;
+import uk.gov.companieshouse.api.appointment.InternalData;
 import uk.gov.companieshouse.officer.delta.processor.config.OfficerRoleConfig;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 
 @Component
-public class AppointmentTransform implements Transformative<OfficersItem, AppointmentAPI> {
+public class AppointmentTransform implements Transformative<OfficersItem, FullRecordCompanyOfficerApi> {
     OfficerTransform officerTransform;
     SensitiveOfficerTransform sensitiveOfficerTransform;
     OfficerRoleConfig officerRoleConfig;
@@ -24,38 +28,46 @@ public class AppointmentTransform implements Transformative<OfficersItem, Appoin
     }
 
     @Override
-    public AppointmentAPI factory() {
-        return new AppointmentAPI();
+    public FullRecordCompanyOfficerApi factory() {
+        return new FullRecordCompanyOfficerApi();
     }
 
     @Override
-    public AppointmentAPI transform(OfficersItem inputOfficer, AppointmentAPI outputAppointment)
+    public FullRecordCompanyOfficerApi transform(OfficersItem inputOfficer, FullRecordCompanyOfficerApi outputAppointment)
             throws NonRetryableErrorException {
 
-        outputAppointment.setInternalId(inputOfficer.getInternalId());
+        var externalData = new ExternalData();
+        var internalData = new InternalData();
+
+        outputAppointment.setExternalData(externalData);
+        outputAppointment.setInternalData(internalData);
+
+        externalData.setInternalId(inputOfficer.getInternalId());
 
         final String encodedInternalId = TransformerUtils.encode(inputOfficer.getInternalId());
-        outputAppointment.setId(encodedInternalId);
-        outputAppointment.setAppointmentId(encodedInternalId);
+        externalData.setAppointmentId(encodedInternalId);
 
         final String encodedOfficerId = TransformerUtils.encode(inputOfficer.getOfficerId());
-        outputAppointment.setOfficerId(encodedOfficerId);
+        externalData.setOfficerId(encodedOfficerId);
 
         final String encodedPreviousOfficerId = TransformerUtils.encode(inputOfficer.getPreviousOfficerId());
-        outputAppointment.setPreviousOfficerId(encodedPreviousOfficerId);
+        externalData.setPreviousOfficerId(encodedPreviousOfficerId);
 
-        outputAppointment.setCompanyNumber(inputOfficer.getCompanyNumber());
+        externalData.setCompanyNumber(inputOfficer.getCompanyNumber());
 
-        outputAppointment.setData(officerTransform.transform(inputOfficer));
-        outputAppointment.setSensitiveData(sensitiveOfficerTransform.transform(inputOfficer));
-        
-        outputAppointment.setOfficerRoleSortOrder(getOfficerSortOrder(outputAppointment));
+        externalData.setData(officerTransform.transform(inputOfficer));
+        externalData.setSensitiveData(sensitiveOfficerTransform.transform(inputOfficer));
+
+        internalData.setOfficerRoleSortOrder(getOfficerSortOrder(outputAppointment));
+        internalData.setUpdatedAt(parseLocalDateTime("changedAt", inputOfficer.getChangedAt()));
+
         return outputAppointment;
     }
 
-    private int getOfficerSortOrder(AppointmentAPI outputAppointment) {
-        String officerRole = outputAppointment.getData().getOfficerRole();
-        Integer order = outputAppointment.getData().getResignedOn() == null ? 
+    private int getOfficerSortOrder(FullRecordCompanyOfficerApi outputAppointment) {
+
+        var officerRole = outputAppointment.getExternalData().getData().getOfficerRole().toString();
+        Integer order = outputAppointment.getExternalData().getData().getResignedOn() == null ?
                 officerRoleConfig.getNonResigned().get(officerRole) : 
                 officerRoleConfig.getResigned().get(officerRole);
         return order.intValue();

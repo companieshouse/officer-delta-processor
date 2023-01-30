@@ -2,6 +2,7 @@
 package uk.gov.companieshouse.officer.delta.processor.service.api;
 
 import uk.gov.companieshouse.api.InternalApiClient;
+import uk.gov.companieshouse.api.appointment.FullRecordCompanyOfficerApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
 
@@ -23,7 +24,7 @@ public interface ApiClientService {
      * @param appointment
      * @return the api response
      */
-    ApiResponse<Void> putAppointment(final String logContext, final String companyNumber, final AppointmentAPI appointment);
+    ApiResponse<Void> putAppointment(final String logContext, final String companyNumber, final FullRecordCompanyOfficerApi appointment);
 
     /**
      * Delete a Company Appointment.

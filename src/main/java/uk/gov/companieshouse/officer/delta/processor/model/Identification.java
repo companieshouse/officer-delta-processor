@@ -1,75 +1,56 @@
 package uk.gov.companieshouse.officer.delta.processor.model;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import uk.gov.companieshouse.api.model.delta.officers.IdentificationAPI;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Identification {
 
     @JsonProperty("EEA")
-    private IdentificationAPI eea;
+    private uk.gov.companieshouse.api.appointment.Identification eea;
 
     @JsonProperty("other_corporate_body_or_firm")
-    private IdentificationAPI otherCorporateBodyOrFirm;
+    private uk.gov.companieshouse.api.appointment.Identification otherCorporateBodyOrFirm;
 
     @JsonProperty("non_eea")
-    private IdentificationAPI nonEeaApi;
+    private uk.gov.companieshouse.api.appointment.Identification nonEeaApi;
 
     @JsonProperty("UK_limited_company")
-    private IdentificationAPI uKLimitedCompany;
+    private uk.gov.companieshouse.api.appointment.Identification uKLimitedCompany;
 
-    @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<>();
-
-    @JsonAnyGetter
-    public Map<String, Object> getAdditionalProperties() {
-        return this.additionalProperties;
-    }
-
-    @JsonAnySetter
-    public void setAdditionalProperty(String name, Object value) {
-        this.additionalProperties.put(name, value);
-    }
-
-    public IdentificationAPI getEea() {
+    public uk.gov.companieshouse.api.appointment.Identification getEea() {
         return eea;
     }
 
-    public void setEea(IdentificationAPI eea) {
+    public void setEea(uk.gov.companieshouse.api.appointment.Identification eea) {
         this.eea = eea;
     }
 
-    public IdentificationAPI getOtherCorporateBodyOrFirm() {
+    public uk.gov.companieshouse.api.appointment.Identification getOtherCorporateBodyOrFirm() {
         return otherCorporateBodyOrFirm;
     }
 
-    public void setOtherCorporateBodyOrFirm(IdentificationAPI otherCorporateBodyOrFirm) {
+    public void setOtherCorporateBodyOrFirm(uk.gov.companieshouse.api.appointment.Identification otherCorporateBodyOrFirm) {
         this.otherCorporateBodyOrFirm = otherCorporateBodyOrFirm;
     }
 
-    public IdentificationAPI getNonEeaApi() {
+    public uk.gov.companieshouse.api.appointment.Identification getNonEeaApi() {
         return nonEeaApi;
     }
 
-    public void setNonEeaApi(IdentificationAPI nonEeaApi) {
+    public void setNonEeaApi(uk.gov.companieshouse.api.appointment.Identification nonEeaApi) {
         this.nonEeaApi = nonEeaApi;
     }
 
-    public IdentificationAPI getUKLimitedCompany() {
+    public uk.gov.companieshouse.api.appointment.Identification getUKLimitedCompany() {
         return uKLimitedCompany;
     }
 
-    public void setUKLimitedCompany(IdentificationAPI uKLimitedCompany) {
+    public void setUKLimitedCompany(uk.gov.companieshouse.api.appointment.Identification uKLimitedCompany) {
         this.uKLimitedCompany = uKLimitedCompany;
     }
 

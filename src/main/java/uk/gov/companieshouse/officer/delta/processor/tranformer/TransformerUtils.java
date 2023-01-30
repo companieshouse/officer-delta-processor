@@ -6,8 +6,10 @@ import uk.gov.companieshouse.officer.delta.processor.model.enums.OfficerRole;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
 import java.time.ZoneId;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Base64;
@@ -32,53 +34,90 @@ public class TransformerUtils {
     }
 
     /**
-     * @param identifier       the field identifier to provide context in error messages
-     * @param s                the string representation of the UTC datetime. Expected to match pattern
-     *                         DATETIME_PATTERN.
-     * @param effectivePattern the date pattern to mention in the Exception
-     * @return the Instant corresponding to the parsed string (at UTC by definition)
-     */
-    private static Instant convertToInstant(final String identifier, final String s, final String effectivePattern)
-            throws NonRetryableErrorException {
-        try {
-            return Instant.from(UTC_DATETIME_FORMATTER.parse(s));
-        }
-        catch (DateTimeParseException e) {
-            throw new NonRetryableErrorException(
-                    String.format("%s: date/time pattern not matched: [%s]", identifier, effectivePattern), null);
-        }
-    }
-
-    /**
      * Parse a date string (expected format: DATE_PATTERN).
      * Implementation note: Instant conversion requires input level of detail is Seconds, so TIME_START_OF_DAY is
      * appended before conversion.
      *
      * @param identifier    property name of value (for Exception message)
      * @param rawDateString the date string
-     * @return the Instant corresponding to the parsed string (at UTC by definition)
+     * @return the LocalDate corresponding to the parsed string (at UTC by definition)
      * @throws NonRetryableErrorException if date parsing fails
      */
-    public static Instant parseDateString(final String identifier, String rawDateString)
-            throws NonRetryableErrorException {
-        return convertToInstant(identifier, rawDateString + TIME_START_OF_DAY, DATE_PATTERN);
+    public static LocalDate parseLocalDate(final String identifier, String rawDateString)
+        throws NonRetryableErrorException {
+        return convertToLocalDate(identifier, rawDateString + TIME_START_OF_DAY, DATE_PATTERN);
     }
 
     /**
      * Parse a date string (expected format: DATETIME_PATTERN).
      *
-     * @param identifier        property name of value (for sException message)
+     * @param identifier        property name of value (for Exception message)
      * @param rawDateTimeString the date and time string
-     * @return the Instant corresponding to the parsed string (at UTC by definition)
+     * @return the LocalDate corresponding to the parsed string (at UTC by definition)
      * @throws NonRetryableErrorException if datetime parsing fails
      */
-    public static Instant parseDateTimeString(final String identifier, String rawDateTimeString)
+    public static LocalDate parseLocalDateTime(final String identifier, String rawDateTimeString)
             throws NonRetryableErrorException {
         final String dateTimeString = rawDateTimeString.length() > DATETIME_LENGTH
                 ? rawDateTimeString.substring(0, DATETIME_LENGTH)
                 : rawDateTimeString;
 
-        return convertToInstant(identifier, dateTimeString, DATETIME_PATTERN);
+        return convertToLocalDate(identifier, dateTimeString, DATETIME_PATTERN);
+    }
+
+    /**
+     * Parse a date string (expected format: DATETIME_PATTERN).
+     *
+     * @param identifier        property name of value (for Exception message)
+     * @param rawDateTimeString the date and time string
+     * @return the OffsetDateTime corresponding to the parsed string (at UTC by definition)
+     * @throws NonRetryableErrorException if datetime parsing fails
+     */
+    public static OffsetDateTime parseOffsetDateTime(final String identifier, String rawDateTimeString)
+            throws NonRetryableErrorException {
+        final String dateTimeString = rawDateTimeString.length() > DATETIME_LENGTH
+                ? rawDateTimeString.substring(0, DATETIME_LENGTH)
+                : rawDateTimeString;
+
+        return convertToOffsetDateTime(identifier, dateTimeString, DATETIME_PATTERN);
+    }
+
+    /**
+     * @param identifier       the field identifier to provide context in error messages
+     * @param s                the string representation of the UTC datetime. Expected to match pattern
+     *                         DATETIME_PATTERN.
+     * @param effectivePattern the date pattern to mention in the Exception
+     * @return the LocalDate corresponding to the parsed string (at UTC by definition)
+     */
+    private static LocalDate convertToLocalDate(final String identifier, final String s, final String effectivePattern)
+            throws NonRetryableErrorException {
+        try {
+            return LocalDate.parse(s, UTC_DATETIME_FORMATTER);
+        }
+        catch (DateTimeParseException e) {
+            throw new NonRetryableErrorException(String.format("%s: date/time pattern not matched: [%s]", identifier, effectivePattern), null);
+        }
+    }
+
+    /**
+     * @param identifier       the field identifier to provide context in error messages
+     * @param s                the string representation of the UTC datetime. Expected to match pattern
+     *                         DATETIME_PATTERN.
+     * @param effectivePattern the date pattern to mention in the Exception
+     * @return the OffsetDateTime corresponding to the parsed string (at UTC by definition)
+     */
+    private static OffsetDateTime convertToOffsetDateTime(final String identifier, final String s, final String effectivePattern)
+            throws NonRetryableErrorException {
+        try {
+            var df = DateTimeFormatter.ofPattern(effectivePattern);
+            return LocalDateTime.parse(s, df)
+                    .atZone(ZoneId.of("Europe/London"))
+                    .toOffsetDateTime();
+
+        }
+        catch (DateTimeParseException e) {
+            throw new NonRetryableErrorException(String.format("%s: date/time pattern not matched: [%s]", identifier, effectivePattern), null);
+        }
     }
 
     public static String base64Encode(final byte[] bytes) {

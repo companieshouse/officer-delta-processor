@@ -1,16 +1,15 @@
 package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.lookupOfficerRole;
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseDateString;
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseDateTimeString;
+import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseLocalDate;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseYesOrNo;
+import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.lookupOfficerRole;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.api.model.delta.officers.FormerNamesAPI;
-import uk.gov.companieshouse.api.model.delta.officers.LinksAPI;
-import uk.gov.companieshouse.api.model.delta.officers.OfficerAPI;
+import uk.gov.companieshouse.api.appointment.Data;
+import uk.gov.companieshouse.api.appointment.ItemLinkTypes;
+import uk.gov.companieshouse.api.appointment.OfficerLinkTypes;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithCountryOfResidence;
@@ -19,41 +18,44 @@ import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupa
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithPre1992Appointment;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithResidentialAddress;
 
-import java.time.Instant;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 @Component
-public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI> {
+public class OfficerTransform implements Transformative<OfficersItem, Data> {
     public static final String COMPANY = "/company";
     public static final String APPOINTMENTS = "/appointments";
     public static final String OFFICERS = "/officers";
     IdentificationTransform idTransform;
 
+    ServiceAddressTransform serviceAddressTransform;
+
+    FormerNameTransform formerNameTransform;
+
     @Autowired
-    public OfficerTransform(IdentificationTransform idTransform) {
+    public OfficerTransform(IdentificationTransform idTransform, ServiceAddressTransform serviceAddressTransform, FormerNameTransform formerNameTransform) {
         this.idTransform = idTransform;
+        this.serviceAddressTransform = serviceAddressTransform;
+        this.formerNameTransform = formerNameTransform;
+
     }
 
     @Override
-    public OfficerAPI factory() {
-        return new OfficerAPI();
+    public Data factory() {
+        return new Data();
     }
 
     @Override
-    public OfficerAPI transform(OfficersItem source, OfficerAPI officer) throws NonRetryableErrorException {
+    public Data transform(OfficersItem source, Data officer) throws NonRetryableErrorException {
 
-        officer.setUpdatedAt(
-                parseDateTimeString("changedAt", source.getChangedAt()));
-        officer.setAppointedOn(
-                parseDateString("appointmentDate", source.getAppointmentDate()));
+        officer.setAppointedOn(parseLocalDate("appointmentDate", source.getAppointmentDate()));
 
         if (source.getResignationDate() != null) {
-            officer.setResignedOn(
-                    parseDateString("resignation_date", source.getResignationDate()));
+            officer.setResignedOn(parseLocalDate("resignation_date", source.getResignationDate()));
         }
 
         final String officerRole = lookupOfficerRole(source.getKind(), source.getCorporateInd());
-        officer.setOfficerRole(officerRole);
+        officer.setOfficerRole(Data.OfficerRoleEnum.fromValue(officerRole));
 
         if (source.getCorporateInd().equalsIgnoreCase("Y")) {
             officer.setCompanyName(source.getSurname());
@@ -75,27 +77,27 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
         }
 
         if (RolesWithFormerNames.includes(officerRole) && source.getPreviousNameArray() != null) {
-            officer.setFormerNameData(source.getPreviousNameArray().stream()
-                    .map(s -> new FormerNamesAPI(
-                            s.getPreviousForename(), s.getPreviousSurname())).collect(Collectors.toList()));
+            officer.setFormerNames(source.getPreviousNameArray().stream()
+                    .map(formerNameTransform::transform).collect(Collectors.toList()));
         }
 
-        final Instant appointmentDate = parseDateString(
+        final var appointmentDate = parseLocalDate(
                 "appointmentDate", source.getAppointmentDate());
 
         if (RolesWithPre1992Appointment.includes(officerRole)) {
             officer.setIsPre1992Appointment(parseYesOrNo(source.getApptDatePrefix()));
-            if (officer.isPre1992Appointment()) {
+            if (Boolean.TRUE.equals(officer.getIsPre1992Appointment())) {
                 officer.setAppointedOn(null);
                 officer.setAppointedBefore(appointmentDate);
             } else {
                 officer.setAppointedOn(appointmentDate);
             }
         } else {
+            officer.setIsPre1992Appointment(false);
             officer.setAppointedOn(appointmentDate);
         }
 
-        officer.setServiceAddress(source.getServiceAddress());
+        officer.setServiceAddress(serviceAddressTransform.transform(source.getServiceAddress()));
         officer.setServiceAddressSameAsRegisteredOfficeAddress(
                 parseYesOrNo(source.getServiceAddressSameAsRegisteredAddress()));
 
@@ -107,11 +109,8 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
             officer.setCountryOfResidence(source.getServiceAddress().getUsualCountryOfResidence());
         }
 
-        //Prevent it from being stored in URA within the appointments collection.
-        officer.getServiceAddress().setUsualCountryOfResidence(null);
-
         if (source.getIdentification() != null)
-            officer.setIdentificationData(idTransform.transform(source.getIdentification()));
+            officer.setIdentification(idTransform.transform(source.getIdentification()));
 
         String selfLink = COMPANY.concat("/")
             .concat(source.getCompanyNumber())
@@ -125,8 +124,14 @@ public class OfficerTransform implements Transformative<OfficersItem, OfficerAPI
             .concat(TransformerUtils.encode(source.getOfficerId()))
             .concat(APPOINTMENTS);
 
-        LinksAPI linksAPI = new LinksAPI(selfLink, officerSelf, officerAppointments);
-        officer.setLinksData(linksAPI);
+        var itemLinkTypes = new ItemLinkTypes();
+        var officerLinkTypes = new OfficerLinkTypes();
+
+        itemLinkTypes.setSelf(selfLink);
+        itemLinkTypes.setOfficer(officerLinkTypes);
+        itemLinkTypes.getOfficer().setSelf(officerSelf);
+        itemLinkTypes.getOfficer().setAppointments(officerAppointments);
+        officer.setLinks(Collections.singletonList(itemLinkTypes));
 
         return officer;
     }
