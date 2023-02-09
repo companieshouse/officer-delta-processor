@@ -44,6 +44,7 @@ import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientService;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.AppointmentTransform;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.IdentificationTransform;
+import uk.gov.companieshouse.officer.delta.processor.tranformer.PrincipalOfficeAddressTransform;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.ServiceAddressTransform;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.FormerNameTransform;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.UsualResidentialAddressTransform;
@@ -82,7 +83,8 @@ class DeltaProcessorTest {
         ServiceAddressTransform serviceAddressTransform = new ServiceAddressTransform();
         FormerNameTransform formerNameTransform = new FormerNameTransform();
         UsualResidentialAddressTransform usualResidentialAddressTransform = new UsualResidentialAddressTransform();
-        OfficerTransform officerTransform = new OfficerTransform(idTransform, serviceAddressTransform, formerNameTransform);
+        PrincipalOfficeAddressTransform principalOfficeAddressTransform = new PrincipalOfficeAddressTransform();
+        OfficerTransform officerTransform = new OfficerTransform(idTransform, serviceAddressTransform, formerNameTransform, principalOfficeAddressTransform);
         SensitiveOfficerTransform sensitiveOfficerTransform = new SensitiveOfficerTransform(usualResidentialAddressTransform);
         HashMap<String, Integer> resigned = new HashMap<>();
         resigned.put("director", 200);

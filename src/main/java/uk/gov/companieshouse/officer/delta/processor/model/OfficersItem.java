@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import uk.gov.companieshouse.api.appointment.ContactDetails;
 import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -71,6 +72,15 @@ public class OfficersItem {
 
     @JsonProperty("usual_residential_address")
     private AddressAPI usualResidentialAddress;
+
+    @JsonProperty("principal_office_address")
+    private AddressAPI principalOfficeAddress;
+
+    @JsonProperty("responsibilities")
+   private String responsibilities;
+
+    @JsonProperty("contact_details")
+    private ContactDetails contactDetails;
 
     @JsonProperty("forename")
     private String forename;
@@ -257,6 +267,30 @@ public class OfficersItem {
         return usualResidentialAddress;
     }
 
+    public void setPrincipalOfficeAddress(AddressAPI principalOfficeAddress) {
+        this.principalOfficeAddress = principalOfficeAddress;
+    }
+
+    public AddressAPI getPrincipalOfficeAddress() {
+        return principalOfficeAddress;
+    }
+
+    public void setResponsibilities(String responsibilities) {
+        this.responsibilities = responsibilities;
+    }
+
+    public String getResponsibilities() {
+        return responsibilities;
+    }
+
+    public void setContactDetails(ContactDetails contactDetails) {
+        this.contactDetails = contactDetails;
+    }
+
+    public ContactDetails getContactDetails() {
+        return contactDetails;
+    }
+
     public void setForename(String forename) {
         this.forename = forename;
     }
@@ -367,6 +401,9 @@ public class OfficersItem {
                 && Objects.equals(getCorporateInd(), that.getCorporateInd())
                 && Objects.equals(getServiceAddress(), that.getServiceAddress())
                 && Objects.equals(getUsualResidentialAddress(), that.getUsualResidentialAddress())
+                && Objects.equals(getPrincipalOfficeAddress(), that.getPrincipalOfficeAddress())
+                && Objects.equals(getResponsibilities(), that.getResponsibilities())
+                && Objects.equals(getContactDetails(), that.getContactDetails())
                 && Objects.equals(getForename(), that.getForename())
                 && Objects.equals(getOfficerId(), that.getOfficerId())
                 && Objects.equals(getPreviousOfficerId(), that.getPreviousOfficerId())
@@ -400,6 +437,9 @@ public class OfficersItem {
                 getCorporateInd(),
                 getServiceAddress(),
                 getUsualResidentialAddress(),
+                getPrincipalOfficeAddress(),
+                getResponsibilities(),
+                getContactDetails(),
                 getForename(),
                 getOfficerId(),
                 getPreviousOfficerId(),
