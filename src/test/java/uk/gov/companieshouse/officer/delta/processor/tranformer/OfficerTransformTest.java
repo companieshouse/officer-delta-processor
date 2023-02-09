@@ -21,7 +21,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.api.appointment.ContactDetails;
 import uk.gov.companieshouse.api.appointment.Data;
+import uk.gov.companieshouse.api.appointment.PrincipalOfficeAddress;
 import uk.gov.companieshouse.api.appointment.ServiceAddress;
 import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
@@ -55,6 +57,8 @@ class OfficerTransformTest {
     @Mock
     private FormerNameTransform formerNameTransform;
     @Mock
+    private PrincipalOfficeAddressTransform principalOfficeAddressTransform;
+    @Mock
     private AddressAPI addressAPI;
     @Mock
     private Identification identification;
@@ -62,6 +66,8 @@ class OfficerTransformTest {
     private uk.gov.companieshouse.api.appointment.Identification identificationAPI;
     @Mock
     private ServiceAddress serviceAddress;
+    @Mock
+    private PrincipalOfficeAddress principalOfficeAddress;
     @Mock
     private Data data;
 
@@ -75,7 +81,7 @@ class OfficerTransformTest {
 
     @BeforeEach
     void setUp() {
-        testTransform = new OfficerTransform(identificationTransform, serviceAddressTransform, formerNameTransform);
+        testTransform = new OfficerTransform(identificationTransform, serviceAddressTransform, formerNameTransform, principalOfficeAddressTransform);
     }
 
     @Test
@@ -246,6 +252,32 @@ class OfficerTransformTest {
         assertThat(result.getServiceAddress(), is(sameInstance(serviceAddress)));
         assertThat(result.getServiceAddressSameAsRegisteredOfficeAddress(), is(true));
         assertThat(result.getIdentification(), is(sameInstance(identificationAPI)));
+    }
+
+
+    @Test
+    void testCorporateManagingOfficerTransform() throws NonRetryableErrorException {
+        Data officerAPI = testTransform.factory();
+        OfficersItem officer = createOfficer(addressAPI, identification);
+        ContactDetails contactDetails = new ContactDetails();
+        AddressAPI principalOfficeAddressAPI = new AddressAPI();
+
+        officer.setKind(OfficerRole.MANOFFCORP.name());
+        officer.setPrincipalOfficeAddress(principalOfficeAddressAPI);
+        officer.setContactDetails(contactDetails);
+        officer.setResponsibilities("test");
+
+        officer.setAppointmentDate(VALID_DATE);
+        officer.setDateOfBirth(VALID_DATE);
+
+        when(identificationTransform.transform(identification)).thenReturn(identificationAPI);
+        when(principalOfficeAddressTransform.transform(principalOfficeAddressAPI)).thenReturn(principalOfficeAddress);
+
+        final Data result = testTransform.transform(officer, officerAPI);
+
+        assertThat(result.getPrincipalOfficeAddress(), is(principalOfficeAddress));
+        assertThat(result.getContactDetails(), is(contactDetails));
+        assertThat(result.getResponsibilities(), is("test"));
     }
 
     @DisplayName("Verify data in the Links object is created as expected")

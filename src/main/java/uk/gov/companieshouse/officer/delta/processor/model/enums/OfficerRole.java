@@ -31,7 +31,8 @@ public enum OfficerRole {
     PERSAUTHR("person-authorised-to-represent"),
     RECMAN("receiver-and-manager"),
     SEC("secretary"),
-    SECCORP("corporate-secretary");
+    SECCORP("corporate-secretary"),
+    MANOFFCORP("corporate-managing-officer");
 
     private final String value;
 

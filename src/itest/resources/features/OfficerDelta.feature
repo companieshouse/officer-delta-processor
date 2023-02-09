@@ -24,3 +24,8 @@ Scenario: Can transform and send a corporate-non-corp-kind officer
   Given the application is running
   When the consumer receives a corporate_non_corp_kind officer delta with id ODxi2KP6LfSvwes9xY0O86YliyM
   Then a PUT request is sent to the appointments api with the transformed data
+
+Scenario: Can transform and send a corporate-managing officer
+  Given the application is running
+  When the consumer receives a corporate_managing officer delta with id EcEKO1YhIKexb0cSDZsn_OHsFw4
+  Then a PUT request is sent to the appointments api with the transformed data

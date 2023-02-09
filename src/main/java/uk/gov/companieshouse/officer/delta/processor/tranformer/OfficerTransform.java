@@ -7,11 +7,13 @@ import static uk.gov.companieshouse.officer.delta.processor.tranformer.Transform
 import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.api.appointment.ContactDetails;
 import uk.gov.companieshouse.api.appointment.Data;
 import uk.gov.companieshouse.api.appointment.ItemLinkTypes;
 import uk.gov.companieshouse.api.appointment.OfficerLinkTypes;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
+import uk.gov.companieshouse.officer.delta.processor.model.enums.OfficerRole;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithCountryOfResidence;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithFormerNames;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupation;
@@ -32,12 +34,15 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
 
     FormerNameTransform formerNameTransform;
 
+    PrincipalOfficeAddressTransform principalOfficeAddressTransform;
+
     @Autowired
-    public OfficerTransform(IdentificationTransform idTransform, ServiceAddressTransform serviceAddressTransform, FormerNameTransform formerNameTransform) {
+    public OfficerTransform(IdentificationTransform idTransform, ServiceAddressTransform serviceAddressTransform,
+                            FormerNameTransform formerNameTransform, PrincipalOfficeAddressTransform principalOfficeAddressTransform) {
         this.idTransform = idTransform;
         this.serviceAddressTransform = serviceAddressTransform;
         this.formerNameTransform = formerNameTransform;
-
+        this.principalOfficeAddressTransform = principalOfficeAddressTransform;
     }
 
     @Override
@@ -83,6 +88,13 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
 
         final var appointmentDate = parseLocalDate(
                 "appointmentDate", source.getAppointmentDate());
+
+        if(OfficerRole.MANOFFCORP.getValue().equals(officerRole)) {
+            officer.setPrincipalOfficeAddress(principalOfficeAddressTransform.transform(source.getPrincipalOfficeAddress()));
+            officer.setContactDetails(source.getContactDetails());
+            officer.setResponsibilities(source.getResponsibilities());
+        }
+
 
         if (RolesWithPre1992Appointment.includes(officerRole)) {
             officer.setIsPre1992Appointment(parseYesOrNo(source.getApptDatePrefix()));
