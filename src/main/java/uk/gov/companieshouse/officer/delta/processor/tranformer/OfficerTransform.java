@@ -13,6 +13,7 @@ import uk.gov.companieshouse.api.appointment.ItemLinkTypes;
 import uk.gov.companieshouse.api.appointment.OfficerLinkTypes;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
+import uk.gov.companieshouse.officer.delta.processor.model.enums.OfficerRole;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithCountryOfResidence;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithFormerNames;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupation;
@@ -88,9 +89,12 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
         final var appointmentDate = parseLocalDate(
                 "appointmentDate", source.getAppointmentDate());
 
-        officer.setPrincipalOfficeAddress(principalOfficeAddressTransform.transform(source.getPrincipalOfficeAddress()));
-        officer.setContactDetails(source.getContactDetails());
-        officer.setResponsibilities(source.getResponsibilities());
+        if(OfficerRole.MANOFFCORP.getValue().equals(officerRole)) {
+            officer.setPrincipalOfficeAddress(principalOfficeAddressTransform.transform(source.getPrincipalOfficeAddress()));
+            officer.setContactDetails(source.getContactDetails());
+            officer.setResponsibilities(source.getResponsibilities());
+        }
+
 
         if (RolesWithPre1992Appointment.includes(officerRole)) {
             officer.setIsPre1992Appointment(parseYesOrNo(source.getApptDatePrefix()));
