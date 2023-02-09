@@ -256,12 +256,13 @@ class OfficerTransformTest {
 
 
     @Test
-    void testPrincipalAddressTransform() throws NonRetryableErrorException {
+    void testCorporateManagingOfficerTransform() throws NonRetryableErrorException {
         Data officerAPI = testTransform.factory();
         OfficersItem officer = createOfficer(addressAPI, identification);
         ContactDetails contactDetails = new ContactDetails();
         AddressAPI principalOfficeAddressAPI = new AddressAPI();
 
+        officer.setKind(OfficerRole.MANOFFCORP.name());
         officer.setPrincipalOfficeAddress(principalOfficeAddressAPI);
         officer.setContactDetails(contactDetails);
         officer.setResponsibilities("test");
