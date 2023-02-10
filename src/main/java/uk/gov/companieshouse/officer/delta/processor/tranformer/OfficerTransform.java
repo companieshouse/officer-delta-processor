@@ -89,10 +89,13 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
         final var appointmentDate = parseLocalDate(
                 "appointmentDate", source.getAppointmentDate());
 
+        if(officerRole.contains(OfficerRole.MANOFF.getValue())) {
+            officer.setResponsibilities(source.getResponsibilities());
+        }
+
         if(OfficerRole.MANOFFCORP.getValue().equals(officerRole)) {
             officer.setPrincipalOfficeAddress(principalOfficeAddressTransform.transform(source.getPrincipalOfficeAddress()));
             officer.setContactDetails(source.getContactDetails());
-            officer.setResponsibilities(source.getResponsibilities());
         }
 
 

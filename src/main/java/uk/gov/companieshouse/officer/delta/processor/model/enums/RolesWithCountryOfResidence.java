@@ -10,7 +10,8 @@ public enum RolesWithCountryOfResidence {
     MEMMANORG(OfficerRole.MEMMANORG),
     MEMSUPORG(OfficerRole.MEMSUPORG),
     MEMADMORG(OfficerRole.MEMADMORG),
-    NOMDIR(OfficerRole.NOMDIR);
+    NOMDIR(OfficerRole.NOMDIR),
+    MANOFF(OfficerRole.MANOFF);
 
     private final OfficerRole officerRole;
 
