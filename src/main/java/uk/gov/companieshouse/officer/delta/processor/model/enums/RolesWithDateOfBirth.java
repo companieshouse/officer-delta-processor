@@ -9,7 +9,8 @@ public enum RolesWithDateOfBirth {
     MEMBER_OF_A_MANAGEMENT_ORGAN(OfficerRole.MEMMANORG),
     MEMBER_OF_A_SUPERVISORY_ORGAN(OfficerRole.MEMSUPORG),
     MEMBER_OF_AN_ADMINISTRATIVE_ORGAN(OfficerRole.MEMADMORG),
-    NOMINEE_DIRECTOR(OfficerRole.NOMDIR);
+    NOMINEE_DIRECTOR(OfficerRole.NOMDIR),
+    MANOFF(OfficerRole.MANOFF);
 
     private final OfficerRole officerRole;
 

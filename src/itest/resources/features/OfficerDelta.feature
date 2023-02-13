@@ -29,3 +29,8 @@ Scenario: Can transform and send a corporate-managing officer
   Given the application is running
   When the consumer receives a corporate_managing officer delta with id EcEKO1YhIKexb0cSDZsn_OHsFw4
   Then a PUT request is sent to the appointments api with the transformed data
+
+Scenario: Can transform and send a managing officer
+  Given the application is running
+  When the consumer receives a managing officer delta with id EcEKO1YhIKexb0cSDZsn_OHsFw4
+  Then a PUT request is sent to the appointments api with the transformed data

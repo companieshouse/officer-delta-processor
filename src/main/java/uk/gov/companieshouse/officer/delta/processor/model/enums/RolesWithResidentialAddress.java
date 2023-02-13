@@ -12,7 +12,8 @@ public enum RolesWithResidentialAddress {
     MEMBER_OF_AN_ADMINISTRATIVE_ORGAN(OfficerRole.MEMADMORG),
     NOMINEE_DIRECTOR(OfficerRole.NOMDIR),
     PERSAUTHR(OfficerRole.PERSAUTHR),
-    PERSAUTHRA(OfficerRole.PERSAUTHRA);
+    PERSAUTHRA(OfficerRole.PERSAUTHRA),
+    MANOFF(OfficerRole.MANOFF);
 
     private final OfficerRole officerRole;
 

@@ -32,6 +32,7 @@ public enum OfficerRole {
     RECMAN("receiver-and-manager"),
     SEC("secretary"),
     SECCORP("corporate-secretary"),
+    MANOFF("managing-officer"),
     MANOFFCORP("corporate-managing-officer");
 
     private final String value;

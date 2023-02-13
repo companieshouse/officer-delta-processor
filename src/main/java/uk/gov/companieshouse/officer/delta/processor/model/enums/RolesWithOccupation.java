@@ -10,7 +10,8 @@ public enum RolesWithOccupation {
     MEMBER_OF_AN_ADMINISTRATIVE_ORGAN(OfficerRole.MEMADMORG),
     NOMINEE_DIRECTOR(OfficerRole.NOMDIR),
     NOMINEE_SECRETARY(OfficerRole.NOMSEC),
-    SECRETARY(OfficerRole.SEC);
+    SECRETARY(OfficerRole.SEC),
+    MANOFF(OfficerRole.MANOFF);
 
     private final OfficerRole officerRole;
 
