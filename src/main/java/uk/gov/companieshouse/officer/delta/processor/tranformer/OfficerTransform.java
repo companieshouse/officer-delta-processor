@@ -7,7 +7,6 @@ import static uk.gov.companieshouse.officer.delta.processor.tranformer.Transform
 import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.api.appointment.ContactDetails;
 import uk.gov.companieshouse.api.appointment.Data;
 import uk.gov.companieshouse.api.appointment.ItemLinkTypes;
 import uk.gov.companieshouse.api.appointment.OfficerLinkTypes;
@@ -89,15 +88,7 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
         final var appointmentDate = parseLocalDate(
                 "appointmentDate", source.getAppointmentDate());
 
-        if(officerRole.contains(OfficerRole.MANOFF.getValue())) {
-            officer.setResponsibilities(source.getResponsibilities());
-        }
-
-        if(OfficerRole.MANOFFCORP.getValue().equals(officerRole)) {
-            officer.setPrincipalOfficeAddress(principalOfficeAddressTransform.transform(source.getPrincipalOfficeAddress()));
-            officer.setContactDetails(source.getContactDetails());
-        }
-
+        handleManagingOfficerFields(source, officer, officerRole);
 
         if (RolesWithPre1992Appointment.includes(officerRole)) {
             officer.setIsPre1992Appointment(parseYesOrNo(source.getApptDatePrefix()));
@@ -149,6 +140,17 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
         officer.setLinks(Collections.singletonList(itemLinkTypes));
 
         return officer;
+    }
+
+    private void handleManagingOfficerFields(OfficersItem source, Data officer, String officerRole) {
+        if(officerRole.contains(OfficerRole.MANOFF.getValue())) {
+            officer.setResponsibilities(source.getResponsibilities());
+        }
+
+        if(OfficerRole.MANOFFCORP.getValue().equals(officerRole)) {
+            officer.setPrincipalOfficeAddress(principalOfficeAddressTransform.transform(source.getPrincipalOfficeAddress()));
+            officer.setContactDetails(source.getContactDetails());
+        }
     }
 }
 
