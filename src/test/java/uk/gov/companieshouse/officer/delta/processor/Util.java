@@ -3,7 +3,6 @@ package uk.gov.companieshouse.officer.delta.processor;
 import com.github.stefanbirkner.systemlambda.SystemLambda;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeaders;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -13,7 +12,6 @@ import uk.gov.companieshouse.kafka.consumer.ConsumerConfig;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.Collections;
 
 import static com.github.stefanbirkner.systemlambda.SystemLambda.withEnvironmentVariable;
@@ -21,8 +19,8 @@ import static org.springframework.kafka.support.KafkaHeaders.EXCEPTION_CAUSE_FQC
 
 public class Util {
     public static SystemLambda.WithEnvironmentVariables withKafkaEnvironment(ConsumerConfig config) {
-        final String brokerAddr = Strings.join(Arrays.asList(config.getBrokerAddresses()), ',');
-        final String topicString = Strings.join(config.getTopics(), ',');
+        final String brokerAddr = String.join(",", config.getBrokerAddresses());
+        final String topicString = String.join(",", config.getTopics());
 
         return withEnvironmentVariable("KAFKA_BROKER_ADDR", brokerAddr)
                 .and("KAFKA_TOPICS_LIST", topicString)

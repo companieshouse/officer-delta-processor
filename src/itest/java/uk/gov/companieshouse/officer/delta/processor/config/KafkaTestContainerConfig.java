@@ -1,5 +1,8 @@
 package uk.gov.companieshouse.officer.delta.processor.config;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
+
+import java.time.Duration;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -37,7 +40,8 @@ public class KafkaTestContainerConfig {
 
     @Bean
     public KafkaContainer kafkaContainer() {
-        KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
+        KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"))
+                .withStartupTimeout(Duration.of(300, SECONDS));
         kafkaContainer.start();
         return kafkaContainer;
     }

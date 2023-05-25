@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>uk.gov.companieshouse</groupId>
 		<artifactId>companies-house-parent</artifactId>
-		<version>1.3.0</version>
+		<version>1.3.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<artifactId>officer-delta-processor</artifactId>
@@ -18,48 +18,31 @@
 		<skip.integration.tests>false</skip.integration.tests>
 		<skip.unit.tests>false</skip.unit.tests>
 
-		<java.version>11</java.version>
-
-		<avro.version>1.8.1</avro.version>
 		<ch-kafka.version>1.4.4</ch-kafka.version>
-		<kafka-models.version>1.0.28</kafka-models.version>
-		<commons-lang3.version>3.11</commons-lang3.version>
+		<kafka-models.version>1.0.31</kafka-models.version>
 		<private.sdk.version>2.0.219</private.sdk.version>
-		<spring.boot.version>2.6.4</spring.boot.version>
+		<spring.boot.version>2.7.11</spring.boot.version>
 
 		<!-- Logging -->
-		<log4j-bom.version>2.17.0</log4j-bom.version>
-		<structured-logging.version>1.9.12</structured-logging.version>
-		<api-sdk-manager-java-library.version>1.0.4</api-sdk-manager-java-library.version>
+		<structured-logging.version>1.9.17</structured-logging.version>
+		<api-sdk-manager-java-library.version>1.0.6</api-sdk-manager-java-library.version>
 
 		<!-- Test -->
-		<mockito-junit-jupiter.version>3.8.0</mockito-junit-jupiter.version>
 		<equalsverifier.version>3.1.9</equalsverifier.version>
-		<testcontainers.version>1.15.3</testcontainers.version>
-		<system-lambda.version>1.2.0</system-lambda.version>
-		<maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
-		<maven-failsafe-plugin.version>2.22.2</maven-failsafe-plugin.version>
-		<jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
-		<io-cucumber.version>7.2.3</io-cucumber.version>
-		<skip.integration.tests>false</skip.integration.tests>
-		<skip.unit.tests>false</skip.unit.tests>
-		<assertj-core.version>3.22.0</assertj-core.version>
+		<testcontainers.version>1.18.1</testcontainers.version>
+		<system-lambda.version>1.2.1</system-lambda.version>
+		<maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
+		<maven-failsafe-plugin.version>3.0.0</maven-failsafe-plugin.version>
+		<io-cucumber.version>7.11.2</io-cucumber.version>
 		<wiremock.standalone.version>2.32.0</wiremock.standalone.version>
-		<maven-build-helper-plugin.version>3.2.0</maven-build-helper-plugin.version>
-		<maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
-
-		<!-- Spring -->
-		<spring-boot-dependencies.version>2.6.4</spring-boot-dependencies.version>
-		<spring-test.version>5.2.0.RELEASE</spring-test.version>
-		<spring-boot-maven-plugin.version>2.2.0.RELEASE</spring-boot-maven-plugin.version>
+		<maven-build-helper-plugin.version>3.4.0</maven-build-helper-plugin.version>
+		<maven-resources-plugin.version>3.3.1	</maven-resources-plugin.version>
 
 		<!-- Maven -->
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 
 		<!-- Sonar dependency -->
-		<sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
-		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
 		<sonar.projectKey>uk.gov.companieshouse:officer-delta-processor</sonar.projectKey>
 		<sonar.sources>src/main</sonar.sources>
 		<sonar.tests>src/test</sonar.tests>
@@ -72,29 +55,40 @@
 	</properties>
 	<dependencyManagement>
 		<dependencies>
-			<!-- Fix for CVE-2021-44228 -->
-			<!-- Fix for CVE-2021-45105 -->
-			<!-- Required until v2.5.8 springframework & v2.6.2 springboot -->
-			<dependency>
-				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-bom</artifactId>
-				<version>${log4j-bom.version}</version>
-				<scope>import</scope>
-				<type>pom</type>
-			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
-				<version>${spring-boot-dependencies.version}</version>
+				<version>${spring.boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>testcontainers-bom</artifactId>
+				<version>${testcontainers.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.cucumber</groupId>
+				<artifactId>cucumber-bom</artifactId>
+				<version>${io-cucumber.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.yaml</groupId>
+					<artifactId>snakeyaml</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -109,24 +103,23 @@
 			<artifactId>spring-kafka</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-logging</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-to-slf4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
 			<groupId>uk.gov.companieshouse</groupId>
 			<artifactId>structured-logging</artifactId>
 			<version>${structured-logging.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>${commons-lang3.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.avro</groupId>
-			<artifactId>avro</artifactId>
-			<version>${avro.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>20210307</version>
 		</dependency>
 		<dependency>
 			<groupId>uk.gov.companieshouse</groupId>
@@ -148,7 +141,6 @@
 			<artifactId>api-sdk-manager-java-library</artifactId>
 			<version>${api-sdk-manager-java-library.version}</version>
 		</dependency>
-		
 
 		<!-- Test -->
 		<dependency>
@@ -164,7 +156,6 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-inline</artifactId>
-			<version>${mockito-junit-jupiter.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -181,19 +172,16 @@
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>kafka</artifactId>
-			<version>${testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>testcontainers</artifactId>
-			<version>${testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>junit-jupiter</artifactId>
-			<version>${testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -210,26 +198,32 @@
 		</dependency>
 		<dependency>
 			<groupId>io.cucumber</groupId>
-			<artifactId>cucumber-core</artifactId>
-			<version>${io-cucumber.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.cucumber</groupId>
 			<artifactId>cucumber-java</artifactId>
-			<version>${io-cucumber.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.cucumber</groupId>
-			<artifactId>cucumber-junit</artifactId>
-			<version>${io-cucumber.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.cucumber</groupId>
 			<artifactId>cucumber-spring</artifactId>
-			<version>${io-cucumber.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-junit-platform-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-suite</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-console</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -268,7 +262,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>${spring-boot-maven-plugin.version}</version>
+				<version>${spring.boot.version}</version>
 				<executions>
 					<execution>
 						<goals>
@@ -372,6 +366,7 @@
 				<version>${maven-failsafe-plugin.version}</version>
 				<executions>
 					<execution>
+						<phase>integration-test</phase>
 						<goals>
 							<goal>integration-test</goal>
 							<goal>verify</goal>
@@ -379,13 +374,18 @@
 					</execution>
 				</executions>
 				<configuration>
-					<encoding>UTF-8</encoding>
+					<properties>
+						<property>
+							<name>listener</name>
+							<value>org.sonar.java.jacoco.JUnitListener</value>
+						</property>
+					</properties>
 					<argLine>-Dfile.encoding=UTF-8</argLine>
 					<argLine>${failsafeArgLine}</argLine>
 					<classesDirectory>${project.build.outputDirectory}</classesDirectory>
 					<skipITs>${skip.integration.tests}</skipITs>
 					<includes>
-						<include>*ITest.java</include>
+						<include>**/*ITest.java</include>
 					</includes>
 				</configuration>
 			</plugin>
@@ -419,7 +419,7 @@
 			<plugin>
 				<groupId>com.google.cloud.tools</groupId>
 				<artifactId>jib-maven-plugin</artifactId>
-				<version>3.1.1</version>
+				<version>3.3.2</version>
 			</plugin>
 		</plugins>
 	</build>

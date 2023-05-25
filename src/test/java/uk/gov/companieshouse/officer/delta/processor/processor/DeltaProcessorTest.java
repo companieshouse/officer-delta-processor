@@ -17,13 +17,18 @@ import static uk.gov.companieshouse.officer.delta.processor.tranformer.Transform
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -65,6 +70,9 @@ import java.util.stream.Stream;
 class DeltaProcessorTest {
     private static final String CONTEXT_ID = "context_id";
 
+    private static final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule());
+
     private static AppointmentTransform appointmentTransform;
     private static String json;
     private static FullRecordCompanyOfficerApi expectedAppointment;
@@ -76,18 +84,20 @@ class DeltaProcessorTest {
     @Mock
     private Logger logger;
 
+    @Captor
+    private ArgumentCaptor<FullRecordCompanyOfficerApi> appointmentCapture;
+
+
     @BeforeAll
     static void beforeAll() throws IOException, NonRetryableErrorException {
         json = loadJson("officer_delta_dummy.json");
-        IdentificationTransform idTransform = new IdentificationTransform();
-        ServiceAddressTransform serviceAddressTransform = new ServiceAddressTransform();
-        FormerNameTransform formerNameTransform = new FormerNameTransform();
-        UsualResidentialAddressTransform usualResidentialAddressTransform = new UsualResidentialAddressTransform();
-        PrincipalOfficeAddressTransform principalOfficeAddressTransform = new PrincipalOfficeAddressTransform();
-        OfficerTransform officerTransform = new OfficerTransform(idTransform, serviceAddressTransform, formerNameTransform, principalOfficeAddressTransform);
-        SensitiveOfficerTransform sensitiveOfficerTransform = new SensitiveOfficerTransform(usualResidentialAddressTransform);
-        HashMap<String, Integer> resigned = new HashMap<>();
-        resigned.put("director", 200);
+        OfficerTransform officerTransform = new OfficerTransform(new IdentificationTransform(),
+                new ServiceAddressTransform(),
+                new FormerNameTransform(),
+                new PrincipalOfficeAddressTransform());
+        SensitiveOfficerTransform sensitiveOfficerTransform = new SensitiveOfficerTransform(
+                new UsualResidentialAddressTransform());
+        Map<String, Integer> resigned = Map.of("director", 200);
         OfficerRoleConfig officerRoleConfig = new OfficerRoleConfig(new HashMap<>(), resigned);
         appointmentTransform = new AppointmentTransform(officerTransform, sensitiveOfficerTransform, officerRoleConfig);
         expectedAppointment = jsonToAppointment(json);
@@ -95,7 +105,7 @@ class DeltaProcessorTest {
 
     private static FullRecordCompanyOfficerApi jsonToAppointment(final String json)
             throws JsonProcessingException, NonRetryableErrorException {
-        final ObjectMapper objectMapper = new ObjectMapper();
+
         final Officers officers = objectMapper.readValue(json, Officers.class);
         final List<OfficersItem> officersOfficers = officers.getOfficers();
         final OfficersItem officer = officersOfficers.get(0);
@@ -108,7 +118,6 @@ class DeltaProcessorTest {
 
     private static OfficerDeleteDelta jsonToDelete(final String json)
             throws JsonProcessingException, NonRetryableErrorException {
-        final ObjectMapper objectMapper = new ObjectMapper();
         final OfficerDeleteDelta officerDelete = objectMapper.readValue(json, OfficerDeleteDelta.class);
         return officerDelete;
     }
@@ -246,4 +255,28 @@ class DeltaProcessorTest {
                     .collect(Collectors.joining("\n"));
     }
 
+    @ParameterizedTest
+    @CsvSource({
+            "20230125171003950844,1674666603950",
+            "20230325235959950844,1679788799950",
+            "20230614091500950844,1686734100950",
+            "20231029010000950844,1698541200950",
+            "20231029020000950844,1698544800950"
+    })
+    void processDeltaAtConversion(String chipsDeltaAt, long serialisedDeltaAt) {
+
+        String deltaMessage = json.replaceFirst("\"delta_at\": \"(.*)\"",
+                String.format("\"delta_at\": \"%s\"", chipsDeltaAt));
+
+        final ChsDelta delta = new ChsDelta(deltaMessage, 0, CONTEXT_ID, false);
+        final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.OK.value(), null, null);
+
+        when(apiClientService.putAppointment(eq(CONTEXT_ID), any(), any())).thenReturn(response);
+
+        testProcessor.process(delta);
+
+        verify(apiClientService).putAppointment(eq(CONTEXT_ID), any(), appointmentCapture.capture());
+        assertThat(appointmentCapture.getValue().getInternalData().getDeltaAt().toInstant().toEpochMilli(),
+                is(serialisedDeltaAt));
+    }
 }
