@@ -14,7 +14,7 @@ import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 
 @Component
 public class AppointmentTransform implements Transformative<OfficersItem, FullRecordCompanyOfficerApi> {
-    OfficerTransform officerTransform;
+    //OfficerTransform officerTransform;
     SensitiveOfficerTransform sensitiveOfficerTransform;
     OfficerRoleConfig officerRoleConfig;
 
