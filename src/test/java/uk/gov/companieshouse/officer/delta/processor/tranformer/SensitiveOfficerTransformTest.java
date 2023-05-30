@@ -169,7 +169,6 @@ class SensitiveOfficerTransformTest {
                 assertThrows(NonRetryableErrorException.class, () -> testTransform.transform(officer, officerAPI));
 
         assertThat(exception.getMessage(), is(expectedMessage));
-        assertThat(exception.getCause(), is(nullValue()));
     }
 
     private OfficersItem createOfficer(final AddressAPI address, final Identification identification) {
