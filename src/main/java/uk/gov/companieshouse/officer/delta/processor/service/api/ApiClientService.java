@@ -4,7 +4,6 @@ package uk.gov.companieshouse.officer.delta.processor.service.api;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.appointment.FullRecordCompanyOfficerApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.api.model.delta.officers.AppointmentAPI;
 
 /**
  * The {@code ApiClientService} interface provides an abstraction that can be

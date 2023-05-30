@@ -1,5 +1,9 @@
 package uk.gov.companieshouse.officer.delta.processor.consumer;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,12 +16,7 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.officer.delta.processor.Util;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.processor.Processor;
-
 import java.io.IOException;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DeltaConsumerTest {
