@@ -54,7 +54,6 @@ class AppointmentTransformTest {
 
     @Test
     void transformSingle() throws NonRetryableErrorException {
-        Assertions.fail();
         final OfficersItem item = createOfficer();
         final FullRecordCompanyOfficerApi appointmentAPI = testTransform.factory();
 
