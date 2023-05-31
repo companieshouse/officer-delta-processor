@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.HashMap;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,6 +54,7 @@ class AppointmentTransformTest {
 
     @Test
     void transformSingle() throws NonRetryableErrorException {
+        Assertions.fail();
         final OfficersItem item = createOfficer();
         final FullRecordCompanyOfficerApi appointmentAPI = testTransform.factory();
 
