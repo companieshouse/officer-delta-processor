@@ -7,7 +7,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.officer.delta.processor.AbstractIntegrationTest;
 
-public class OfficerDeltaProcessorITest extends AbstractIntegrationTest {
+class OfficerDeltaProcessorITest extends AbstractIntegrationTest {
 
     @Autowired
     public KafkaTemplate<String, Object> kafkaTemplate;
@@ -16,7 +16,7 @@ public class OfficerDeltaProcessorITest extends AbstractIntegrationTest {
     private String mainTopic;
 
     @Test
-    public void testSendingKafkaMessage() {
+    void testSendingKafkaMessage() {
         ChsDelta chsDelta = new ChsDelta("{ \"key\": \"value\" }", 1, "some_id", false);
         kafkaTemplate.send(mainTopic, chsDelta);
     }

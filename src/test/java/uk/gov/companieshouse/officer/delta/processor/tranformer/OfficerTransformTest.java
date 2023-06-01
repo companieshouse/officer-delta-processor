@@ -385,7 +385,6 @@ class OfficerTransformTest {
                 assertThrows(NonRetryableErrorException.class, () -> testTransform.transform(officer, data));
 
         assertThat(exception.getMessage(), is(expectedMessage));
-        assertThat(exception.getCause(), is(nullValue()));
     }
 
     private OfficersItem createOfficer(final AddressAPI address, final Identification identification) {

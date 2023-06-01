@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.appointment.Data;
 import uk.gov.companieshouse.api.appointment.ExternalData;
 import uk.gov.companieshouse.api.appointment.FullRecordCompanyOfficerApi;
+import uk.gov.companieshouse.api.appointment.InternalData;
 import uk.gov.companieshouse.officer.delta.processor.config.OfficerRoleConfig;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
@@ -38,6 +39,8 @@ class AppointmentTransformTest {
     private Data data;
     @Mock
     private ExternalData externalData;
+    @Mock
+    private InternalData internalData;
     @Mock
     private OfficerRoleConfig officerRoleConfig;
 
@@ -60,6 +63,8 @@ class AppointmentTransformTest {
         appointmentAPI.getExternalData().setAppointmentId("internalId");
         HashMap<String, Integer> nonResigned = new HashMap<>();
         nonResigned.put("secretary", 10);
+
+        appointmentAPI.setInternalData(internalData);
 
         when(officerTransform.transform(item)).thenReturn(data);
         when(officerRoleConfig.getNonResigned()).thenReturn(nonResigned);
