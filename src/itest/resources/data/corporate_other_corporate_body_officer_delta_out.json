@@ -34,7 +34,7 @@
       "officer_role":"corporate-director",
       "is_secure_officer":null,
       "identification":{
-        "identification_type":"non-eea",
+        "identification_type":"other-corporate-body-or-firm",
         "legal_authority":"Chapter 32",
         "legal_form":"Hong Kong",
         "place_registered":"United Kingdom",

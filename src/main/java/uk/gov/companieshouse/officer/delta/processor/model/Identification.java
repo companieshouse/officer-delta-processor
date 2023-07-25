@@ -16,7 +16,7 @@ public class Identification {
     @JsonProperty("other_corporate_body_or_firm")
     private uk.gov.companieshouse.api.appointment.Identification otherCorporateBodyOrFirm;
 
-    @JsonProperty("non_eea")
+    @JsonProperty("non_EEA")
     private uk.gov.companieshouse.api.appointment.Identification nonEeaApi;
 
     @JsonProperty("UK_limited_company")
