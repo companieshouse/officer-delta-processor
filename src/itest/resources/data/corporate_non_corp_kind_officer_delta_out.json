@@ -34,7 +34,7 @@
       "officer_role":"corporate-director",
       "is_secure_officer":null,
       "identification":{
-        "identification_type":"uk-limited",
+        "identification_type":"uk-limited-company",
         "legal_authority":null,
         "legal_form":null,
         "place_registered":null,

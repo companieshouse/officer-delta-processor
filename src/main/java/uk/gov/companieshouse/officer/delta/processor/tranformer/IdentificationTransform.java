@@ -39,7 +39,7 @@ public class IdentificationTransform implements Transformative<Identification, u
 
         } else if (source.getUKLimitedCompany() != null) {
 
-            identification.setIdentificationType(uk.gov.companieshouse.api.appointment.Identification.IdentificationTypeEnum.fromValue("uk-limited"));
+            identification.setIdentificationType(uk.gov.companieshouse.api.appointment.Identification.IdentificationTypeEnum.fromValue("uk-limited-company"));
             identification.setLegalAuthority(source.getUKLimitedCompany().getLegalAuthority());
             identification.setLegalForm(source.getUKLimitedCompany().getLegalForm());
             identification.setPlaceRegistered(source.getUKLimitedCompany().getPlaceRegistered());

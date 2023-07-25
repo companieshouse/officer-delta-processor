@@ -64,8 +64,7 @@ class IdentificationTransformTest {
     @Test
     void transformUkLimitedCompany() {
         final Identification identification = new Identification();
-        //changed uk-limited-company to uk-limited
-        final uk.gov.companieshouse.api.appointment.Identification identificationAPI = createIdentificationAPI("uk-limited");
+        final uk.gov.companieshouse.api.appointment.Identification identificationAPI = createIdentificationAPI("uk-limited-company");
 
         identification.setUKLimitedCompany(identificationAPI);
 
