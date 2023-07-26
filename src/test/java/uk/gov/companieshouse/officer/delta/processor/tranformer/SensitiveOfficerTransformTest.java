@@ -23,7 +23,7 @@ import uk.gov.companieshouse.api.appointment.SensitiveData;
 import uk.gov.companieshouse.api.appointment.UsualResidentialAddress;
 import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
-import uk.gov.companieshouse.officer.delta.processor.model.Identification;
+import uk.gov.companieshouse.officer.delta.processor.model.DeltaIdentification;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.OfficerRole;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithDateOfBirth;
@@ -41,7 +41,7 @@ class SensitiveOfficerTransformTest {
     @Mock
     private AddressAPI addressAPI;
     @Mock
-    private Identification identification;
+    private DeltaIdentification identification;
     @Mock
     private UsualResidentialAddressTransform usualResidentialAddressTransform;
     @Mock
@@ -171,7 +171,7 @@ class SensitiveOfficerTransformTest {
         assertThat(exception.getMessage(), is(expectedMessage));
     }
 
-    private OfficersItem createOfficer(final AddressAPI address, final Identification identification) {
+    private OfficersItem createOfficer(final AddressAPI address, final DeltaIdentification identification) {
         final OfficersItem item = new OfficersItem();
 
         item.setCompanyNumber("companyNumber");

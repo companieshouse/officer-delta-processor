@@ -92,7 +92,7 @@ public class OfficersItem {
     private String previousOfficerId;
 
     @JsonProperty("identification")
-    private Identification identification;
+    private DeltaIdentification identification;
 
     @JsonProperty("nationality")
     private String nationality;
@@ -323,11 +323,11 @@ public class OfficersItem {
         this.previousOfficerId = previousOfficerId;
     }
 
-    public void setIdentification(Identification identification) {
+    public void setIdentification(DeltaIdentification identification) {
         this.identification = identification;
     }
 
-    public Identification getIdentification() {
+    public DeltaIdentification getIdentification() {
         return identification;
     }
 

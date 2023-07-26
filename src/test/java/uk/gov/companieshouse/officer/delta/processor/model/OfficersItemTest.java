@@ -175,7 +175,7 @@ class OfficersItemTest {
 
     @Test
     void setIdentification() {
-        final Identification expected = new Identification();
+        final DeltaIdentification expected = new DeltaIdentification();
 
         testItem.setIdentification(expected);
 
