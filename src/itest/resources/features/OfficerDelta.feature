@@ -15,6 +15,11 @@ Scenario: Can transform and send a corporate officer with identification type ot
   When the consumer receives a corporate_other_corporate_body officer delta with id EcEKO1YhIKexb0cSDZsn_OHsFw4
   Then a PUT request is sent to the appointments api with the transformed data
 
+Scenario: Can transform and send a corporate officer with identification type registered overseas entity corporate managing officer
+  Given the application is running
+  When the consumer receives a corporate_roe_managing officer delta with id EcEKO1YhIKexb0cSDZsn_OHsFw4
+  Then a PUT request is sent to the appointments api with the transformed data
+
 Scenario: Can transform and send a pre-1992-corporate officer
   Given the application is running
   When the consumer receives a pre_1992_corporate officer delta with id EcEKO1YhIKexb0cSDZsn_OHsFw4

@@ -9,10 +9,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.officer.delta.processor.model.Identification;
+import uk.gov.companieshouse.api.appointment.Identification;
+import uk.gov.companieshouse.officer.delta.processor.model.DeltaIdentification;
 
 @ExtendWith(MockitoExtension.class)
 class IdentificationTransformTest {
+
     private IdentificationTransform testTransform;
 
     @BeforeEach
@@ -22,62 +24,75 @@ class IdentificationTransformTest {
 
     @Test
     void factory() {
-        assertThat(testTransform.factory(), is(instanceOf(uk.gov.companieshouse.api.appointment.Identification.class)));
+        assertThat(testTransform.factory(), is(instanceOf(Identification.class)));
     }
 
     @Test
     void transformEea() {
-        final Identification identification = new Identification();
-        final uk.gov.companieshouse.api.appointment.Identification identificationAPI = createIdentificationAPI("eea");
+        final DeltaIdentification identification = new DeltaIdentification();
+        final Identification identificationAPI = createIdentificationAPI("eea");
 
         identification.setEea(identificationAPI);
 
-        final uk.gov.companieshouse.api.appointment.Identification result = testTransform.transform(identification, identificationAPI);
+        final Identification result = testTransform.transform(identification, identificationAPI);
 
         assertThat(result, is(equalTo(identificationAPI)));
     }
 
     @Test
     void transformOtherCorpBody() {
-        final Identification identification = new Identification();
-        final uk.gov.companieshouse.api.appointment.Identification identificationAPI = createIdentificationAPI("other-corporate-body-or-firm");
+        final DeltaIdentification identification = new DeltaIdentification();
+        final Identification identificationAPI = createIdentificationAPI("other-corporate-body-or-firm");
 
         identification.setOtherCorporateBodyOrFirm(identificationAPI);
 
-        final uk.gov.companieshouse.api.appointment.Identification result = testTransform.transform(identification, identificationAPI);
+        final Identification result = testTransform.transform(identification, identificationAPI);
 
         assertThat(result, is(equalTo(identificationAPI)));
     }
 
     @Test
     void transformNonEea() {
-        final Identification identification = new Identification();
-        final uk.gov.companieshouse.api.appointment.Identification identificationAPI = createIdentificationAPI("non-eea");
+        final DeltaIdentification identification = new DeltaIdentification();
+        final Identification identificationAPI = createIdentificationAPI("non-eea");
 
         identification.setNonEeaApi(identificationAPI);
 
-        final uk.gov.companieshouse.api.appointment.Identification result = testTransform.transform(identification, identificationAPI);
+        final Identification result = testTransform.transform(identification, identificationAPI);
 
         assertThat(result, is(equalTo(identificationAPI)));
     }
 
     @Test
     void transformUkLimitedCompany() {
-        final Identification identification = new Identification();
-        final uk.gov.companieshouse.api.appointment.Identification identificationAPI = createIdentificationAPI("uk-limited-company");
+        final DeltaIdentification identification = new DeltaIdentification();
+        final Identification identificationAPI = createIdentificationAPI("uk-limited-company");
 
         identification.setUKLimitedCompany(identificationAPI);
 
-        final uk.gov.companieshouse.api.appointment.Identification result = testTransform.transform(identification, identificationAPI);
+        final Identification result = testTransform.transform(identification, identificationAPI);
 
         assertThat(result, is(equalTo(identificationAPI)));
     }
 
-    private uk.gov.companieshouse.api.appointment.Identification createIdentificationAPI(String identificationType) {
+    @Test
+    void transformRegisteredOverseasEntityCorporateManagingOfficer() {
+        final DeltaIdentification identification = new DeltaIdentification();
+        final Identification identificationAPI = createIdentificationAPI(
+                "registered-overseas-entity-corporate-managing-officer");
 
-        uk.gov.companieshouse.api.appointment.Identification identification = new uk.gov.companieshouse.api.appointment.Identification();
+        identification.setRegisteredOverseasEntityCorporateManagingOfficer(identificationAPI);
 
-        identification.setIdentificationType(uk.gov.companieshouse.api.appointment.Identification.IdentificationTypeEnum.fromValue(identificationType));
+        final Identification result = testTransform.transform(identification, identificationAPI);
+
+        assertThat(result, is(equalTo(identificationAPI)));
+    }
+
+    private Identification createIdentificationAPI(String identificationType) {
+
+        Identification identification = new Identification();
+
+        identification.setIdentificationType(Identification.IdentificationTypeEnum.fromValue(identificationType));
         identification.setLegalAuthority("legalAuthority");
         identification.setLegalForm("legalForm");
         identification.setPlaceRegistered("placeRegistered");
