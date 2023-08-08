@@ -34,8 +34,10 @@ class ServiceAddressTransformTest {
 
         assertThat(result.getAddressLine1(), is(addressAPI.getAddressLine1()));
         assertThat(result.getAddressLine2(), is(addressAPI.getAddressLine2()));
+        assertThat(result.getCareOf(), is(addressAPI.getCareOf()));
         assertThat(result.getCountry(), is(addressAPI.getCountry()));
         assertThat(result.getLocality(), is(addressAPI.getLocality()));
+        assertThat(result.getPoBox(), is(addressAPI.getPoBox()));
         assertThat(result.getPostalCode(), is(addressAPI.getPostcode()));
         assertThat(result.getPremises(), is(addressAPI.getPremises()));
         assertThat(result.getRegion(), is(addressAPI.getRegion()));

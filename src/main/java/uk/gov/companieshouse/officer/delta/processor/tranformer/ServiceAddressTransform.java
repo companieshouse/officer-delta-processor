@@ -16,8 +16,10 @@ public class ServiceAddressTransform implements Transformative<AddressAPI, Servi
     public ServiceAddress transform(AddressAPI addressAPI, ServiceAddress serviceAddress) throws NonRetryableErrorException {
         serviceAddress.setAddressLine1(addressAPI.getAddressLine1());
         serviceAddress.setAddressLine2(addressAPI.getAddressLine2());
+        serviceAddress.setCareOf(addressAPI.getCareOf());
         serviceAddress.setCountry(addressAPI.getCountry());
         serviceAddress.setLocality(addressAPI.getLocality());
+        serviceAddress.setPoBox(addressAPI.getPoBox());
         serviceAddress.setPostalCode(addressAPI.getPostcode());
         serviceAddress.setPremises(addressAPI.getPremises());
         serviceAddress.setRegion(addressAPI.getRegion());
