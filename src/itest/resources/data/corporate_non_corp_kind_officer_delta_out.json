@@ -5,8 +5,10 @@
       "service_address":{
         "address_line_1":"Stonor Street",
         "address_line_2":null,
+        "care_of": null,
         "country":"England",
         "locality":"Stoke-On-Trent",
+        "po_box": null,
         "postal_code":"ST6 3JL",
         "premises":"50",
         "region":null

@@ -5,8 +5,10 @@
       "service_address":{
         "address_line_1":"1 Crown Way",
         "address_line_2":"Pavement",
+        "care_of": null,
         "country":"United Kingdom",
         "locality":"Cardiff",
+        "po_box": null,
         "postal_code":"CF14 3UZ",
         "premises":"1",
         "region":"Cardiff"
