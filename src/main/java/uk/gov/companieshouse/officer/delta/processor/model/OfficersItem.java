@@ -19,6 +19,12 @@ public class OfficersItem {
     @JsonProperty("company_number")
     private String companyNumber;
 
+    @JsonProperty("company_name")
+    private String companyName;
+
+    @JsonProperty("company_status")
+    private String companyStatus;
+
     @JsonProperty("occupation")
     private String occupation;
 
@@ -366,6 +372,22 @@ public class OfficersItem {
     public String getPersonNumber() { return personNumber; }
 
     public void setPersonNumber(String personNumber) { this.personNumber = personNumber; }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public String getCompanyStatus() {
+        return companyStatus;
+    }
+
+    public void setCompanyStatus(String companyStatus) {
+        this.companyStatus = companyStatus;
+    }
 
     @Override
     public boolean equals(final Object o) {
