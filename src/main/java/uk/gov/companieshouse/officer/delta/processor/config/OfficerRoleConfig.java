@@ -9,8 +9,8 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "officer-role-ordinal")
 public class OfficerRoleConfig {
     
-    private Map<String, Integer> nonResigned;
-    private Map<String, Integer> resigned;
+    private final Map<String, Integer> nonResigned;
+    private final Map<String, Integer> resigned;
 
     public OfficerRoleConfig(Map<String, Integer> nonResigned, Map<String, Integer> resigned) {
         this.nonResigned = nonResigned;
@@ -21,16 +21,7 @@ public class OfficerRoleConfig {
         return nonResigned;
     }
 
-    public void setNonResigned(Map<String, Integer> nonResigned) {
-        this.nonResigned = nonResigned;
-    }
-
     public Map<String, Integer> getResigned() {
         return resigned;
     }
-
-    public void setResigned(Map<String, Integer> resigned) {
-        this.resigned = resigned;
-    }
-
 }

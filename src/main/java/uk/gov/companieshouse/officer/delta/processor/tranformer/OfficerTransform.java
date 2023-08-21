@@ -27,13 +27,13 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
     public static final String COMPANY = "/company";
     public static final String APPOINTMENTS = "/appointments";
     public static final String OFFICERS = "/officers";
-    IdentificationTransform idTransform;
+    private final IdentificationTransform idTransform;
 
-    ServiceAddressTransform serviceAddressTransform;
+    private final ServiceAddressTransform serviceAddressTransform;
 
-    FormerNameTransform formerNameTransform;
+    private final FormerNameTransform formerNameTransform;
 
-    PrincipalOfficeAddressTransform principalOfficeAddressTransform;
+    private final PrincipalOfficeAddressTransform principalOfficeAddressTransform;
 
     @Autowired
     public OfficerTransform(IdentificationTransform idTransform, ServiceAddressTransform serviceAddressTransform,

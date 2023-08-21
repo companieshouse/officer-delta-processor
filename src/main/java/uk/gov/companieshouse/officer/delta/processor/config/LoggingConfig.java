@@ -1,11 +1,11 @@
 package uk.gov.companieshouse.officer.delta.processor.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+import uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication;
 
 /**
  * Configuration class for logging.
@@ -14,12 +14,6 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @PropertySource("classpath:logger.properties")
 public class LoggingConfig {
 
-    private static Logger staticLogger;
-
-    @SuppressWarnings("unused")
-    @Value("${logger.namespace}")
-    private String loggerNamespace;
-
     /**
      * Creates a logger with specified namespace.
      *
@@ -27,11 +21,6 @@ public class LoggingConfig {
      */
     @Bean
     public Logger logger() {
-        return LoggerFactory.getLogger(loggerNamespace);
+        return LoggerFactory.getLogger(OfficerDeltaProcessorApplication.NAMESPACE);
     }
-
-    public static Logger getLogger() {
-        return staticLogger;
-    }
-
 }

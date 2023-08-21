@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.officer.delta.processor.logging.DataMapHolder;
 
 @Component
 public class ChsDeltaDeserializer implements Deserializer<ChsDelta> {
@@ -24,14 +25,14 @@ public class ChsDeltaDeserializer implements Deserializer<ChsDelta> {
     @Override
     public ChsDelta deserialize(String topic, byte[] data) {
         try {
-            logger.trace(String.format("Message picked up from topic: %s", topic));
+            logger.trace(String.format("Message picked up from topic: %s", topic), DataMapHolder.getLogMap());
             Decoder decoder = DecoderFactory.get().binaryDecoder(data, null);
             DatumReader<ChsDelta> reader = new ReflectDatumReader<>(ChsDelta.class);
             var chsDelta = reader.read(null, decoder);
-            logger.trace("Message successfully de-serialised into Avro ChsDelta object");
+            logger.trace("Message successfully de-serialised into Avro ChsDelta object", DataMapHolder.getLogMap());
             return chsDelta;
         } catch (Exception ex) {
-            logger.error("De-Serialization exception while converting to Avro schema object", ex);
+            logger.error("De-Serialization exception while converting to Avro schema object", ex, DataMapHolder.getLogMap());
             throw new NonRetryableErrorException(ex);
         }
     }

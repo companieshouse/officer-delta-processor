@@ -14,6 +14,7 @@ import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.exception.RetryableErrorException;
+import uk.gov.companieshouse.officer.delta.processor.logging.DataMapHolder;
 import uk.gov.companieshouse.officer.delta.processor.model.Officers;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientService;
@@ -32,38 +33,45 @@ import static uk.gov.companieshouse.officer.delta.processor.tranformer.Transform
 public class DeltaProcessor implements Processor<ChsDelta> {
     public static final Pattern PARSE_MESSAGE_PATTERN = Pattern.compile("Source.*line", Pattern.DOTALL);
 
-    final Logger logger;
-
-    final AppointmentTransform transformer;
-    final ApiClientService apiClientService;
+    private final Logger logger;
+    private final AppointmentTransform transformer;
+    private final ApiClientService apiClientService;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public DeltaProcessor(Logger logger, AppointmentTransform transformer, ApiClientService apiClientService) {
+    public DeltaProcessor(Logger logger, AppointmentTransform transformer, ApiClientService apiClientService,
+            ObjectMapper objectMapper) {
         this.logger = logger;
         this.transformer = transformer;
         this.apiClientService = apiClientService;
+        this.objectMapper = objectMapper;
     }
 
     @Override
     public void process(ChsDelta delta) throws RetryableErrorException, NonRetryableErrorException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        final String logContext = delta.getContextId();
-        final Map<String, Object> logMap = new HashMap<>();
+
+        String logContext = delta.getContextId();
+        Map<String, Object> logMap = new HashMap<>();
 
         try {
             Officers officers = objectMapper.readValue(delta.getData(), Officers.class);
-            final List<OfficersItem> officersOfficers = officers.getOfficers();
+            final List<OfficersItem> officersList = officers.getOfficers();
 
-            for (int i = 0; i < officersOfficers.size(); i++) {
-                final OfficersItem officer = officersOfficers.get(i);
+            for (int i = 0; i < officersList.size(); i++) {
+                OfficersItem officer = officersList.get(i);
+                DataMapHolder.get()
+                        .companyNumber(officer.getCompanyNumber())
+                        .officerId(officer.getOfficerId());
 
-                logMap.put("company_number", officer.getCompanyNumber());
+                logMap = DataMapHolder.getLogMap();
                 logger.infoContext(logContext, String.format("Process data for officer [%d]", i), logMap);
 
                 FullRecordCompanyOfficerApi appointmentAPI = transformer.transform(officer);
-                appointmentAPI.getInternalData().setDeltaAt(parseOffsetDateTime("deltaAt", officers.getDeltaAt()));
+                appointmentAPI
+                        .getInternalData()
+                        .setDeltaAt(parseOffsetDateTime("deltaAt", officers.getDeltaAt()));
 
-                final ApiResponse<Void> response =
+                ApiResponse<Void> response =
                         apiClientService.putAppointment(logContext, officer.getCompanyNumber(), appointmentAPI);
 
                 handleResponse(null, HttpStatus.valueOf(response.getStatusCode()), logContext,
@@ -77,7 +85,7 @@ public class DeltaProcessor implements Processor<ChsDelta> {
             final String cleanMessage = PARSE_MESSAGE_PATTERN.matcher(e.getMessage()).replaceAll("Source line");
             final NonRetryableErrorException cause = new NonRetryableErrorException(cleanMessage, null);
             logger.errorContext(logContext,
-                    "Unable to read JSON from delta: " + ExceptionUtils.getRootCauseMessage(cause), cause, null);
+                    "Unable to read JSON from delta: " + ExceptionUtils.getRootCauseMessage(cause), cause, logMap);
 
             throw new NonRetryableErrorException("Unable to JSON parse CHSDelta", cause);
         }
@@ -95,18 +103,19 @@ public class DeltaProcessor implements Processor<ChsDelta> {
     @Override
     public void processDelete(ChsDelta chsDelta) {
         final String logContext = chsDelta.getContextId();
-        final Map<String, Object> logMap = new HashMap<>();
-
-        var mapper = new ObjectMapper();
         OfficerDeleteDelta officersDelete;
         try {
-            officersDelete = mapper.readValue(chsDelta.getData(),
+            officersDelete = objectMapper.readValue(chsDelta.getData(),
                     OfficerDeleteDelta.class);
         final String companyNumber = officersDelete.getCompanyNumber();
+        DataMapHolder.get()
+                .companyNumber(companyNumber)
+                .officerId(officersDelete.getOfficerId());
+
         final String internalId = TransformerUtils.encode(officersDelete.getInternalId());
             apiClientService.deleteAppointment(logContext, internalId, companyNumber);
         } catch (ResponseStatusException e) {
-            handleResponse(e, e.getStatus(), logContext, "Sending officer delete failed", logMap);
+            handleResponse(e, e.getStatus(), logContext, "Sending officer delete failed", DataMapHolder.getLogMap());
         } catch (Exception ex) {
             throw new NonRetryableErrorException(
                     "Error when extracting officers delete delta", ex);

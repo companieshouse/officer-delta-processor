@@ -1,7 +1,6 @@
 
 package uk.gov.companieshouse.officer.delta.processor.service.api;
 
-import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.appointment.FullRecordCompanyOfficerApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
 
@@ -11,8 +10,6 @@ import uk.gov.companieshouse.api.model.ApiResponse;
  * the use of a test framework that supports mocking of static methods.
  */
 public interface ApiClientService {
-
-    InternalApiClient getApiClient(String contextId);
 
     /**
      * Apply a Company Appointment delta.

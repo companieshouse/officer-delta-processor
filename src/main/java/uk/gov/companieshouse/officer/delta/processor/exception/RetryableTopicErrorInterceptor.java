@@ -3,7 +3,9 @@ package uk.gov.companieshouse.officer.delta.processor.exception;
 import org.apache.kafka.clients.producer.ProducerInterceptor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import uk.gov.companieshouse.officer.delta.processor.config.LoggingConfig;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
+import uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication;
 
 import java.util.Map;
 
@@ -16,14 +18,13 @@ import static org.springframework.kafka.support.KafkaHeaders.EXCEPTION_STACKTRAC
  */
 public class RetryableTopicErrorInterceptor implements ProducerInterceptor<String, Object> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(OfficerDeltaProcessorApplication.NAMESPACE);
+
     @Override
     public ProducerRecord<String, Object> onSend(ProducerRecord<String, Object> kafkaRecord) {
         String nextTopic = kafkaRecord.topic().contains("-error") ? getNextErrorTopic(kafkaRecord)
                 : kafkaRecord.topic();
-        if (LoggingConfig.getLogger() != null) {
-            LoggingConfig.getLogger().info(format("Moving record into new topic: %s",
-                    nextTopic));
-        }
+        LOGGER.info(format("Moving record into new topic: %s", nextTopic));
         if (nextTopic.contains("-invalid")) {
             return new ProducerRecord<>(nextTopic, kafkaRecord.key(), kafkaRecord.value());
         }
