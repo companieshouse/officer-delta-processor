@@ -22,14 +22,14 @@ class CompanyStatusTest {
 
         // when
         List<String> companyStatusList = new ArrayList<>();
-        for (String deltaStatus : argument.getDeltaCompanyStatusList()) {
-            companyStatusList.add(CompanyStatus.statusFromKey(deltaStatus));
+        for (String statusKey : argument.getDeltaCompanyStatusKeys()) {
+            companyStatusList.add(CompanyStatus.statusFromKey(statusKey));
         }
 
         // then
         assertFalse(companyStatusList.isEmpty());
         assertTrue(companyStatusList.stream().allMatch(
-                        companyStatus -> Objects.equals(companyStatus, argument.getDeltaCompanyStatus())));
+                        companyStatus -> Objects.equals(companyStatus, argument.getExpectedCompanyStatus())));
     }
 
     private static Stream<Arguments> companyStatusScenarios() {
@@ -134,12 +134,12 @@ class CompanyStatusTest {
     }
 
     private static class CompanyStatusTestArgument {
-        private final List<String> deltaCompanyStatusList;
-        private final String deltaCompanyStatus;
+        private final List<String> deltaCompanyStatusKeys;
+        private final String expectedCompanyStatus;
 
-        private CompanyStatusTestArgument(List<String> deltaCompanyStatusList, String deltaCompanyStatus) {
-            this.deltaCompanyStatusList = deltaCompanyStatusList;
-            this.deltaCompanyStatus = deltaCompanyStatus;
+        private CompanyStatusTestArgument(List<String> deltaCompanyStatusKeys, String expectedCompanyStatus) {
+            this.deltaCompanyStatusKeys = deltaCompanyStatusKeys;
+            this.expectedCompanyStatus = expectedCompanyStatus;
         }
 
 
@@ -147,12 +147,12 @@ class CompanyStatusTest {
             return new CompanyStatusTestArgumentBuilder();
         }
 
-        public List<String> getDeltaCompanyStatusList() {
-            return deltaCompanyStatusList;
+        public List<String> getDeltaCompanyStatusKeys() {
+            return deltaCompanyStatusKeys;
         }
 
-        public String getDeltaCompanyStatus() {
-            return deltaCompanyStatus;
+        public String getExpectedCompanyStatus() {
+            return expectedCompanyStatus;
         }
 
         private static class CompanyStatusTestArgumentBuilder {
