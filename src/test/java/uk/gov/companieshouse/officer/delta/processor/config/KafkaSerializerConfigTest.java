@@ -15,8 +15,9 @@ import uk.gov.companieshouse.officer.delta.processor.serialization.ChsDeltaDeser
 import uk.gov.companieshouse.officer.delta.processor.serialization.ChsDeltaSerializer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isA;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.IsNot.not;
 
 class KafkaSerializerConfigTest {

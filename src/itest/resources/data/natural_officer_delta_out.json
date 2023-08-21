@@ -1,6 +1,9 @@
 {
   "external_data":{
+    "company_name": "TEST_COMPANY",
+    "company_status": "active",
     "data":{
+      "company_name": null,
       "person_number":"1234567890",
       "service_address":{
         "address_line_1":"1 Crown Way",
@@ -42,7 +45,6 @@
         "place_registered":"United Kingdom",
         "registration_number":"38298"
       },
-      "company_name":null,
       "surname":"GLOVER",
       "forename":"PHIL",
       "honours":null,

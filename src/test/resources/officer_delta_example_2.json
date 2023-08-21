@@ -1,6 +1,7 @@
 {
   "officers": [
       {
+      "changed_at": "20230821165446010203",
       "company_number": "11826905",
       "company_name": "JOHNNY'S FISH BAR LIMITED",
       "status": "Q",
@@ -38,5 +39,6 @@
       }
     }
   ],
-  "CreatedTime": "17-AUG-23 11.52.54.000000"
+  "CreatedTime": "17-AUG-23 11.52.54.000000",
+  "delta_at": "20230818171003950844"
 }

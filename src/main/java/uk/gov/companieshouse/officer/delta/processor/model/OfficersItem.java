@@ -22,7 +22,7 @@ public class OfficersItem {
     @JsonProperty("company_name")
     private String companyName;
 
-    @JsonProperty("company_status")
+    @JsonProperty("status")
     private String companyStatus;
 
     @JsonProperty("occupation")
@@ -435,7 +435,9 @@ public class OfficersItem {
                 && Objects.equals(getPersonNumber(), that.getPersonNumber())
                 && Objects.equals(getSecureDirector(), that.getSecureDirector())
                 && Objects.equals(getPreviousNameArray(), that.getPreviousNameArray())
-                && Objects.equals(getAdditionalProperties(), that.getAdditionalProperties());
+                && Objects.equals(getAdditionalProperties(), that.getAdditionalProperties())
+                && Objects.equals(getCompanyName(), that.getCompanyName())
+                && Objects.equals(getCompanyStatus(), that.getCompanyStatus());
     }
 
     @Override
@@ -471,7 +473,9 @@ public class OfficersItem {
                 getPersonNumber(),
                 getSecureDirector(),
                 getPreviousNameArray(),
-                getAdditionalProperties());
+                getAdditionalProperties(),
+                getCompanyName(),
+                getCompanyStatus());
     }
 
     @Override

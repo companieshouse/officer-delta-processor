@@ -1,9 +1,10 @@
 {
   "officers":[
     {
+      "status": "Q",
+      "company_name": "TEST_COMPANY",
       "company_number":"01777777",
       "previous_officer_id":"9001808944",
-      "changed_at":"20221109132615529605",
       "kind":"DIR",
       "internal_id":"9001808864",
       "appointment_date":"20221101",

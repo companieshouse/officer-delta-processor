@@ -28,8 +28,7 @@ class CompanyStatusTest {
 
         // then
         assertFalse(companyStatusList.isEmpty());
-        assertTrue(
-                companyStatusList.stream().allMatch(
+        assertTrue(companyStatusList.stream().allMatch(
                         companyStatus -> Objects.equals(companyStatus, argument.getDeltaCompanyStatus())));
     }
 

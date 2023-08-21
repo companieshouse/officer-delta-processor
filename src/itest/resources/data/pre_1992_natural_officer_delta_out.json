@@ -1,5 +1,7 @@
 {
   "external_data":{
+    "company_name": "TEST_COMPANY",
+    "company_status": "receivership",
     "data":{
       "person_number":"1234567890",
       "service_address":{

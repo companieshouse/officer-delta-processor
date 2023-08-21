@@ -1,6 +1,8 @@
 {
   "officers": [
     {
+      "status": "A",
+      "company_name": "TEST_COMPANY",
       "company_number": "01777777",
       "changed_at": "20170605123030",
       "kind": "DIR",

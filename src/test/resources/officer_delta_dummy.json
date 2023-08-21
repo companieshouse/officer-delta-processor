@@ -1,6 +1,8 @@
 {
   "officers": [
     {
+      "company_name": "JOHNNY'S FISH BAR LIMITED",
+      "status": "Q",
       "changed_at": "20210907165446010203",
       "company_number": "09876543",
       "kind": "DIR",

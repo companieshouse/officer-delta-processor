@@ -6,7 +6,9 @@ import uk.gov.companieshouse.environment.EnvironmentReader;
 import uk.gov.companieshouse.kafka.serialization.SerializerFactory;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isA;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.IsNot.not;
 
 class ApplicationConfigTest {

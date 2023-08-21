@@ -1,5 +1,7 @@
 {
   "external_data":{
+    "company_name": "TEST_COMPANY",
+    "company_status": "dissolved",
     "data":{
       "person_number":null,
       "service_address":{
