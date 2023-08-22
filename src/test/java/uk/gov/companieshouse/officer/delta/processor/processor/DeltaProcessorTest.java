@@ -90,7 +90,7 @@ class DeltaProcessorTest {
 
     @BeforeAll
     static void beforeAll() throws IOException, NonRetryableErrorException {
-        json = loadJson("officer_delta_dummy.json");
+        json = loadJson("officer_delta_example_2.json");
         OfficerTransform officerTransform = new OfficerTransform(new IdentificationTransform(),
                 new ServiceAddressTransform(),
                 new FormerNameTransform(),

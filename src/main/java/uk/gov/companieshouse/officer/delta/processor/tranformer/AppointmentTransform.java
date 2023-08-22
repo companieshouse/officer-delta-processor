@@ -3,6 +3,7 @@ package uk.gov.companieshouse.officer.delta.processor.tranformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static uk.gov.companieshouse.api.appointment.ExternalData.CompanyStatusEnum;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseLocalDateTime;
 
 import uk.gov.companieshouse.api.appointment.ExternalData;
@@ -11,6 +12,7 @@ import uk.gov.companieshouse.api.appointment.InternalData;
 import uk.gov.companieshouse.officer.delta.processor.config.OfficerRoleConfig;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
+import uk.gov.companieshouse.officer.delta.processor.model.enums.CompanyStatus;
 
 @Component
 public class AppointmentTransform implements Transformative<OfficersItem, FullRecordCompanyOfficerApi> {
@@ -54,6 +56,11 @@ public class AppointmentTransform implements Transformative<OfficersItem, FullRe
         externalData.setPreviousOfficerId(encodedPreviousOfficerId);
 
         externalData.setCompanyNumber(inputOfficer.getCompanyNumber());
+
+        externalData.setCompanyName(inputOfficer.getCompanyName());
+
+        String companyStatus = CompanyStatus.statusFromKey(inputOfficer.getCompanyStatus());
+        externalData.setCompanyStatus(CompanyStatusEnum.fromValue(companyStatus));
 
         externalData.setData(officerTransform.transform(inputOfficer));
         externalData.setSensitiveData(sensitiveOfficerTransform.transform(inputOfficer));

@@ -57,6 +57,7 @@ class AppointmentTransformTest {
     @Test
     void transformSingle() throws NonRetryableErrorException {
         final OfficersItem item = createOfficer();
+        item.setCompanyStatus("Q");
         final FullRecordCompanyOfficerApi appointmentAPI = testTransform.factory();
 
         appointmentAPI.setExternalData(externalData);
@@ -88,6 +89,7 @@ class AppointmentTransformTest {
     @Test
     void transformResignedSingle() throws NonRetryableErrorException {
         final OfficersItem item = createOfficer();
+        item.setCompanyStatus("Q");
         item.setResignationDate("2020-01-01");
         final FullRecordCompanyOfficerApi appointmentAPI = testTransform.factory();
         appointmentAPI.setExternalData(externalData);

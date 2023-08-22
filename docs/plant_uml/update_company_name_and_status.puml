@@ -1,0 +1,21 @@
+@startuml
+
+!pragma layout smetana
+skinparam style strictuml
+
+autonumber
+
+participant chs_delta_api
+participant officer_delta_processor
+participant company_appointments_api
+
+
+chs_delta_api ->> officer_delta_processor: officer-delta (event type: change)
+activate officer_delta_processor
+officer_delta_processor -> company_appointments_api: PUT company name and status {company_number} {appointment_id}
+activate company_appointments_api
+company_appointments_api --> officer_delta_processor: 200 OK
+deactivate company_appointments_api
+deactivate officer_delta_processor
+
+@enduml

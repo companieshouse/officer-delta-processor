@@ -1,0 +1,44 @@
+{
+  "officers": [
+      {
+      "changed_at": "20230821165446010203",
+      "company_number": "11826905",
+      "company_name": "JOHNNY'S FISH BAR LIMITED",
+      "status": "Q",
+      "kind": "DIR",
+      "internal_id": "3019729156",
+      "appointment_date": "20190530",
+      "resignation_date": "20200115",
+      "title": "Mr",
+      "corporate_ind": "N",
+      "surname": "ZENGIN",
+      "forename": "Can",
+      "date_of_birth": "19910315",
+      "secure_director": "N",
+      "service_address_same_as_registered_address": "Y",
+      "nationality": "British",
+      "occupation": "Businessman",
+      "officer_id": "3011387622",
+      "officer_detail_id": "3013888956",
+      "service_address": {
+        "premise": "403",
+        "address_line_1": "Hornsey Road",
+        "locality": "London",
+        "country": "United Kingdom",
+        "postal_code": "N19 4DX",
+        "usual_country_of_residence": "England"
+      },
+      "usual_residential_address": {
+        "premise": "Rhiwbina Library",
+        "address_line_1": "Pen-Y-Dre",
+        "address_line_2": "Rhiwbina",
+        "locality": "Cardiff",
+        "region": "SOUTH GLAMORGAN",
+        "postal_code": "CF14 6EH",
+        "usual_country_of_residence": "ENGLAND"
+      }
+    }
+  ],
+  "CreatedTime": "17-AUG-23 11.52.54.000000",
+  "delta_at": "20230818171003950844"
+}

@@ -1,5 +1,7 @@
 {
   "external_data":{
+    "company_name": "TEST_COMPANY",
+    "company_status": "active",
     "data":{
       "person_number":"1234567890",
       "service_address":{
@@ -42,7 +44,7 @@
         "place_registered":"United Kingdom",
         "registration_number":"38298"
       },
-      "company_name":null,
+      "company_name": null,
       "surname":"GLOVER",
       "forename":"PHIL",
       "honours":null,

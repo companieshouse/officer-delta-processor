@@ -19,6 +19,12 @@ public class OfficersItem {
     @JsonProperty("company_number")
     private String companyNumber;
 
+    @JsonProperty("company_name")
+    private String companyName;
+
+    @JsonProperty("status")
+    private String companyStatus;
+
     @JsonProperty("occupation")
     private String occupation;
 
@@ -367,6 +373,22 @@ public class OfficersItem {
 
     public void setPersonNumber(String personNumber) { this.personNumber = personNumber; }
 
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public String getCompanyStatus() {
+        return companyStatus;
+    }
+
+    public void setCompanyStatus(String companyStatus) {
+        this.companyStatus = companyStatus;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -413,7 +435,9 @@ public class OfficersItem {
                 && Objects.equals(getPersonNumber(), that.getPersonNumber())
                 && Objects.equals(getSecureDirector(), that.getSecureDirector())
                 && Objects.equals(getPreviousNameArray(), that.getPreviousNameArray())
-                && Objects.equals(getAdditionalProperties(), that.getAdditionalProperties());
+                && Objects.equals(getAdditionalProperties(), that.getAdditionalProperties())
+                && Objects.equals(getCompanyName(), that.getCompanyName())
+                && Objects.equals(getCompanyStatus(), that.getCompanyStatus());
     }
 
     @Override
@@ -449,7 +473,9 @@ public class OfficersItem {
                 getPersonNumber(),
                 getSecureDirector(),
                 getPreviousNameArray(),
-                getAdditionalProperties());
+                getAdditionalProperties(),
+                getCompanyName(),
+                getCompanyStatus());
     }
 
     @Override
