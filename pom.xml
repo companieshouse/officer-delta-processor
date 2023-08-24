@@ -327,31 +327,14 @@
 						<id>post-integration-test</id>
 						<phase>post-integration-test</phase>
 						<goals>
-							<goal>report</goal>
+							<goal>report-aggregate</goal>
 						</goals>
 						<configuration>
 							<!-- Sets the path to the file which contains the execution data. -->
-							<dataFile>${sonar.jacoco.reports}/jacoco-it.exec</dataFile>
-							<!-- Sets the output directory for the code coverage report. -->
-							<outputDirectory>${sonar.jacoco.reports}/jacoco-it</outputDirectory>
-						</configuration>
-					</execution>
-					<execution>
-						<id>merge-results</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>merge</goal>
-						</goals>
-						<configuration>
-							<fileSets>
-								<fileSet>
-									<directory>${sonar.jacoco.reports}</directory>
-									<includes>
-										<include>*.exec</include>
-									</includes>
-								</fileSet>
-							</fileSets>
-							<destFile>${sonar.jacoco.reports}/jacoco.exec</destFile>
+							<dataFileIncludes>
+								${sonar.jacoco.reports}/jacoco-it.exec,
+								${sonar.jacoco.reports}/jacoco.exec
+							</dataFileIncludes>
 						</configuration>
 					</execution>
 				</executions>
