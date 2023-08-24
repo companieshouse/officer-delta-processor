@@ -46,6 +46,7 @@
 		<sonar.projectKey>uk.gov.companieshouse:officer-delta-processor</sonar.projectKey>
 		<sonar.sources>src</sonar.sources>
 		<sonar.tests>src</sonar.tests>
+		<sonar.exclusions>**/src/test/**,**/src/itest/**</sonar.exclusions>
 		<sonar.verbose>true</sonar.verbose>
 		<sonar.coverage.jacoco.xmlReportPaths>
 			${project.basedir}/target/site/jacoco/jacoco.xml,
