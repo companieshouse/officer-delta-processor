@@ -9,20 +9,19 @@ import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
+import uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication;
 
 @Component
 @Aspect
 class StructuredLoggingKafkaListenerAspect {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(
+            OfficerDeltaProcessorApplication.NAMESPACE);
+
     private static final String LOG_MESSAGE_RECEIVED = "Processing delta";
     private static final String LOG_MESSAGE_PROCESSED = "Processed delta";
     private static final String EXCEPTION_MESSAGE = "%s exception thrown: %s";
-
-    private final Logger logger;
-
-    public StructuredLoggingKafkaListenerAspect(Logger logger) {
-        this.logger = logger;
-    }
 
     @Around("@annotation(org.springframework.kafka.annotation.KafkaListener)")
     public Object manageStructuredLogging(ProceedingJoinPoint joinPoint)
@@ -38,15 +37,15 @@ class StructuredLoggingKafkaListenerAspect {
                     .partition((Integer) message.getHeaders().get("kafka_receivedPartitionId"))
                     .offset((Long)message.getHeaders().get("kafka_offset"));
 
-            logger.debug(LOG_MESSAGE_RECEIVED, DataMapHolder.getLogMap());
+            LOGGER.debug(LOG_MESSAGE_RECEIVED, DataMapHolder.getLogMap());
 
             Object result = joinPoint.proceed();
 
-            logger.debug(LOG_MESSAGE_PROCESSED, DataMapHolder.getLogMap());
+            LOGGER.debug(LOG_MESSAGE_PROCESSED, DataMapHolder.getLogMap());
 
             return result;
         } catch (Exception ex) {
-            logger.debug(String.format(EXCEPTION_MESSAGE, 
+            LOGGER.debug(String.format(EXCEPTION_MESSAGE,
                 ex.getClass().getSimpleName(), ex.getMessage()), 
                 DataMapHolder.getLogMap());
             throw ex;
