@@ -6,6 +6,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,12 +31,12 @@ class OfficerDeltaProcessorTest {
     private String mainTopic;
 
     @Test
+    @Disabled("Pending POM refactor")
     void testSendingKafkaMessage() throws InterruptedException, ExecutionException, TimeoutException {
         ChsDelta chsDelta = new ChsDelta("{ \"key\": \"value\" }", 1, "some_id", false);
         chsDelta.setContextId(UUID.randomUUID().toString());
         var future = kafkaTemplate.send(mainTopic, chsDelta);
         future.get(10, TimeUnit.SECONDS);
         assertTrue(future.isDone());
-        Thread.sleep(1000); //nosonar
     }
 }

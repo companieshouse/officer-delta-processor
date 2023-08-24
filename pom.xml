@@ -302,7 +302,7 @@
 					</execution>
 					<execution>
 						<id>post-unit-test</id>
-						<phase>test</phase>
+						<phase>verify</phase>
 						<goals>
 							<goal>report</goal>
 						</goals>
@@ -315,9 +315,10 @@
 						<id>pre-integration-test</id>
 						<phase>pre-integration-test</phase>
 						<goals>
-							<goal>prepare-agent</goal>
+							<goal>prepare-agent-integration</goal>
 						</goals>
 						<configuration>
+							<dumpOnExit>true</dumpOnExit>
 							<!-- Sets the path to the file which contains the execution data. -->
 							<destFile>${sonar.jacoco.reports}/jacoco-it.exec</destFile>
 							<propertyName>failsafeArgLine</propertyName>
@@ -327,11 +328,9 @@
 						<id>post-integration-test</id>
 						<phase>post-integration-test</phase>
 						<goals>
-							<goal>report</goal>
+							<goal>report-aggregate</goal>
 						</goals>
 						<configuration>
-							<!-- Sets the path to the file which contains the execution data. -->
-							<dataFile>${sonar.jacoco.reports}/jacoco-it.exec</dataFile>
 							<!-- Sets the output directory for the code coverage report. -->
 							<outputDirectory>${sonar.jacoco.reports}/jacoco-it</outputDirectory>
 						</configuration>
