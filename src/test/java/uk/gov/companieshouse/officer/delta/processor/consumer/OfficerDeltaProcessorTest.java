@@ -1,12 +1,10 @@
 package uk.gov.companieshouse.officer.delta.processor.consumer;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,17 +24,17 @@ class OfficerDeltaProcessorTest {
 
     @Autowired
     public KafkaTemplate<String, Object> kafkaTemplate;
+    @Autowired
+    private CountDownLatch latch;
 
     @Value("${officer.delta.processor.topic}")
     private String mainTopic;
 
     @Test
-    @Disabled("Pending POM refactor")
-    void testSendingKafkaMessage() throws InterruptedException, ExecutionException, TimeoutException {
+    void testSendingKafkaMessage() throws Exception {
         ChsDelta chsDelta = new ChsDelta("{ \"key\": \"value\" }", 1, "some_id", false);
         chsDelta.setContextId(UUID.randomUUID().toString());
-        var future = kafkaTemplate.send(mainTopic, chsDelta);
-        future.get(10, TimeUnit.SECONDS);
-        assertTrue(future.isDone());
+        kafkaTemplate.send(mainTopic, chsDelta);
+        assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
     }
 }
