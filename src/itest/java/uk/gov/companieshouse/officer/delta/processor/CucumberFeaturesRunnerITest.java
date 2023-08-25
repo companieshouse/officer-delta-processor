@@ -9,6 +9,6 @@ import org.junit.platform.suite.api.Suite;
 @SelectClasspathResource("features")
 @CucumberContextConfiguration
 @TestPropertySource(locations="classpath:test.properties")
-public class CucumberFeaturesRunnerITest extends AbstractIntegrationTest {
+public class CucumberFeaturesRunnerITest extends AbstractITest {
 
 }

@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 @TestConfiguration
-    public class KafkaTestContainerConfig {
+public class KafkaTestContainerConfig {
 
     private final ChsDeltaDeserializer chsDeltaDeserializer;
     private final ChsDeltaSerializer chsDeltaSerializer;
@@ -89,7 +89,10 @@ import java.util.Map;
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ChsDeltaSerializer.class);
         props.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
                 RetryableTopicErrorInterceptor.class.getName());
-        return new DefaultKafkaProducerFactory<>(props, new StringSerializer(), chsDeltaSerializer);
+        DefaultKafkaProducerFactory<String, Object> factory = new DefaultKafkaProducerFactory<>(
+                props, new StringSerializer(), chsDeltaSerializer);
+
+        return factory;
     }
 
     @Bean
