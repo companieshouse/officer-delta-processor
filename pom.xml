@@ -18,14 +18,14 @@
 		<skip.integration.tests>false</skip.integration.tests>
 		<skip.unit.tests>false</skip.unit.tests>
 
-		<ch-kafka.version>1.4.4</ch-kafka.version>
+		<ch-kafka.version>1.4.8</ch-kafka.version>
 		<kafka-models.version>1.0.31</kafka-models.version>
 		<private.sdk.version>2.0.290</private.sdk.version>
-		<spring.boot.version>2.7.11</spring.boot.version>
+		<spring.boot.version>2.7.14</spring.boot.version>
 
 		<!-- Logging -->
-		<structured-logging.version>1.9.17</structured-logging.version>
-		<api-sdk-manager-java-library.version>1.0.6</api-sdk-manager-java-library.version>
+		<structured-logging.version>1.9.25</structured-logging.version>
+		<api-sdk-manager-java-library.version>1.0.11</api-sdk-manager-java-library.version>
 
 		<!-- Test -->
 		<equalsverifier.version>3.1.9</equalsverifier.version>
@@ -34,7 +34,7 @@
 		<maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
 		<maven-failsafe-plugin.version>3.0.0</maven-failsafe-plugin.version>
 		<io-cucumber.version>7.11.2</io-cucumber.version>
-		<wiremock.standalone.version>2.32.0</wiremock.standalone.version>
+		<wiremock.standalone.version>2.35.0</wiremock.standalone.version>
 		<maven-build-helper-plugin.version>3.4.0</maven-build-helper-plugin.version>
 		<maven-resources-plugin.version>3.3.1	</maven-resources-plugin.version>
 
@@ -45,7 +45,7 @@
 		<!-- Sonar dependency -->
 		<sonar.projectKey>uk.gov.companieshouse:officer-delta-processor</sonar.projectKey>
 		<sonar.sources>src/main</sonar.sources>
-		<sonar.tests>src/test</sonar.tests>
+		<sonar.tests>src/test,src/itest</sonar.tests>
 		<sonar.verbose>true</sonar.verbose>
 		<sonar.coverage.jacoco.xmlReportPaths>
 			${project.basedir}/target/site/jacoco/jacoco.xml,
@@ -117,6 +117,10 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>uk.gov.companieshouse</groupId>
 			<artifactId>structured-logging</artifactId>
 			<version>${structured-logging.version}</version>
@@ -143,11 +147,6 @@
 		</dependency>
 
 		<!-- Test -->
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
@@ -230,6 +229,12 @@
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka-test</artifactId>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.scala-lang</groupId>
+					<artifactId>scala-library</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.github.tomakehurst</groupId>
@@ -252,6 +257,14 @@
 				<exclusion>
 					<groupId>com.github.jknack</groupId>
 					<artifactId>handlebars-helpers</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-fileupload</groupId>
+					<artifactId>commons-fileupload</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.eclipse.jetty</groupId>
+					<artifactId>jetty-xml</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

@@ -3,6 +3,7 @@ package uk.gov.companieshouse.officer.delta.processor.config;
 import static java.time.temporal.ChronoUnit.SECONDS;
 
 import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -31,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 @TestConfiguration
-public class KafkaTestContainerConfig {
+    public class KafkaTestContainerConfig {
 
     private final ChsDeltaDeserializer chsDeltaDeserializer;
     private final ChsDeltaSerializer chsDeltaSerializer;
@@ -88,10 +89,7 @@ public class KafkaTestContainerConfig {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ChsDeltaSerializer.class);
         props.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
                 RetryableTopicErrorInterceptor.class.getName());
-        DefaultKafkaProducerFactory<String, Object> factory = new DefaultKafkaProducerFactory<>(
-                props, new StringSerializer(), chsDeltaSerializer);
-
-        return factory;
+        return new DefaultKafkaProducerFactory<>(props, new StringSerializer(), chsDeltaSerializer);
     }
 
     @Bean
@@ -118,4 +116,8 @@ public class KafkaTestContainerConfig {
         return consumer;
     }
 
+    @Bean
+    public CountDownLatch CountDownLatch() {
+        return new CountDownLatch(1);
+    }
 }

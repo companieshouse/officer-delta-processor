@@ -4,20 +4,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.retrytopic.DltStrategy;
 import org.springframework.kafka.retrytopic.FixedDelayStrategy;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.Message;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
+import uk.gov.companieshouse.officer.delta.processor.logging.DataMapHolder;
 import uk.gov.companieshouse.officer.delta.processor.processor.Processor;
 
 import java.time.Duration;
 import java.time.Instant;
 
-import static java.lang.String.format;
 
 @Component
 public class DeltaConsumer {
@@ -50,16 +49,10 @@ public class DeltaConsumer {
     @KafkaListener(topics = "${officer.delta.processor.topic}",
             groupId = "${kafka.odp.group.name}",
             containerFactory = "listenerContainerFactory")
-    public void receiveMainMessages(org.springframework.messaging.Message<ChsDelta> message,
-                                    @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
-                                    @Header(KafkaHeaders.RECEIVED_PARTITION_ID) String partition,
-                                    @Header(KafkaHeaders.OFFSET) String offset) {
+    public void receiveMainMessages(Message<ChsDelta> message) {
         var startTime = Instant.now();
         var chsDelta = message.getPayload();
-        String contextId = chsDelta.getContextId();
-        logger.info(format("A new message successfully picked up from topic: %s, "
-                        + "partition: %s and offset: %s with contextId: %s",
-                topic, partition, offset, contextId));
+        logger.info("Starting processing an officers delta", DataMapHolder.getLogMap());
 
         try {
             if (Boolean.TRUE.equals(chsDelta.getIsDelete())) {
@@ -67,14 +60,12 @@ public class DeltaConsumer {
             } else {
                 processor.process(chsDelta);
             }
-            logger.info(format("Officer Delta message with contextId: %s is successfully "
-                            + "processed in %d milliseconds", contextId,
-                    Duration.between(startTime, Instant.now()).toMillis()));
+            logger.info(String.format("Officer Delta message successfully processed in %d milliseconds",
+                    Duration.between(startTime, Instant.now()).toMillis()), DataMapHolder.getLogMap());
         } catch (Exception exception) {
-            logger.errorContext(contextId, format("Exception occurred while processing "
-                    + "message on the topic: %s", topic), exception, null);
+            logger.errorContext(chsDelta.getContextId(), "Exception occurred while processing message",
+                    exception, DataMapHolder.getLogMap());
             throw exception;
         }
     }
-
 }

@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.officer.delta.processor.service.api;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -11,8 +10,8 @@ import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.logging.Logger;
 
-import java.util.HashMap;
 import java.util.Map;
+import uk.gov.companieshouse.officer.delta.processor.logging.DataMapHolder;
 
 /**
  * Service that sends REST requests via private SDK.
@@ -38,13 +37,11 @@ public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements Ap
      *
      * @param logger the CH logger
      */
-    @Autowired
     public ApiClientServiceImpl(final Logger logger) {
         super(logger);
     }
 
-    @Override
-    public InternalApiClient getApiClient(String contextId) {
+    private InternalApiClient getApiClient(String contextId) {
         InternalApiClient internalApiClient = new InternalApiClient(getHttpClient(contextId));
         internalApiClient.setBasePath(apiUrl);
         internalApiClient.setBasePaymentsPath(paymentsApiUrl);
@@ -74,23 +71,22 @@ public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements Ap
     }
 
     @Override
-    public ApiResponse<Void> deleteAppointment(
-            final String log, final String internalId,
+    public ApiResponse<Void> deleteAppointment(final String logContext, final String internalId,
             final String companyNumber) {
         final var uri =
                 String.format("/company/%s/appointments/%s/full_record/delete",
                         companyNumber, internalId);
 
         Map<String,Object> logMap = createLogMap(internalId,"DELETE", uri);
-        logger.infoContext(log, String.format("DELETE %s", uri), logMap);
+        logger.infoContext(logContext, String.format("DELETE %s", uri), logMap);
 
-        return executeOp(log, "deleteOfficer", uri,
-                getApiClient(log).privateDisqualificationResourceHandler()
+        return executeOp(logContext, "deleteOfficer", uri,
+                getApiClient(logContext).privateDisqualificationResourceHandler()
                         .deleteOfficer(uri));
     }
 
     private Map<String,Object> createLogMap(String companyNumber, String method, String path){
-        final Map<String, Object> logMap = new HashMap<>();
+        final Map<String, Object> logMap = DataMapHolder.getLogMap();
         logMap.put("company_number", companyNumber);
         logMap.put("method",method);
         logMap.put("path", path);

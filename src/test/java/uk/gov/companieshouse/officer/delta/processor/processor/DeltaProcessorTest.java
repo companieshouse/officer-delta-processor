@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -118,13 +119,13 @@ class DeltaProcessorTest {
 
     private static OfficerDeleteDelta jsonToDelete(final String json)
             throws JsonProcessingException, NonRetryableErrorException {
-        final OfficerDeleteDelta officerDelete = objectMapper.readValue(json, OfficerDeleteDelta.class);
-        return officerDelete;
+        return objectMapper.readValue(json, OfficerDeleteDelta.class);
     }
 
     @BeforeEach
     void setUp() {
-        testProcessor = new DeltaProcessor(logger, appointmentTransform, apiClientService);
+        testProcessor = new DeltaProcessor(logger, appointmentTransform, apiClientService,
+                objectMapper);
     }
 
     @Test
@@ -156,7 +157,7 @@ class DeltaProcessorTest {
 
         final InOrder inOrder = inOrder(logger, apiClientService);
 
-        inOrder.verify(logger).errorContext(anyString(), anyString(), any(NonRetryableErrorException.class), isNull());
+        inOrder.verify(logger).errorContext(anyString(), anyString(), any(NonRetryableErrorException.class), anyMap());
         inOrder.verifyNoMoreInteractions();
 
     }

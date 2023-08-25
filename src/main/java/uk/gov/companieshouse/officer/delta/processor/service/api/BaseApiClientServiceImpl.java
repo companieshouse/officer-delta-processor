@@ -8,8 +8,8 @@ import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.logging.Logger;
 
-import java.util.HashMap;
 import java.util.Map;
+import uk.gov.companieshouse.officer.delta.processor.logging.DataMapHolder;
 
 public abstract class BaseApiClientServiceImpl {
     protected Logger logger;
@@ -31,25 +31,29 @@ public abstract class BaseApiClientServiceImpl {
     public <T> ApiResponse<T> executeOp(final String logContext, final String operationName, final String uri,
             final Executor<ApiResponse<T>> executor) {
 
-        final Map<String, Object> logMap = new HashMap<>();
-        logMap.put("operation_name", operationName);
-        logMap.put("path", uri);
-
         try {
 
             return executor.execute();
 
         }
         catch (URIValidationException ex) {
-            logger.errorContext(logContext, "SDK exception", ex, logMap);
+            logger.errorContext(logContext, "SDK exception", ex, buildLogMap(operationName, uri));
 
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
         } catch (ApiErrorResponseException ex) {
+            Map<String, Object> logMap = buildLogMap(operationName, uri);
             logMap.put("status", ex.getStatusCode());
             logger.errorContext(logContext, "SDK exception", ex, logMap);
 
             throw new ResponseStatusException(HttpStatus.valueOf(ex.getStatusCode()),
                     ex.getStatusMessage(), ex);
         }
+    }
+
+    private static Map<String, Object> buildLogMap(String operationName, String uri) {
+        final Map<String, Object> logMap = DataMapHolder.getLogMap();
+        logMap.put("operation_name", operationName);
+        logMap.put("path", uri);
+        return logMap;
     }
 }

@@ -35,7 +35,7 @@ class DeltaConsumerTest {
     @Test
     void When_consumer_receives_valid_payload_process_is_called() throws IOException {
         Message<ChsDelta> message = Util.createChsDeltaMessage("officer_delta_example.json", false);
-        consumer.receiveMainMessages(message, "topic", "partition", "offset");
+        consumer.receiveMainMessages(message);
 
         verify(processor).process(any());
     }
@@ -43,7 +43,7 @@ class DeltaConsumerTest {
     @Test
     void When_consumer_receives_valid_delete_payload_processDelete_is_called() throws IOException {
         Message<ChsDelta> message = Util.createChsDeltaMessage("officer_delete_delta.json", true);
-        consumer.receiveMainMessages(message, "topic", "partition", "offset");
+        consumer.receiveMainMessages(message);
 
         verify(processor).processDelete(any());
     }
@@ -57,6 +57,6 @@ class DeltaConsumerTest {
                 .when(processor).process(brokenMessage);
 
         Assert.assertThrows(Exception.class, ()->consumer
-                .receiveMainMessages(message, "topic", "partition", "offset"));
+                .receiveMainMessages(message));
     }
 }

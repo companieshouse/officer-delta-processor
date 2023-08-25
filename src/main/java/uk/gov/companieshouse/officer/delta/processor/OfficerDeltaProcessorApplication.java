@@ -8,6 +8,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class OfficerDeltaProcessorApplication {
 
+    public static final String NAMESPACE = "officer-delta-processor";
+
     public static void main(String[] args) {
         SpringApplication.run(OfficerDeltaProcessorApplication.class, args);
     }

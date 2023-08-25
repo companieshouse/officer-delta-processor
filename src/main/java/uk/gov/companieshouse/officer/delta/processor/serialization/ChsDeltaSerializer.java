@@ -12,6 +12,7 @@ import uk.gov.companieshouse.kafka.serialization.AvroSerializer;
 import uk.gov.companieshouse.logging.Logger;
 
 import java.nio.charset.StandardCharsets;
+import uk.gov.companieshouse.officer.delta.processor.logging.DataMapHolder;
 
 @Component
 public class ChsDeltaSerializer implements Serializer<Object> {
@@ -25,7 +26,7 @@ public class ChsDeltaSerializer implements Serializer<Object> {
 
     @Override
     public byte[] serialize(String topic, Object payload) {
-        logger.trace("Payload serialised");
+        logger.trace("Payload serialised", DataMapHolder.getLogMap());
 
         try {
             if (payload == null) {
@@ -49,7 +50,7 @@ public class ChsDeltaSerializer implements Serializer<Object> {
 
             return payload.toString().getBytes(StandardCharsets.UTF_8);
         } catch (Exception ex) {
-            logger.error("Serialization exception while writing to byte array", ex);
+            logger.error("Serialization exception while writing to byte array", ex, DataMapHolder.getLogMap());
             throw new NonRetryableErrorException(ex);
         }
     }
