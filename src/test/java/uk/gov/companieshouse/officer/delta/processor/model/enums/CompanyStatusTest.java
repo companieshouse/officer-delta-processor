@@ -99,10 +99,10 @@ class CompanyStatusTest {
                         )
                 ),
                 Arguments.of(
-                        Named.of("Test company status voluntary_proceedings",
+                        Named.of("Test company status voluntary-arrangement",
                                 CompanyStatusTestArgument.CompanyStatusTestArgumentBuilder()
                                         .withDeltaCompanyStatusList(List.of("I"))
-                                        .withCompanyStatus("voluntary_proceedings")
+                                        .withCompanyStatus("voluntary-arrangement")
                                         .build()
                         )
                 ),
