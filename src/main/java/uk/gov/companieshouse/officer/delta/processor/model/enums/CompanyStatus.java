@@ -14,7 +14,7 @@ public enum CompanyStatus {
     OPEN(List.of("8"), "open"),
     CLOSED(List.of("9"), "closed"),
     INSOLVENCY_PROCEEDINGS(List.of("C", "E", "H", "J", "K", "L", "N", "O", "P", "S", "U", "V", "W"), "insolvency-proceedings"),
-    VOLUNTARY_PROCEEDINGS(List.of("I"), "voluntary_proceedings"),
+    VOLUNTARY_ARRANGEMENT(List.of("I"), "voluntary-arrangement"),
     ADMINISTRATION(List.of("M", "T"), "administration"),
     REMOVED(List.of("AD"), "removed"),
     REGISTERED(List.of("AC"), "registered");
