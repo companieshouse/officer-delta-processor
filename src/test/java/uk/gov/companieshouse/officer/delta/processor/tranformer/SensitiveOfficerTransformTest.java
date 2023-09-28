@@ -118,8 +118,10 @@ class SensitiveOfficerTransformTest {
 
         if (RolesWithDateOfBirth.includes(officerRole)) {
             assertThat(outputOfficer.getDateOfBirth(), is(notNullValue()));
-        } else {
+        } else if (RolesWithResidentialAddress.includes(officerRole)) {
             assertThat(outputOfficer.getDateOfBirth(), is(nullValue()));
+        } else {
+            assertThat(outputOfficer, is(nullValue()));
         }
     }
 
@@ -158,8 +160,7 @@ class SensitiveOfficerTransformTest {
             assertThat(outputOfficer.getUsualResidentialAddress(), is(notNullValue()));
             assertThat(outputOfficer.getResidentialAddressSameAsServiceAddress(), is(true));
         } else {
-            assertThat(outputOfficer.getUsualResidentialAddress(), is(nullValue()));
-            assertThat(outputOfficer.getResidentialAddressSameAsServiceAddress(), is(nullValue()));
+            assertThat(outputOfficer, is(nullValue()));
         }
     }
 
