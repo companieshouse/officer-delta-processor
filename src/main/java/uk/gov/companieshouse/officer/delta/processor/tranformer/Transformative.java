@@ -1,7 +1,5 @@
 package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
-import java.util.Objects;
-import org.apache.commons.lang3.ObjectUtils;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 
 import java.util.ArrayList;

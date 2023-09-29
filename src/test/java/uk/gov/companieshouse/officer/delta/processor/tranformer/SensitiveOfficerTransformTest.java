@@ -76,7 +76,7 @@ class SensitiveOfficerTransformTest {
         officer.setAdditionalProperty("resignation_date", VALID_DATE);
         officer.setDateOfBirth(INVALID_DATE);
         officer.setOfficerRole(KIND_OF_OFFICER_ROLE_WITH_DOB);
-        verifyProcessingError(officerAPI, officer, "dateOfBirth: date/time pattern not matched: [yyyyMMdd]");
+        verifyProcessingError(officerAPI, officer);
     }
 
     @Test
@@ -164,12 +164,11 @@ class SensitiveOfficerTransformTest {
         }
     }
 
-    private void verifyProcessingError(final SensitiveData officerAPI, final OfficersItem officer,
-            final String expectedMessage) {
+    private void verifyProcessingError(final SensitiveData officerAPI, final OfficersItem officer) {
         final NonRetryableErrorException exception =
                 assertThrows(NonRetryableErrorException.class, () -> testTransform.transform(officer, officerAPI));
 
-        assertThat(exception.getMessage(), is(expectedMessage));
+        assertThat(exception.getMessage(), is("dateOfBirth: date/time pattern not matched: [yyyyMMdd]"));
     }
 
     private OfficersItem createOfficer(final AddressAPI address, final DeltaIdentification identification) {
