@@ -76,7 +76,7 @@ class SensitiveOfficerTransformTest {
         officer.setAdditionalProperty("resignation_date", VALID_DATE);
         officer.setDateOfBirth(INVALID_DATE);
         officer.setOfficerRole(KIND_OF_OFFICER_ROLE_WITH_DOB);
-        verifyProcessingError(officerAPI, officer, "dateOfBirth: date/time pattern not matched: [yyyyMMdd]");
+        verifyProcessingError(officerAPI, officer);
     }
 
     @Test
@@ -118,8 +118,10 @@ class SensitiveOfficerTransformTest {
 
         if (RolesWithDateOfBirth.includes(officerRole)) {
             assertThat(outputOfficer.getDateOfBirth(), is(notNullValue()));
-        } else {
+        } else if (RolesWithResidentialAddress.includes(officerRole)) {
             assertThat(outputOfficer.getDateOfBirth(), is(nullValue()));
+        } else {
+            assertThat(outputOfficer, is(nullValue()));
         }
     }
 
@@ -158,17 +160,15 @@ class SensitiveOfficerTransformTest {
             assertThat(outputOfficer.getUsualResidentialAddress(), is(notNullValue()));
             assertThat(outputOfficer.getResidentialAddressSameAsServiceAddress(), is(true));
         } else {
-            assertThat(outputOfficer.getUsualResidentialAddress(), is(nullValue()));
-            assertThat(outputOfficer.getResidentialAddressSameAsServiceAddress(), is(nullValue()));
+            assertThat(outputOfficer, is(nullValue()));
         }
     }
 
-    private void verifyProcessingError(final SensitiveData officerAPI, final OfficersItem officer,
-            final String expectedMessage) {
+    private void verifyProcessingError(final SensitiveData officerAPI, final OfficersItem officer) {
         final NonRetryableErrorException exception =
                 assertThrows(NonRetryableErrorException.class, () -> testTransform.transform(officer, officerAPI));
 
-        assertThat(exception.getMessage(), is(expectedMessage));
+        assertThat(exception.getMessage(), is("dateOfBirth: date/time pattern not matched: [yyyyMMdd]"));
     }
 
     private OfficersItem createOfficer(final AddressAPI address, final DeltaIdentification identification) {

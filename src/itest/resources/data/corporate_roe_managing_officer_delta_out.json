@@ -69,11 +69,7 @@
       "responsibilities" : "string",
       "former_names":null
     },
-    "sensitive_data":{
-      "usual_residential_address":null,
-      "residential_address_same_as_service_address":null,
-      "date_of_birth":null
-    },
+    "sensitive_data": null,
     "internal_id":"0025987375",
     "appointment_id":"EcEKO1YhIKexb0cSDZsn_OHsFw4",
     "officer_id":"r4Aq2-D3appznoESN24MtsLovfo",
