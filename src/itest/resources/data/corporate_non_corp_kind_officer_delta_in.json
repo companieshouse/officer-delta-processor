@@ -14,6 +14,7 @@
       "service_address_same_as_registered_address":"N",
       "corp_identifier":"TRUE",
       "officer_id":"9001808944",
+      "external_number": "12345",
       "officer_detail_id":"9001808811",
       "changed_at":"20221109132615529605",
       "service_address":{

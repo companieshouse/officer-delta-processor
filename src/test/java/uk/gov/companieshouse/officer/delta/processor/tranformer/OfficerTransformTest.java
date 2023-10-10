@@ -47,7 +47,7 @@ class OfficerTransformTest {
     public static final String CORP_IND_Y = "Y";
     public static final String CORP_IND_N = "N";
     private static final String CHANGED_AT = "20210909133736012345";
-    private static final LocalDate VALID_LOCAL_DATE = LocalDate.of(2000,01,01);
+    private static final LocalDate VALID_LOCAL_DATE = LocalDate.of(2000, 1,1);
     private OfficerTransform testTransform;
 
     @Mock
@@ -68,8 +68,6 @@ class OfficerTransformTest {
     private ServiceAddress serviceAddress;
     @Mock
     private PrincipalOfficeAddress principalOfficeAddress;
-    @Mock
-    private Data data;
 
     private static Stream<Arguments> provideScenarioParams() {
         return Stream.of(Arguments.of(CHANGED_AT, true),
@@ -248,7 +246,7 @@ class OfficerTransformTest {
         assertThat(result.getNationality(), is(officer.getNationality()));
         assertThat(result.getOccupation(), is(officer.getOccupation()));
         assertThat(result.getHonours(), is(officer.getHonours()));
-        assertThat(result.getPersonNumber(), is(officer.getPersonNumber()));
+        assertThat(result.getPersonNumber(), is(officer.getExternalNumber()));
         assertThat(result.getServiceAddress(), is(sameInstance(serviceAddress)));
         assertThat(result.getServiceAddressSameAsRegisteredOfficeAddress(), is(true));
         assertThat(result.getIdentification(), is(sameInstance(identificationAPI)));
@@ -408,7 +406,7 @@ class OfficerTransformTest {
         item.setResidentialAddressSameAsServiceAddress("Y");
         item.setIdentification(identification);
         item.setCorporateInd("N");
-        item.setPersonNumber("1234567890");
+        item.setExternalNumber("1234567890");
 
         return item;
     }
