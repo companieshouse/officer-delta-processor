@@ -3,7 +3,7 @@
     "company_name": "TEST_COMPANY",
     "company_status": "dissolved",
     "data":{
-      "person_number":null,
+      "person_number": "12345",
       "service_address":{
         "address_line_1":"1 Crown Way",
         "address_line_2":"Pavement",

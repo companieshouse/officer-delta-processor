@@ -12,6 +12,7 @@
       "surname": "MY BIG OLD COMPANY LIMITED",
       "service_address_same_as_registered_address": "Y",
       "officer_id": "3001237435",
+      "external_number": "12345",
       "secure_director": "N",
       "officer_detail_id": "3456251385",
       "identification": {

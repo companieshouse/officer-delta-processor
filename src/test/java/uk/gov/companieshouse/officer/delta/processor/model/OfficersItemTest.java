@@ -67,8 +67,8 @@ class OfficersItemTest {
 
     @Test
     void setPersonNumber() {
-        testItem.setPersonNumber(EXPECTED);
-        assertThat(testItem.getPersonNumber(), is(EXPECTED));
+        testItem.setExternalNumber(EXPECTED);
+        assertThat(testItem.getExternalNumber(), is(EXPECTED));
     }
 
     @Test
@@ -202,7 +202,7 @@ class OfficersItemTest {
 
     @Test
     void setPreviousNameArray() {
-        final List<PreviousNameArray> expected = new ArrayList<PreviousNameArray>();
+        final List<PreviousNameArray> expected = new ArrayList<>();
 
         testItem.setPreviousNameArray(expected);
         assertThat(testItem.getPreviousNameArray(), is(sameInstance(expected)));
@@ -223,7 +223,7 @@ class OfficersItemTest {
                         containsString("changedAt=<null>"),
                         containsString("companyNumber=<null>"),
                         containsString("corporateInd=<null>"),
-                        containsString("personNumber=<null>"),
+                        containsString("externalNumber=<null>"),
                         containsString("dateOfBirth=<null>"),
                         containsString("forename=<null>"),
                         containsString("honours=<null>"),

@@ -106,8 +106,8 @@ public class OfficersItem {
     @JsonProperty("surname")
     private String surname;
 
-    @JsonProperty("person_number")
-    private String personNumber;
+    @JsonProperty("external_number")
+    private String externalNumber;
 
     @JsonProperty(value = "secure_director", required = true)
     private String secureDirector;
@@ -369,9 +369,9 @@ public class OfficersItem {
         this.previousNameArray = previousNameArray;
     }
 
-    public String getPersonNumber() { return personNumber; }
+    public String getExternalNumber() { return externalNumber; }
 
-    public void setPersonNumber(String personNumber) { this.personNumber = personNumber; }
+    public void setExternalNumber(String externalNumber) { this.externalNumber = externalNumber; }
 
     public String getCompanyName() {
         return companyName;
@@ -432,7 +432,7 @@ public class OfficersItem {
                 && Objects.equals(getIdentification(), that.getIdentification())
                 && Objects.equals(getNationality(), that.getNationality())
                 && Objects.equals(getSurname(), that.getSurname())
-                && Objects.equals(getPersonNumber(), that.getPersonNumber())
+                && Objects.equals(getExternalNumber(), that.getExternalNumber())
                 && Objects.equals(getSecureDirector(), that.getSecureDirector())
                 && Objects.equals(getPreviousNameArray(), that.getPreviousNameArray())
                 && Objects.equals(getAdditionalProperties(), that.getAdditionalProperties())
@@ -470,7 +470,7 @@ public class OfficersItem {
                 getIdentification(),
                 getNationality(),
                 getSurname(),
-                getPersonNumber(),
+                getExternalNumber(),
                 getSecureDirector(),
                 getPreviousNameArray(),
                 getAdditionalProperties(),

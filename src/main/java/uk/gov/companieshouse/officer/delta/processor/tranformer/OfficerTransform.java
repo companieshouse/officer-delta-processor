@@ -72,7 +72,7 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
         }
 
         officer.setCompanyNumber(source.getCompanyNumber());
-        officer.setPersonNumber(source.getPersonNumber());
+        officer.setPersonNumber(source.getExternalNumber());
 
         // Occupation and Nationality are in the same set of Roles
         if (RolesWithOccupation.includes(officerRole)) {
