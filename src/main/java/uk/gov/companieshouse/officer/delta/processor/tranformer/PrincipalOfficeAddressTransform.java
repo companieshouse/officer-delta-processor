@@ -16,7 +16,7 @@ public class PrincipalOfficeAddressTransform implements Transformative<AddressAP
     public PrincipalOfficeAddress transform(AddressAPI addressAPI, PrincipalOfficeAddress principalOfficeAddress) throws NonRetryableErrorException {
         principalOfficeAddress.setAddressLine1(addressAPI.getAddressLine1());
         principalOfficeAddress.setAddressLine2(addressAPI.getAddressLine2());
-        principalOfficeAddress.setCareOf(addressAPI.getCareOf());
+        principalOfficeAddress.setCareOf(addressAPI.getCareOfName());
         principalOfficeAddress.setCountry(addressAPI.getCountry());
         principalOfficeAddress.setLocality(addressAPI.getLocality());
         principalOfficeAddress.setPoBox(addressAPI.getPoBox());

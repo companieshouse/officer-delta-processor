@@ -16,7 +16,7 @@ public class UsualResidentialAddressTransform implements Transformative<AddressA
     public UsualResidentialAddress transform(AddressAPI addressAPI, UsualResidentialAddress usualResidentialAddress) throws NonRetryableErrorException {
         usualResidentialAddress.setAddressLine1(addressAPI.getAddressLine1());
         usualResidentialAddress.setAddressLine2(addressAPI.getAddressLine2());
-        usualResidentialAddress.setCareOf(addressAPI.getCareOf());
+        usualResidentialAddress.setCareOf(addressAPI.getCareOfName());
         usualResidentialAddress.setCountry(addressAPI.getCountry());
         usualResidentialAddress.setLocality(addressAPI.getLocality());
         usualResidentialAddress.setPoBox(addressAPI.getPoBox());
