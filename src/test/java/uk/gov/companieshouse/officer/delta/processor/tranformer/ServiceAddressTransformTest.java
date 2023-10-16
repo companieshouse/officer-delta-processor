@@ -34,7 +34,7 @@ class ServiceAddressTransformTest {
 
         assertThat(result.getAddressLine1(), is(addressAPI.getAddressLine1()));
         assertThat(result.getAddressLine2(), is(addressAPI.getAddressLine2()));
-        assertThat(result.getCareOf(), is(addressAPI.getCareOf()));
+        assertThat(result.getCareOf(), is(addressAPI.getCareOfName()));
         assertThat(result.getCountry(), is(addressAPI.getCountry()));
         assertThat(result.getLocality(), is(addressAPI.getLocality()));
         assertThat(result.getPoBox(), is(addressAPI.getPoBox()));
@@ -49,7 +49,7 @@ class ServiceAddressTransformTest {
 
         addressAPI.setAddressLine1("ura_line1");
         addressAPI.setAddressLine2("ura_line2");
-        addressAPI.setCareOf("ura_care_of");
+        addressAPI.setCareOfName("ura_care_of");
         addressAPI.setCountry("United Kingdom");
         addressAPI.setLocality("Cardiff");
         addressAPI.setPoBox("ura_po");
