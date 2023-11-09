@@ -164,6 +164,11 @@ class SensitiveOfficerTransformTest {
         }
     }
 
+    @Test
+    void testTransformShouldHandleNullSource() {
+        assertThat(testTransform.transform((OfficersItem) null), is(nullValue()));
+    }
+
     private void verifyProcessingError(final SensitiveData officerAPI, final OfficersItem officer) {
         final NonRetryableErrorException exception =
                 assertThrows(NonRetryableErrorException.class, () -> testTransform.transform(officer, officerAPI));

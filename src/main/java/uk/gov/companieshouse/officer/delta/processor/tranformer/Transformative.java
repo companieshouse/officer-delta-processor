@@ -36,6 +36,9 @@ public interface Transformative<S, T> {
     T factory();
 
     default T transform(S source) throws NonRetryableErrorException {
+        if (source == null) {
+            return null;
+        }
         T target = transform(source, factory());
         if (target.equals(factory())) {
             target = null;

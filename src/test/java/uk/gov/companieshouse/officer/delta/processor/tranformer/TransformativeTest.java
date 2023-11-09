@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 
@@ -65,5 +66,10 @@ class TransformativeTest {
         final List<ZoneId> result = testTransformative.transform(Arrays.asList(TZ_PHOENIX, TZ_BAGHDAD, TZ_TROLL));
 
         assertThat(result, contains(ZoneId.of(TZ_PHOENIX), ZoneId.of(TZ_BAGHDAD), ZoneId.of(TZ_TROLL)));
+    }
+
+    @Test
+    void testTransformShouldHandleNullSource() {
+        assertThat(testTransformative.transform((String) null), is(nullValue()));
     }
 }

@@ -9,6 +9,7 @@ import uk.gov.companieshouse.officer.delta.processor.model.PreviousNameArray;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,6 +40,11 @@ class FormerNameTransformTest {
         assertThat(result.getForenames(), is(previousNameArray.getPreviousForename()));
         assertThat(result.getSurname(), is(previousNameArray.getPreviousSurname()));
 
+    }
+
+    @Test
+    void testTransformShouldHandleNullSource() {
+        assertThat(testTransform.transform((PreviousNameArray) null), is(nullValue()));
     }
 
 }

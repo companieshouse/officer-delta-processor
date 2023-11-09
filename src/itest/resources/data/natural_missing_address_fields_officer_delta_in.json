@@ -28,31 +28,6 @@
           "legal_authority": "Chapter 32",
           "legal_form": "Hong Kong"
         }
-      },
-      "service_address": {
-        "premise": "1",
-        "address_line_1" : "1 Crown Way",
-        "address_line_2" : "Pavement",
-        "care_of_name" : "John Smith",
-        "locality" : "Cardiff",
-        "po_box" : "CF14 3UZ",
-        "region" : "Cardiff",
-        "postal_code" : "CF14 3UZ",
-        "country": "United Kingdom",
-        "usual_country_of_residence": "United Kingdom"
-      },
-      "usual_residential_address": {
-        "premise": "URA",
-        "address_line_1": "ura_line1",
-        "address_line_2": "ura_line2",
-        "locality": "Cardiff",
-        "care_of_name": "ura_care_of",
-        "region": "ura_region",
-        "po_box": "ura_po",
-        "supplied_company_name": "ura_cname",
-        "country": "United Kingdom",
-        "postal_code": "CF2 1B6",
-        "usual_country_of_residence": "United Kingdom"
       }
     }
   ],

@@ -3,6 +3,7 @@ package uk.gov.companieshouse.officer.delta.processor.tranformer;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -86,6 +87,11 @@ class IdentificationTransformTest {
         final Identification result = testTransform.transform(identification, identificationAPI);
 
         assertThat(result, is(equalTo(identificationAPI)));
+    }
+
+    @Test
+    void testTransformShouldHandleNullSource() {
+        assertThat(testTransform.transform((DeltaIdentification) null), is(nullValue()));
     }
 
     private Identification createIdentificationAPI(String identificationType) {

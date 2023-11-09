@@ -40,19 +40,17 @@ public class SensitiveOfficerTransform implements Transformative<OfficersItem, S
          }
 
         if (RolesWithDateOfBirth.includes(officerRole) && isNotEmpty(source.getDateOfBirth())) {
+            var dobFromString = parseLocalDate(DOB_IDENTIFIER, source.getDateOfBirth());
+            var year = String.valueOf(dobFromString.getYear());
+            var month = String.valueOf(dobFromString.getMonthValue());
+            var day = String.valueOf(dobFromString.getDayOfMonth());
+
             var dateOfBirth = new DateOfBirth();
-
-            var year = String.valueOf((parseLocalDate(DOB_IDENTIFIER, source.getDateOfBirth())).getYear());
-            var month = String.valueOf((parseLocalDate(DOB_IDENTIFIER, source.getDateOfBirth())).getMonthValue());
-            var day = String.valueOf((parseLocalDate(DOB_IDENTIFIER, source.getDateOfBirth())).getDayOfMonth());
-
             dateOfBirth.setYear(Integer.parseInt(year));
             dateOfBirth.setMonth(Integer.parseInt(month));
             dateOfBirth.setDay(Integer.parseInt(day));
 
             officer.setDateOfBirth(dateOfBirth);
-
-
         }
 
         return officer;
