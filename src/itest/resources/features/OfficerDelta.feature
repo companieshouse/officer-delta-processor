@@ -5,6 +5,11 @@ Scenario: Can transform and send a natural officer
   When the consumer receives a natural officer delta with id EcEKO1YhIKexb0cSDZsn_OHsFw4
   Then a PUT request is sent to the appointments api with the transformed data
 
+Scenario: Can transform and send a natural officer which is missing address fields
+  Given the application is running
+  When the consumer receives a natural_missing_address_fields officer delta with id EcEKO1YhIKexb0cSDZsn_OHsFw4
+  Then a PUT request is sent to the appointments api with the transformed data
+
 Scenario: Can transform and send a corporate officer
   Given the application is running
   When the consumer receives a corporate officer delta with id EcEKO1YhIKexb0cSDZsn_OHsFw4
@@ -38,6 +43,11 @@ Scenario: Can transform and send a corporate-non-corp-kind officer
 Scenario: Can transform and send a corporate-managing officer
   Given the application is running
   When the consumer receives a corporate_managing officer delta with id EcEKO1YhIKexb0cSDZsn_OHsFw4
+  Then a PUT request is sent to the appointments api with the transformed data
+
+Scenario: Can transform and send a corporate-managing officer which is missing address fields
+  Given the application is running
+  When the consumer receives a corporate_managing_missing_address_fields officer delta with id EcEKO1YhIKexb0cSDZsn_OHsFw4
   Then a PUT request is sent to the appointments api with the transformed data
 
 Scenario: Can transform and send a managing officer

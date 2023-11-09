@@ -350,6 +350,23 @@ class OfficerTransformTest {
     }
 
     @Test
+    void transformNaturalWhenKindIsDIRandServiceAddressIsNull() {
+        final OfficersItem officer = createOfficer(addressAPI, identification);
+        officer.setServiceAddress(null);
+
+        officer.setAppointmentDate(VALID_DATE);
+        officer.setDateOfBirth(VALID_DATE);
+        officer.setCorporateInd(CORP_IND_N);
+        officer.setKind(OfficerRole.DIR.name());
+        officer.setCompanyNumber("1111111");
+
+        final Data outputOfficer = testTransform.transform(officer);
+
+        assertThat(outputOfficer.getOfficerRole(), is(Data.OfficerRoleEnum.DIRECTOR));
+        assertThat(outputOfficer.getCountryOfResidence(), is(nullValue()));
+    }
+
+    @Test
     void transformNaturalWhenKindIsDIRandCorpIndisMissing() {
         final OfficersItem officer = createOfficer(addressAPI, identification);
 

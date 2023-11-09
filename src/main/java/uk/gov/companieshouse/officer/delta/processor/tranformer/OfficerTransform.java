@@ -111,7 +111,7 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
             officer.setIsSecureOfficer(BooleanUtils.toBooleanObject(source.getSecureDirector()));
         }
 
-        if (RolesWithCountryOfResidence.includes(officerRole)) {
+        if (RolesWithCountryOfResidence.includes(officerRole) && source.getServiceAddress() != null) {
             officer.setCountryOfResidence(source.getServiceAddress().getUsualCountryOfResidence());
         }
 
