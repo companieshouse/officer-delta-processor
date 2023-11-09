@@ -376,6 +376,11 @@ class OfficerTransformTest {
         assertThat(outputOfficer.getOfficerRole(), is(Data.OfficerRoleEnum.CORPORATE_DIRECTOR));
     }
 
+    @Test
+    void testTransformShouldHandleNullSource() {
+        assertThat(testTransform.transform((OfficersItem) null), is(nullValue()));
+    }
+
     private void verifyProcessingError(final Data data, final OfficersItem officer,
             final String expectedMessage) {
 

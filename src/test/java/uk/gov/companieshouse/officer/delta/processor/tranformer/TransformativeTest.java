@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 
 import java.time.ZoneId;
@@ -65,5 +67,10 @@ class TransformativeTest {
         final List<ZoneId> result = testTransformative.transform(Arrays.asList(TZ_PHOENIX, TZ_BAGHDAD, TZ_TROLL));
 
         assertThat(result, contains(ZoneId.of(TZ_PHOENIX), ZoneId.of(TZ_BAGHDAD), ZoneId.of(TZ_TROLL)));
+    }
+
+    @Test
+    void testTransformShouldHandleNullSource() {
+        assertThat(testTransformative.transform((String) null), is(nullValue()));
     }
 }

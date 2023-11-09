@@ -2,6 +2,7 @@ package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.verify;
@@ -22,6 +23,7 @@ import uk.gov.companieshouse.api.appointment.Data;
 import uk.gov.companieshouse.api.appointment.ExternalData;
 import uk.gov.companieshouse.api.appointment.FullRecordCompanyOfficerApi;
 import uk.gov.companieshouse.api.appointment.InternalData;
+import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
 import uk.gov.companieshouse.officer.delta.processor.config.OfficerRoleConfig;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
@@ -110,6 +112,11 @@ class AppointmentTransformTest {
         assertThat(appointmentAPI.getExternalData().getData(), is(sameInstance(data)));
         assertThat(appointmentAPI.getInternalData().getUpdatedAt(), is(LocalDate.of(2021, 9, 9)));
         assertThat(appointmentAPI.getInternalData().getOfficerRoleSortOrder(), is(100));
+    }
+
+    @Test
+    void testTransformShouldHandleNullSource() {
+        assertThat(testTransform.transform((OfficersItem) null), is(nullValue()));
     }
 
     private OfficersItem createOfficer() {

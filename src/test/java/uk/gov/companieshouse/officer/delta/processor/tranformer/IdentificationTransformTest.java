@@ -3,6 +3,7 @@ package uk.gov.companieshouse.officer.delta.processor.tranformer;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.appointment.Identification;
+import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
 import uk.gov.companieshouse.officer.delta.processor.model.DeltaIdentification;
 
 @ExtendWith(MockitoExtension.class)
@@ -86,6 +88,11 @@ class IdentificationTransformTest {
         final Identification result = testTransform.transform(identification, identificationAPI);
 
         assertThat(result, is(equalTo(identificationAPI)));
+    }
+
+    @Test
+    void testTransformShouldHandleNullSource() {
+        assertThat(testTransform.transform((DeltaIdentification) null), is(nullValue()));
     }
 
     private Identification createIdentificationAPI(String identificationType) {

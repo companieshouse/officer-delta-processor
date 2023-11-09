@@ -9,6 +9,7 @@ import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +43,11 @@ class ServiceAddressTransformTest {
         assertThat(result.getPremises(), is(addressAPI.getPremises()));
         assertThat(result.getRegion(), is(addressAPI.getRegion()));
 
+    }
+
+    @Test
+    void testTransformShouldHandleNullSource() {
+        assertThat(testTransform.transform((AddressAPI) null), is(nullValue()));
     }
 
     private AddressAPI createAddress() {
