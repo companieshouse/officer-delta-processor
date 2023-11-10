@@ -77,7 +77,7 @@ public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements Ap
                 String.format("/company/%s/appointments/%s/full_record/delete",
                         companyNumber, internalId);
 
-        Map<String,Object> logMap = createLogMap(internalId,"DELETE", uri);
+        Map<String,Object> logMap = createLogMap(companyNumber,"DELETE", uri);
         logger.infoContext(logContext, String.format("DELETE %s", uri), logMap);
 
         return executeOp(logContext, "deleteOfficer", uri,
