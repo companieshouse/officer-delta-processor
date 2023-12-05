@@ -48,8 +48,7 @@
 		<sonar.tests>src/test,src/itest</sonar.tests>
 		<sonar.verbose>true</sonar.verbose>
 		<sonar.coverage.jacoco.xmlReportPaths>
-			${project.basedir}/target/site/jacoco/jacoco.xml,
-			${project.basedir}/target/site/jacoco-it/jacoco.xml
+			${project.basedir}/target/site/jacoco/jacoco.xml
 		</sonar.coverage.jacoco.xmlReportPaths>
 		<sonar.jacoco.reports>${project.basedir}/target/site</sonar.jacoco.reports>
 	</properties>
@@ -288,6 +287,13 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>${jacoco-maven-plugin.version}</version>
+				<configuration>
+					<append>true</append>
+					<destFile>${sonar.jacoco.reports}/jacoco.exec</destFile>
+					<dataFile>${sonar.jacoco.reports}/jacoco.exec</dataFile>
+					<outputDirectory>${sonar.jacoco.reports}/jacoco</outputDirectory>
+				</configuration>
+
 				<executions>
 					<execution>
 						<id>pre-unit-test</id>
@@ -295,21 +301,15 @@
 							<goal>prepare-agent</goal>
 						</goals>
 						<configuration>
-							<!-- Sets the path to the file which contains the execution model. -->
-							<destFile>${sonar.jacoco.reports}/jacoco.exec</destFile>
 							<propertyName>surefireArgLine</propertyName>
 						</configuration>
 					</execution>
 					<execution>
 						<id>post-unit-test</id>
-						<phase>test</phase>
+						<phase>verify</phase>
 						<goals>
 							<goal>report</goal>
 						</goals>
-						<configuration>
-							<dataFile>${sonar.jacoco.reports}/jacoco.exec</dataFile>
-							<outputDirectory>${sonar.jacoco.reports}/jacoco</outputDirectory>
-						</configuration>
 					</execution>
 					<execution>
 						<id>pre-integration-test</id>
@@ -318,23 +318,15 @@
 							<goal>prepare-agent</goal>
 						</goals>
 						<configuration>
-							<!-- Sets the path to the file which contains the execution data. -->
-							<destFile>${sonar.jacoco.reports}/jacoco-it.exec</destFile>
 							<propertyName>failsafeArgLine</propertyName>
 						</configuration>
 					</execution>
 					<execution>
 						<id>post-integration-test</id>
-						<phase>post-integration-test</phase>
+						<phase>verify</phase>
 						<goals>
 							<goal>report</goal>
 						</goals>
-						<configuration>
-							<!-- Sets the path to the file which contains the execution data. -->
-							<dataFile>${sonar.jacoco.reports}/jacoco-it.exec</dataFile>
-							<!-- Sets the output directory for the code coverage report. -->
-							<outputDirectory>${sonar.jacoco.reports}/jacoco-it</outputDirectory>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
