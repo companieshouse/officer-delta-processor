@@ -35,7 +35,7 @@ public class SensitiveOfficerTransform implements Transformative<OfficersItem, S
         final String officerRole = lookupOfficerRole(source.getKind(), source.getCorporateInd());
         if (RolesWithResidentialAddress.includes(officerRole)) {
         officer.setUsualResidentialAddress(usualResidentialAddressTransform.transform(source.getUsualResidentialAddress()));
-            officer.setResidentialAddressSameAsServiceAddress(
+            officer.setResidentialAddressIsSameAsServiceAddress(
                     BooleanUtils.toBooleanObject(source.getResidentialAddressSameAsServiceAddress()));
          }
 

@@ -15,7 +15,7 @@
         "premises":"50",
         "region":null
       },
-      "service_address_same_as_registered_office_address":false,
+      "service_address_is_same_as_registered_office_address":false,
       "country_of_residence":null,
       "appointed_on":[
         2022,

@@ -248,7 +248,7 @@ class OfficerTransformTest {
         assertThat(result.getHonours(), is(officer.getHonours()));
         assertThat(result.getPersonNumber(), is(officer.getExternalNumber()));
         assertThat(result.getServiceAddress(), is(sameInstance(serviceAddress)));
-        assertThat(result.getServiceAddressSameAsRegisteredOfficeAddress(), is(true));
+        assertThat(result.getServiceAddressIsSameAsRegisteredOfficeAddress(), is(true));
         assertThat(result.getIdentification(), is(sameInstance(identificationAPI)));
     }
 
