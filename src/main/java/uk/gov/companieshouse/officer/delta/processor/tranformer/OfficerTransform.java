@@ -104,7 +104,7 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
         }
 
         officer.setServiceAddress(serviceAddressTransform.transform(source.getServiceAddress()));
-        officer.setServiceAddressSameAsRegisteredOfficeAddress(
+        officer.serviceAddressIsSameAsRegisteredOfficeAddress(
                 parseYesOrNo(source.getServiceAddressSameAsRegisteredAddress()));
 
         if (RolesWithResidentialAddress.includes(officerRole)) {

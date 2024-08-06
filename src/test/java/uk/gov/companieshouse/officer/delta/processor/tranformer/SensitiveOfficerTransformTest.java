@@ -158,7 +158,7 @@ class SensitiveOfficerTransformTest {
 
         if (RolesWithResidentialAddress.includes(officerRole)) {
             assertThat(outputOfficer.getUsualResidentialAddress(), is(notNullValue()));
-            assertThat(outputOfficer.getResidentialAddressSameAsServiceAddress(), is(true));
+            assertThat(outputOfficer.getResidentialAddressIsSameAsServiceAddress(), is(true));
         } else {
             assertThat(outputOfficer, is(nullValue()));
         }
