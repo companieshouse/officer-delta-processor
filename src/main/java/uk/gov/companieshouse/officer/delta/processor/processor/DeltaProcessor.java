@@ -12,6 +12,7 @@ import uk.gov.companieshouse.api.delta.OfficerDeleteDelta;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.exception.RetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.logging.DataMapHolder;
@@ -26,22 +27,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import static uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication.NAMESPACE;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseOffsetDateTime;
 
 
 @Component
 public class DeltaProcessor implements Processor<ChsDelta> {
     public static final Pattern PARSE_MESSAGE_PATTERN = Pattern.compile("Source.*line", Pattern.DOTALL);
+    private static final Logger logger = LoggerFactory.getLogger(NAMESPACE);
 
-    private final Logger logger;
     private final AppointmentTransform transformer;
     private final ApiClientService apiClientService;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public DeltaProcessor(Logger logger, AppointmentTransform transformer, ApiClientService apiClientService,
+    public DeltaProcessor(AppointmentTransform transformer, ApiClientService apiClientService,
             ObjectMapper objectMapper) {
-        this.logger = logger;
         this.transformer = transformer;
         this.apiClientService = apiClientService;
         this.objectMapper = objectMapper;
@@ -61,7 +62,8 @@ public class DeltaProcessor implements Processor<ChsDelta> {
                 OfficersItem officer = officersList.get(i);
                 DataMapHolder.get()
                         .companyNumber(officer.getCompanyNumber())
-                        .officerId(officer.getOfficerId());
+                        .officerId(officer.getOfficerId())
+                        .internalId(officer.getInternalId());
 
                 logMap = DataMapHolder.getLogMap();
                 logger.infoContext(logContext, String.format("Process data for officer [%d]", i), logMap);
@@ -110,7 +112,8 @@ public class DeltaProcessor implements Processor<ChsDelta> {
         final String companyNumber = officersDelete.getCompanyNumber();
         DataMapHolder.get()
                 .companyNumber(companyNumber)
-                .officerId(officersDelete.getOfficerId());
+                .officerId(officersDelete.getOfficerId())
+                .internalId(officersDelete.getInternalId());
 
         final String internalId = TransformerUtils.encode(officersDelete.getInternalId());
             apiClientService.deleteAppointment(logContext, internalId, companyNumber);
@@ -128,12 +131,12 @@ public class DeltaProcessor implements Processor<ChsDelta> {
         logMap.put("status", httpStatus.toString());
         if (HttpStatus.BAD_REQUEST == httpStatus) {
             // 400 BAD REQUEST status is not retryable
-            logger.errorContext(logContext, msg, null, logMap);
+            logger.errorContext(logContext, msg, ex, logMap);
             throw new NonRetryableErrorException(msg, ex);
         }
         else if (httpStatus.is4xxClientError() || httpStatus.is5xxServerError()) {
             // any other client or server status is retryable
-            logger.errorContext(logContext, msg + ", retry", null, logMap);
+            logger.errorContext(logContext, msg + ", retry", ex, logMap);
             throw new RetryableErrorException(msg, ex);
         }
         else {

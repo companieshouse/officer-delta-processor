@@ -8,6 +8,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication;
 
 import java.util.Map;
+import uk.gov.companieshouse.officer.delta.processor.logging.DataMapHolder;
 
 import static java.lang.String.format;
 import static org.springframework.kafka.support.KafkaHeaders.EXCEPTION_CAUSE_FQCN;
@@ -24,7 +25,7 @@ public class RetryableTopicErrorInterceptor implements ProducerInterceptor<Strin
     public ProducerRecord<String, Object> onSend(ProducerRecord<String, Object> kafkaRecord) {
         String nextTopic = kafkaRecord.topic().contains("-error") ? getNextErrorTopic(kafkaRecord)
                 : kafkaRecord.topic();
-        LOGGER.info(format("Moving record into new topic: %s", nextTopic));
+        LOGGER.info(format("Moving record into new topic: %s", nextTopic), DataMapHolder.getLogMap());
         if (nextTopic.contains("-invalid")) {
             return new ProducerRecord<>(nextTopic, kafkaRecord.key(), kafkaRecord.value());
         }

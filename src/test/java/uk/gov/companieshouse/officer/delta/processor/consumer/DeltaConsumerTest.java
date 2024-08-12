@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import uk.gov.companieshouse.delta.ChsDelta;
-import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.officer.delta.processor.Util;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.processor.Processor;
@@ -22,14 +21,12 @@ import java.io.IOException;
 class DeltaConsumerTest {
 
     @Mock
-    private Logger logger;
-    @Mock
     Processor<ChsDelta> processor;
     private DeltaConsumer consumer;
 
     @BeforeEach
     void init() {
-        consumer = new DeltaConsumer(processor,logger);
+        consumer = new DeltaConsumer(processor);
     }
 
     @Test

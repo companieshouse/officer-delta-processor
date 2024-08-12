@@ -24,7 +24,7 @@
 		<spring.boot.version>2.7.14</spring.boot.version>
 
 		<!-- Logging -->
-		<structured-logging.version>1.9.25</structured-logging.version>
+		<structured-logging.version>1.9.34</structured-logging.version>
 		<api-sdk-manager-java-library.version>1.0.11</api-sdk-manager-java-library.version>
 
 		<!-- Test -->
