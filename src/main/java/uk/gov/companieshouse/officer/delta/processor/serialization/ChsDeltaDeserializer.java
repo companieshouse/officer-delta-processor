@@ -25,16 +25,12 @@ public class ChsDeltaDeserializer implements Deserializer<ChsDelta> {
     @Override
     public ChsDelta deserialize(String topic, byte[] data) {
         try {
-            logger.trace(String.format("Message picked up from topic: %s", topic), DataMapHolder.getLogMap());
             Decoder decoder = DecoderFactory.get().binaryDecoder(data, null);
             DatumReader<ChsDelta> reader = new ReflectDatumReader<>(ChsDelta.class);
-            var chsDelta = reader.read(null, decoder);
-            logger.trace("Message successfully de-serialised into Avro ChsDelta object", DataMapHolder.getLogMap());
-            return chsDelta;
+            return reader.read(null, decoder);
         } catch (Exception ex) {
             logger.error("De-Serialization exception while converting to Avro schema object", ex, DataMapHolder.getLogMap());
             throw new NonRetryableErrorException(ex);
         }
     }
-
 }

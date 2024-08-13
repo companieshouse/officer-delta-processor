@@ -26,8 +26,6 @@ public class ChsDeltaSerializer implements Serializer<Object> {
 
     @Override
     public byte[] serialize(String topic, Object payload) {
-        logger.trace("Payload serialised", DataMapHolder.getLogMap());
-
         try {
             if (payload == null) {
                 return "".getBytes();

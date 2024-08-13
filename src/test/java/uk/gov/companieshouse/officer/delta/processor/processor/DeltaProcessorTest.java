@@ -4,11 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
@@ -41,7 +37,6 @@ import uk.gov.companieshouse.api.appointment.FullRecordCompanyOfficerApi;
 import uk.gov.companieshouse.api.delta.OfficerDeleteDelta;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.delta.ChsDelta;
-import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.officer.delta.processor.config.OfficerRoleConfig;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.exception.RetryableErrorException;
@@ -82,8 +77,6 @@ class DeltaProcessorTest {
 
     @Mock
     private ApiClientService apiClientService;
-    @Mock
-    private Logger logger;
 
     @Captor
     private ArgumentCaptor<FullRecordCompanyOfficerApi> appointmentCapture;
@@ -124,7 +117,7 @@ class DeltaProcessorTest {
 
     @BeforeEach
     void setUp() {
-        testProcessor = new DeltaProcessor(logger, appointmentTransform, apiClientService,
+        testProcessor = new DeltaProcessor(appointmentTransform, apiClientService,
                 objectMapper);
     }
 
@@ -155,11 +148,9 @@ class DeltaProcessorTest {
         assertThat(exception.getMessage(), is("Unable to JSON parse CHSDelta"));
         assertThat(exception.getCause().getMessage(), is(redactedMessage));
 
-        final InOrder inOrder = inOrder(logger, apiClientService);
+        final InOrder inOrder = inOrder(apiClientService);
 
-        inOrder.verify(logger).errorContext(anyString(), anyString(), any(NonRetryableErrorException.class), anyMap());
         inOrder.verifyNoMoreInteractions();
-
     }
 
     private static Stream<HttpStatus> provideRetryableStatuses() {
@@ -177,10 +168,9 @@ class DeltaProcessorTest {
 
         assertThrows(RetryableErrorException.class, () -> testProcessor.process(delta));
 
-        final InOrder inOrder = inOrder(logger, apiClientService);
+        final InOrder inOrder = inOrder(apiClientService);
 
         inOrder.verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
-        inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), isNull(), isNotNull());
         inOrder.verifyNoMoreInteractions();
 
     }
@@ -195,11 +185,10 @@ class DeltaProcessorTest {
 
         assertThrows(RetryableErrorException.class, () -> testProcessor.process(delta));
 
-        final InOrder inOrder = inOrder(logger, apiClientService);
+        final InOrder inOrder = inOrder(apiClientService);
 
         inOrder.verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
         inOrder.verifyNoMoreInteractions();
-
     }
 
     private static Stream<HttpStatus> provideNonRetryableStatuses() {
@@ -217,12 +206,10 @@ class DeltaProcessorTest {
 
         assertThrows(NonRetryableErrorException.class, () -> testProcessor.process(delta));
 
-        final InOrder inOrder = inOrder(logger, apiClientService);
+        final InOrder inOrder = inOrder(apiClientService);
 
         inOrder.verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
-        inOrder.verify(logger).errorContext(eq(CONTEXT_ID), anyString(), isNull(), isNotNull());
         inOrder.verifyNoMoreInteractions();
-
     }
 
     @Test

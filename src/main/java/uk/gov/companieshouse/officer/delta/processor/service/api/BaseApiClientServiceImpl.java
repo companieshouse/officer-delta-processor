@@ -54,6 +54,7 @@ public abstract class BaseApiClientServiceImpl {
         final Map<String, Object> logMap = DataMapHolder.getLogMap();
         logMap.put("operation_name", operationName);
         logMap.put("path", uri);
+        logMap.put("request_id", DataMapHolder.getRequestId());
         return logMap;
     }
 }

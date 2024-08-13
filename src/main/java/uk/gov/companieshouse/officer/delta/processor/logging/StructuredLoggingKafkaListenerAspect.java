@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.officer.delta.processor.logging;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -11,6 +12,7 @@ import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication;
+import uk.gov.companieshouse.officer.delta.processor.exception.RetryableErrorException;
 
 @Component
 @Aspect
@@ -37,17 +39,20 @@ class StructuredLoggingKafkaListenerAspect {
                     .partition((Integer) message.getHeaders().get("kafka_receivedPartitionId"))
                     .offset((Long)message.getHeaders().get("kafka_offset"));
 
-            LOGGER.debug(LOG_MESSAGE_RECEIVED, DataMapHolder.getLogMap());
+            LOGGER.info(LOG_MESSAGE_RECEIVED, DataMapHolder.getLogMap());
 
             Object result = joinPoint.proceed();
 
-            LOGGER.debug(LOG_MESSAGE_PROCESSED, DataMapHolder.getLogMap());
+            LOGGER.info(LOG_MESSAGE_PROCESSED, DataMapHolder.getLogMap());
 
             return result;
+        } catch (RetryableErrorException ex) {
+            LOGGER.info(String.format(EXCEPTION_MESSAGE,
+                            ex.getClass().getSimpleName(), Arrays.toString(ex.getStackTrace())),
+                    DataMapHolder.getLogMap());
+            throw ex;
         } catch (Exception ex) {
-            LOGGER.debug(String.format(EXCEPTION_MESSAGE,
-                ex.getClass().getSimpleName(), ex.getMessage()), 
-                DataMapHolder.getLogMap());
+            LOGGER.errorContext(ex.getMessage(), ex, DataMapHolder.getLogMap());
             throw ex;
         } finally {
             DataMapHolder.clear();

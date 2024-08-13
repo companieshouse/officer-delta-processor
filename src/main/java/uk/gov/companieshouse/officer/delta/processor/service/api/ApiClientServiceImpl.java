@@ -90,6 +90,7 @@ public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements Ap
         logMap.put("company_number", companyNumber);
         logMap.put("method",method);
         logMap.put("path", path);
+        logMap.put("request_id", DataMapHolder.getRequestId());
         return logMap;
     }
 }
