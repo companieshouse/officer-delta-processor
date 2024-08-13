@@ -22,7 +22,6 @@ import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientServic
 import uk.gov.companieshouse.officer.delta.processor.tranformer.AppointmentTransform;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -52,21 +51,16 @@ public class DeltaProcessor implements Processor<ChsDelta> {
     public void process(ChsDelta delta) throws RetryableErrorException, NonRetryableErrorException {
 
         String logContext = delta.getContextId();
-        Map<String, Object> logMap = new HashMap<>();
 
         try {
             Officers officers = objectMapper.readValue(delta.getData(), Officers.class);
             final List<OfficersItem> officersList = officers.getOfficers();
 
-            for (int i = 0; i < officersList.size(); i++) {
-                OfficersItem officer = officersList.get(i);
+            for (OfficersItem officer : officersList) {
                 DataMapHolder.get()
                         .companyNumber(officer.getCompanyNumber())
                         .officerId(officer.getOfficerId())
                         .internalId(officer.getInternalId());
-
-                logMap = DataMapHolder.getLogMap();
-                logger.infoContext(logContext, String.format("Process data for officer [%d]", i), logMap);
 
                 FullRecordCompanyOfficerApi appointmentAPI = transformer.transform(officer);
                 appointmentAPI
@@ -77,7 +71,7 @@ public class DeltaProcessor implements Processor<ChsDelta> {
                         apiClientService.putAppointment(logContext, officer.getCompanyNumber(), appointmentAPI);
 
                 handleResponse(null, HttpStatus.valueOf(response.getStatusCode()), logContext,
-                        "Response from sending officer data", logMap);
+                        "Response from sending officer data");
             }
         }
         catch (JsonProcessingException e) {
@@ -87,12 +81,13 @@ public class DeltaProcessor implements Processor<ChsDelta> {
             final String cleanMessage = PARSE_MESSAGE_PATTERN.matcher(e.getMessage()).replaceAll("Source line");
             final NonRetryableErrorException cause = new NonRetryableErrorException(cleanMessage, null);
             logger.errorContext(logContext,
-                    "Unable to read JSON from delta: " + ExceptionUtils.getRootCauseMessage(cause), cause, logMap);
+                    "Unable to read JSON from delta: " + ExceptionUtils.getRootCauseMessage(cause), cause,
+                    DataMapHolder.getLogMap());
 
             throw new NonRetryableErrorException("Unable to JSON parse CHSDelta", cause);
         }
         catch (ResponseStatusException e) {
-            handleResponse(e, e.getStatus(), logContext, "Sending officer data failed", logMap);
+            handleResponse(e, e.getStatus(), logContext, "Sending officer data failed");
         }
         catch (IllegalArgumentException e) {
             // Workaround for Docker router. When service is unavailable: "IllegalArgumentException: expected numeric
@@ -118,7 +113,7 @@ public class DeltaProcessor implements Processor<ChsDelta> {
         final String internalId = TransformerUtils.encode(officersDelete.getInternalId());
             apiClientService.deleteAppointment(logContext, internalId, companyNumber);
         } catch (ResponseStatusException e) {
-            handleResponse(e, e.getStatus(), logContext, "Sending officer delete failed", DataMapHolder.getLogMap());
+            handleResponse(e, e.getStatus(), logContext, "Sending officer delete failed");
         } catch (Exception ex) {
             throw new NonRetryableErrorException(
                     "Error when extracting officers delete delta", ex);
@@ -126,8 +121,9 @@ public class DeltaProcessor implements Processor<ChsDelta> {
     }
 
     private void handleResponse(final ResponseStatusException ex, final HttpStatus httpStatus, final String logContext,
-            final String msg, final Map<String, Object> logMap)
+            final String msg)
             throws NonRetryableErrorException, RetryableErrorException {
+        Map<String, Object> logMap = DataMapHolder.getLogMap();
         logMap.put("status", httpStatus.toString());
         if (HttpStatus.BAD_REQUEST == httpStatus) {
             // 400 BAD REQUEST status is not retryable
