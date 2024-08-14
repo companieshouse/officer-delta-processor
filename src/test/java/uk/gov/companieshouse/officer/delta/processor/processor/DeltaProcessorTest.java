@@ -178,6 +178,7 @@ class DeltaProcessorTest {
 
         inOrder.verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
         inOrder.verifyNoMoreInteractions();
+        System.out.println("Status: " + responseStatus);
         assertThat(capture.getOut()).contains("event: error");
     }
 
