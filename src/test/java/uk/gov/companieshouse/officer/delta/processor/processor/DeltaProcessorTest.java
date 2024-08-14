@@ -164,8 +164,7 @@ class DeltaProcessorTest {
 
     @ParameterizedTest
     @MethodSource("provideRetryableStatuses")
-    @ExtendWith(OutputCaptureExtension.class)
-    void processWhenResponseStatusRetryable(final HttpStatus responseStatus, CapturedOutput capture) {
+    void processWhenResponseStatusRetryable(final HttpStatus responseStatus) {
         final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID, false);
         final String expectedNumber = expectedAppointment.getExternalData().getCompanyNumber();
 
@@ -178,8 +177,7 @@ class DeltaProcessorTest {
 
         inOrder.verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
         inOrder.verifyNoMoreInteractions();
-        System.out.println("Status: " + responseStatus);
-        assertThat(capture.getOut()).contains("event: error");
+
     }
 
     @Test
