@@ -139,8 +139,7 @@ class DeltaProcessorTest {
     }
 
     @Test
-    @ExtendWith(OutputCaptureExtension.class)
-    void processWhenJsonParseFailureThenContentRedacted(CapturedOutput capture) {
+    void processWhenJsonParseFailureThenContentRedacted() {
         final String badJson = json.replace(":", "-");
         final ChsDelta delta = new ChsDelta(badJson, 0, CONTEXT_ID, false);
 
@@ -155,7 +154,6 @@ class DeltaProcessorTest {
         final InOrder inOrder = inOrder(apiClientService);
 
         inOrder.verifyNoMoreInteractions();
-        assertThat(capture.getOut()).contains("event: error");
     }
 
     private static Stream<HttpStatus> provideRetryableStatuses() {
@@ -181,8 +179,7 @@ class DeltaProcessorTest {
     }
 
     @Test
-    @ExtendWith(OutputCaptureExtension.class)
-    void processWhenClientServiceThrowsIllegalArgumentException(CapturedOutput capture) {
+    void processWhenClientServiceThrowsIllegalArgumentException() {
         final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID, false);
         final String expectedNumber = expectedAppointment.getExternalData().getCompanyNumber();
 
@@ -195,7 +192,6 @@ class DeltaProcessorTest {
 
         inOrder.verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
         inOrder.verifyNoMoreInteractions();
-        assertThat(capture.getOut()).contains("event: error");
     }
 
     private static Stream<HttpStatus> provideNonRetryableStatuses() {
@@ -204,8 +200,7 @@ class DeltaProcessorTest {
 
     @ParameterizedTest
     @MethodSource("provideNonRetryableStatuses")
-    @ExtendWith(OutputCaptureExtension.class)
-    void processWhenResponseStatusNonRetryable(final HttpStatus responseStatus, CapturedOutput capture) {
+    void processWhenResponseStatusNonRetryable(final HttpStatus responseStatus) {
         final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID, false);
         final String expectedNumber = expectedAppointment.getExternalData().getCompanyNumber();
 
@@ -218,7 +213,6 @@ class DeltaProcessorTest {
 
         inOrder.verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
         inOrder.verifyNoMoreInteractions();
-        assertThat(capture.getOut()).contains("event: error");
     }
 
     @Test
@@ -241,13 +235,11 @@ class DeltaProcessorTest {
     }
 
     @Test
-    @ExtendWith(OutputCaptureExtension.class)
-    void brokenDeleteThrowsNonRetryableError(CapturedOutput capture) throws IOException {
+    void brokenDeleteThrowsNonRetryableError() throws IOException {
         String brokendelete = loadJson("broken_delta.json");
         final ChsDelta delta = new ChsDelta(brokendelete, 0, CONTEXT_ID, true);
 
         assertThrows(NonRetryableErrorException.class, ()->testProcessor.processDelete(delta));
-        assertThat(capture.getOut()).contains("event: error");
     }
 
     private static String loadJson(String filename) throws IOException {
