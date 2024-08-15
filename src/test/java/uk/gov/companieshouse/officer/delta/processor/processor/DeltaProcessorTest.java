@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.officer.delta.processor.processor;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -16,7 +17,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.Map;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +29,8 @@ import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -81,7 +83,6 @@ class DeltaProcessorTest {
     @Captor
     private ArgumentCaptor<FullRecordCompanyOfficerApi> appointmentCapture;
 
-
     @BeforeAll
     static void beforeAll() throws IOException, NonRetryableErrorException {
         json = loadJson("officer_delta_example_2.json");
@@ -122,7 +123,8 @@ class DeltaProcessorTest {
     }
 
     @Test
-    void process() throws NonRetryableErrorException, RetryableErrorException {
+    @ExtendWith(OutputCaptureExtension.class)
+    void process(CapturedOutput capture) {
         final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID, false);
         final String expectedNumber = expectedAppointment.getExternalData().getCompanyNumber();
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.OK.value(), null, null);
@@ -133,6 +135,7 @@ class DeltaProcessorTest {
 
         verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
         verifyNoMoreInteractions(apiClientService);
+        assertThat(capture.getOut()).doesNotContain("event: error");
     }
 
     @Test
@@ -213,7 +216,8 @@ class DeltaProcessorTest {
     }
 
     @Test
-    void processDelete() throws IOException, NonRetryableErrorException {
+    @ExtendWith(OutputCaptureExtension.class)
+    void processDelete(CapturedOutput capture) throws IOException {
         String deleteJson = loadJson("officer_delete_delta.json");
         OfficerDeleteDelta expectedDelete = jsonToDelete(deleteJson);
         final ChsDelta delta = new ChsDelta(deleteJson, 0, CONTEXT_ID, true);
@@ -227,14 +231,15 @@ class DeltaProcessorTest {
 
         verify(apiClientService).deleteAppointment(CONTEXT_ID, expectedInternalId, expectedNumber);
         verifyNoMoreInteractions(apiClientService);
+        assertThat(capture.getOut()).doesNotContain("event: error");
     }
 
     @Test
-    void brokenDeleteThrowsNonRetryableError() throws IOException, NonRetryableErrorException {
+    void brokenDeleteThrowsNonRetryableError() throws IOException {
         String brokendelete = loadJson("broken_delta.json");
         final ChsDelta delta = new ChsDelta(brokendelete, 0, CONTEXT_ID, true);
 
-        Assert.assertThrows(NonRetryableErrorException.class, ()->testProcessor.processDelete(delta));
+        assertThrows(NonRetryableErrorException.class, ()->testProcessor.processDelete(delta));
     }
 
     private static String loadJson(String filename) throws IOException {
