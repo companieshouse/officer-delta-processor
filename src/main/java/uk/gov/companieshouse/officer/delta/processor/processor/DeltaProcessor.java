@@ -93,7 +93,7 @@ public class DeltaProcessor implements Processor<ChsDelta> {
             // Workaround for Docker router. When service is unavailable: "IllegalArgumentException: expected numeric
             // type but got class uk.gov.companieshouse.api.error.ApiErrorResponse" is thrown when the SDK parses
             // ApiErrorResponseException.
-            logger.error("Failed to officer delta", DataMapHolder.getLogMap());
+            logger.error("Failed to process officer delta", DataMapHolder.getLogMap());
             throw new RetryableErrorException("Failed to send data for officer, retry", e);
         }
     }
