@@ -175,7 +175,7 @@ class DeltaProcessorTest {
     }
 
     private static Stream<HttpStatus> provideRetryableStatuses() {
-        return EnumSet.allOf(HttpStatus.class).stream().filter(s -> s.value() > HttpStatus.BAD_REQUEST.value());
+        return EnumSet.allOf(HttpStatus.class).stream().filter(s -> s.value() > HttpStatus.BAD_REQUEST.value() && s.value() != HttpStatus.CONFLICT.value());
     }
 
     @Test
