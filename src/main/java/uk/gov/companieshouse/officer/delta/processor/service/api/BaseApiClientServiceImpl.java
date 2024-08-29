@@ -37,7 +37,7 @@ public abstract class BaseApiClientServiceImpl {
 
         }
         catch (URIValidationException ex) {
-            logger.errorContext(logContext, "SDK exception", ex, buildLogMap(operationName, uri));
+            logger.infoContext(logContext, "SDK exception", buildLogMap(operationName, uri));
 
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
         } catch (ApiErrorResponseException ex) {
