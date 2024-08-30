@@ -48,9 +48,9 @@ public abstract class BaseApiClientServiceImpl {
             logMap.put("status", ex.getStatusCode());
             if (ex.getStatusCode() == HttpStatus.BAD_REQUEST.value() || ex.getStatusCode() == HttpStatus.CONFLICT.value()) {
                 logger.errorContext(logContext, SDK_EXCEPTION, ex, logMap);
+            } else {
+                logger.infoContext(logContext, SDK_EXCEPTION, logMap);
             }
-            logger.infoContext(logContext, SDK_EXCEPTION, logMap);
-
             throw new ResponseStatusException(HttpStatus.valueOf(ex.getStatusCode()),
                     ex.getStatusMessage(), ex);
         }
