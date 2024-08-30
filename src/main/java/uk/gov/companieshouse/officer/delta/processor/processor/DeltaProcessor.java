@@ -1,5 +1,8 @@
 package uk.gov.companieshouse.officer.delta.processor.processor;
 
+import static uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication.NAMESPACE;
+import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseOffsetDateTime;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -9,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.appointment.FullRecordCompanyOfficerApi;
 import uk.gov.companieshouse.api.delta.OfficerDeleteDelta;
-import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -21,13 +23,9 @@ import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientService;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.AppointmentTransform;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils;
-
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-
-import static uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication.NAMESPACE;
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseOffsetDateTime;
 
 
 @Component
@@ -67,11 +65,7 @@ public class DeltaProcessor implements Processor<ChsDelta> {
                         .getInternalData()
                         .setDeltaAt(parseOffsetDateTime("deltaAt", officers.getDeltaAt()));
 
-                ApiResponse<Void> response =
-                        apiClientService.putAppointment(logContext, officer.getCompanyNumber(), appointmentAPI);
-
-                handleResponse(null, HttpStatus.valueOf(response.getStatusCode()), logContext,
-                        "Response from sending officer data");
+                apiClientService.putAppointment(logContext, officer.getCompanyNumber(), appointmentAPI);
             }
         }
         catch (JsonProcessingException e) {
@@ -131,13 +125,10 @@ public class DeltaProcessor implements Processor<ChsDelta> {
             logger.errorContext(logContext, msg, ex, logMap);
             throw new NonRetryableErrorException(msg, ex);
         }
-        else if (httpStatus.is4xxClientError() || httpStatus.is5xxServerError()) {
+        else {
             // any other client or server status is retryable
             logger.infoContext(logContext, msg + ", retry", logMap);
             throw new RetryableErrorException(msg, ex);
-        }
-        else {
-            logger.debugContext(logContext, msg, logMap);
         }
     }
 }
