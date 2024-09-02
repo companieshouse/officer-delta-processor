@@ -156,10 +156,6 @@ class DeltaProcessorTest {
         inOrder.verifyNoMoreInteractions();
     }
 
-    private static Stream<HttpStatus> provideRetryableStatuses() {
-        return EnumSet.allOf(HttpStatus.class).stream().filter(s -> s.value() > HttpStatus.BAD_REQUEST.value());
-    }
-
     @ParameterizedTest
     @MethodSource("provideRetryableStatuses")
     void processWhenResponseStatusRetryable(final HttpStatus responseStatus) {
@@ -178,6 +174,10 @@ class DeltaProcessorTest {
 
     }
 
+    private static Stream<HttpStatus> provideRetryableStatuses() {
+        return EnumSet.allOf(HttpStatus.class).stream().filter(s -> s.value() != HttpStatus.BAD_REQUEST.value() && s.value() != HttpStatus.CONFLICT.value());
+    }
+
     @Test
     void processWhenClientServiceThrowsIllegalArgumentException() {
         final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID, false);
@@ -192,10 +192,6 @@ class DeltaProcessorTest {
 
         inOrder.verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
         inOrder.verifyNoMoreInteractions();
-    }
-
-    private static Stream<HttpStatus> provideNonRetryableStatuses() {
-        return Stream.of(HttpStatus.BAD_REQUEST);
     }
 
     @ParameterizedTest
@@ -213,6 +209,10 @@ class DeltaProcessorTest {
 
         inOrder.verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
         inOrder.verifyNoMoreInteractions();
+    }
+
+    private static Stream<HttpStatus> provideNonRetryableStatuses() {
+        return Stream.of(HttpStatus.BAD_REQUEST, HttpStatus.CONFLICT);
     }
 
     @Test

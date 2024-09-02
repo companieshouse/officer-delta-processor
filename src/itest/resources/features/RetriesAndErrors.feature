@@ -15,6 +15,11 @@ Feature: Retries and Errors
     When the consumer receives a message but the data api returns a 400
     Then the message should be moved to topic officer-delta-invalid
 
+  Scenario: Process message when the data api returns 409
+    Given the application is running
+    When the consumer receives a message but the data api returns a 409
+    Then the message should be moved to topic officer-delta-invalid
+
   Scenario: Process message when the data api returns 503
     Given the application is running
     When the consumer receives a message but the data api returns a 503

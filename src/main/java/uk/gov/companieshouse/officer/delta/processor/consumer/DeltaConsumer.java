@@ -5,7 +5,10 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.retrytopic.DltStrategy;
 import org.springframework.kafka.retrytopic.FixedDelayStrategy;
+import org.springframework.kafka.retrytopic.RetryTopicHeaders;
+import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.delta.ChsDelta;
@@ -42,7 +45,11 @@ public class DeltaConsumer {
     @KafkaListener(topics = "${officer.delta.processor.topic}",
             groupId = "${kafka.odp.group.name}",
             containerFactory = "listenerContainerFactory")
-    public void receiveMainMessages(Message<ChsDelta> message) {
+    public void receiveMainMessages(Message<ChsDelta> message,
+                                    @Header(name = RetryTopicHeaders.DEFAULT_HEADER_ATTEMPTS, required = false) Integer attempt,
+                                    @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
+                                    @Header(KafkaHeaders.RECEIVED_PARTITION_ID) Integer partition,
+                                    @Header(KafkaHeaders.OFFSET) Long offset) {
         var chsDelta = message.getPayload();
 
         if (Boolean.TRUE.equals(chsDelta.getIsDelete())) {

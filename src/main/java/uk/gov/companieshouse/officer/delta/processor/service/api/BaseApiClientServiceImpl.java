@@ -12,6 +12,9 @@ import java.util.Map;
 import uk.gov.companieshouse.officer.delta.processor.logging.DataMapHolder;
 
 public abstract class BaseApiClientServiceImpl {
+
+    private static final String SDK_EXCEPTION = "SDK exception";
+    
     protected Logger logger;
 
     protected BaseApiClientServiceImpl(final Logger logger) {
@@ -37,14 +40,17 @@ public abstract class BaseApiClientServiceImpl {
 
         }
         catch (URIValidationException ex) {
-            logger.errorContext(logContext, "SDK exception", ex, buildLogMap(operationName, uri));
+            logger.infoContext(logContext, SDK_EXCEPTION, buildLogMap(operationName, uri));
 
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
         } catch (ApiErrorResponseException ex) {
             Map<String, Object> logMap = buildLogMap(operationName, uri);
             logMap.put("status", ex.getStatusCode());
-            logger.errorContext(logContext, "SDK exception", ex, logMap);
-
+            if (ex.getStatusCode() == HttpStatus.BAD_REQUEST.value() || ex.getStatusCode() == HttpStatus.CONFLICT.value()) {
+                logger.errorContext(logContext, SDK_EXCEPTION, ex, logMap);
+            } else {
+                logger.infoContext(logContext, SDK_EXCEPTION, logMap);
+            }
             throw new ResponseStatusException(HttpStatus.valueOf(ex.getStatusCode()),
                     ex.getStatusMessage(), ex);
         }
