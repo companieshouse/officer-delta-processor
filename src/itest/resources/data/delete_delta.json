@@ -2,5 +2,6 @@
   "internal_id": "3102598777",
   "company_number": "09876543",
   "officer_id": "3001237435",
-  "action": "DELETE"
+  "action": "DELETE",
+  "delta_at": "20230724093435661593"
 }
