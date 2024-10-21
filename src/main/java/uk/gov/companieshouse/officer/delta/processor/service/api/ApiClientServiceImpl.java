@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.officer.delta.processor.service.api;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -72,17 +73,20 @@ public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements Ap
 
     @Override
     public ApiResponse<Void> deleteAppointment(final String logContext, final String internalId,
-            final String companyNumber) {
-        final var uri =
-                String.format("/company/%s/appointments/%s/full_record/delete",
+            final String companyNumber, String deltaAt) {
+        if (StringUtils.isBlank(deltaAt)) {
+            logger.error("Missing delta_at in request", DataMapHolder.getLogMap());
+            throw new IllegalArgumentException("delta_at null or empty");
+        }
+        final String uri = String.format("/company/%s/appointments/%s/full_record/delete",
                         companyNumber, internalId);
 
         Map<String,Object> logMap = createLogMap(companyNumber,"DELETE", uri);
         logger.infoContext(logContext, String.format("DELETE %s", uri), logMap);
 
         return executeOp(logContext, "deleteOfficer", uri,
-                getApiClient(logContext).privateDisqualificationResourceHandler()
-                        .deleteOfficer(uri));
+                getApiClient(logContext).privateDeltaResourceHandler()
+                        .deleteOfficer(uri, deltaAt));
     }
 
     private Map<String,Object> createLogMap(String companyNumber, String method, String path){
