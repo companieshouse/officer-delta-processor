@@ -67,7 +67,7 @@ import java.util.stream.Stream;
 @ExtendWith(MockitoExtension.class)
 class DeltaProcessorTest {
     private static final String CONTEXT_ID = "context_id";
-    private static final String DELTA_AT = "20140925171003950844";
+    private static final String DELTA_AT = "20230724093435661593";
 
     private static final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());
