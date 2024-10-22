@@ -1,8 +1,10 @@
 package uk.gov.companieshouse.officer.delta.processor.service.api;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -77,7 +79,14 @@ class ApiClientServiceImplTest {
 
         assertThat(response).isEqualTo(expectedResponse);
     }
+
+    @Test
+    void shouldFailDeleteOfficerWhenMissingDeltaAt() {
+        ApiClientServiceImpl apiClientServiceSpy = Mockito.spy(apiClientService);
+
+        Executable executable = () ->  apiClientServiceSpy.deleteAppointment("context_id",
+                "N-YqKNwdT_HvetusfTJ0H0jAQbA", "09876543", null);
+
+        Assertions.assertThrows(IllegalArgumentException.class, executable, "delta_at null or empty");
+    }
 }
-
-
-
