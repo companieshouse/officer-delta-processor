@@ -20,8 +20,7 @@
 
 		<ch-kafka.version>1.4.8</ch-kafka.version>
 		<kafka-models.version>1.0.31</kafka-models.version>
-<!--		<private.sdk.version>2.0.443</private.sdk.version>-->
-		<private.sdk.version>unversioned-main-8</private.sdk.version>
+		<private.sdk.version>2.0.449</private.sdk.version>
 		<spring.boot.version>2.7.14</spring.boot.version>
 
 		<!-- Logging -->
@@ -42,6 +41,7 @@
 		<!-- Maven -->
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
+		<jib-maven-plugin.version>3.4.2</jib-maven-plugin.version>
 
 		<!-- Sonar dependency -->
 		<sonar.projectKey>uk.gov.companieshouse:officer-delta-processor</sonar.projectKey>
@@ -425,8 +425,20 @@
 			<plugin>
 				<groupId>com.google.cloud.tools</groupId>
 				<artifactId>jib-maven-plugin</artifactId>
-				<version>3.3.2</version>
+				<version>3.4.3</version>
 			</plugin>
+
+			<plugin>
+				<groupId>com.google.cloud.tools</groupId>
+				<artifactId>jib-maven-plugin</artifactId>
+				<version>${jib-maven-plugin.version}</version>
+				<configuration>
+					<to>
+						<image>169942020521.dkr.ecr.eu-west-2.amazonaws.com/local/officer-delta-processor:latest</image>
+					</to>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 </project>
