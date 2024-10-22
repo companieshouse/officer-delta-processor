@@ -38,7 +38,7 @@ public class CommonSteps {
 
     private static final String DELETE_DELTA_URI =
             "/company/09876543/appointments/N-YqKNwdT_HvetusfTJ0H0jAQbA/full_record/delete";
-    private static final String DELETE_DELTA_AT = "20220925171003950844";
+    private static final String DELETE_DELTA_AT = "20230724093435661593";
     private static final String X_DELTA_AT = "X-DELTA-AT";
 
     @Value("${officer.delta.processor.topic}")
