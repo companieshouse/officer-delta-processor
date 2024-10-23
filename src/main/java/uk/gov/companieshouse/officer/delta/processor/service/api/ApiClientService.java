@@ -31,5 +31,6 @@ public interface ApiClientService {
      * @param companyNumber the company number
      * @return the api response
      */
-    ApiResponse<Void> deleteAppointment(final String logContext, final String internalId,final String companyNumber);
+    ApiResponse<Void> deleteAppointment(final String logContext, final String internalId,final String companyNumber,
+            String deltaAt);
 }

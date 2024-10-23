@@ -67,6 +67,7 @@ import java.util.stream.Stream;
 @ExtendWith(MockitoExtension.class)
 class DeltaProcessorTest {
     private static final String CONTEXT_ID = "context_id";
+    private static final String DELTA_AT = "20230724093435661593";
 
     private static final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());
@@ -225,11 +226,12 @@ class DeltaProcessorTest {
         final String expectedInternalId = TransformerUtils.encode(expectedDelete.getInternalId());
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.OK.value(), null, null);
 
-        when(apiClientService.deleteAppointment(CONTEXT_ID, expectedInternalId, expectedNumber)).thenReturn(response);
+        when(apiClientService.deleteAppointment(CONTEXT_ID, expectedInternalId, expectedNumber, DELTA_AT))
+                .thenReturn(response);
 
         testProcessor.processDelete(delta);
 
-        verify(apiClientService).deleteAppointment(CONTEXT_ID, expectedInternalId, expectedNumber);
+        verify(apiClientService).deleteAppointment(CONTEXT_ID, expectedInternalId, expectedNumber, DELTA_AT);
         verifyNoMoreInteractions(apiClientService);
         assertThat(capture.getOut()).doesNotContain("event: error");
     }

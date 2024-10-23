@@ -1,8 +1,10 @@
 package uk.gov.companieshouse.officer.delta.processor.service.api;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,6 +27,8 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class ApiClientServiceImplTest {
+
+    private static final String DELTA_AT = "20220925171003950844";
 
     @Mock
     Logger logger;
@@ -68,14 +72,21 @@ class ApiClientServiceImplTest {
                 any(PrivateOfficerDelete.class));
 
         ApiResponse<Void> response = apiClientServiceSpy.deleteAppointment("context_id",
-                "N-YqKNwdT_HvetusfTJ0H0jAQbA", "09876543");
+                "N-YqKNwdT_HvetusfTJ0H0jAQbA", "09876543", DELTA_AT);
         verify(apiClientServiceSpy).executeOp(anyString(), eq("deleteOfficer"),
                 eq("/company/09876543/appointments/N-YqKNwdT_HvetusfTJ0H0jAQbA/full_record/delete"),
                 any(PrivateOfficerDelete.class));
 
         assertThat(response).isEqualTo(expectedResponse);
     }
+
+    @Test
+    void shouldFailDeleteOfficerWhenMissingDeltaAt() {
+        ApiClientServiceImpl apiClientServiceSpy = Mockito.spy(apiClientService);
+
+        Executable executable = () ->  apiClientServiceSpy.deleteAppointment("context_id",
+                "N-YqKNwdT_HvetusfTJ0H0jAQbA", "09876543", null);
+
+        Assertions.assertThrows(IllegalArgumentException.class, executable, "delta_at null or empty");
+    }
 }
-
-
-

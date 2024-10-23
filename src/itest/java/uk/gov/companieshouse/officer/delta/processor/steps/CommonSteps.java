@@ -25,6 +25,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.delete;
 import static com.github.tomakehurst.wiremock.client.WireMock.deleteRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.put;
 import static com.github.tomakehurst.wiremock.client.WireMock.requestMadeFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
@@ -34,6 +35,11 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CommonSteps {
+
+    private static final String DELETE_DELTA_URI =
+            "/company/09876543/appointments/N-YqKNwdT_HvetusfTJ0H0jAQbA/full_record/delete";
+    private static final String DELETE_DELTA_AT = "20230724093435661593";
+    private static final String X_DELTA_AT = "X-DELTA-AT";
 
     @Value("${officer.delta.processor.topic}")
     private String mainTopic;
@@ -146,8 +152,8 @@ public class CommonSteps {
 
     @Then("a DELETE request is sent to the appointments api with the encoded Id and company number")
     public void deleteRequestIsSent() {
-        verify(1, deleteRequestedFor(urlMatching(
-                "/company/09876543/appointments/N-YqKNwdT_HvetusfTJ0H0jAQbA/full_record/delete")));
+        verify(1, deleteRequestedFor(urlMatching(DELETE_DELTA_URI))
+                .withHeader(X_DELTA_AT, equalTo(DELETE_DELTA_AT)));
     }
 
     @After
@@ -172,7 +178,8 @@ public class CommonSteps {
     }
 
     private void stubDeleteOfficer(int responseCode) {
-        stubFor(delete(urlEqualTo("/company/09876543/appointments/N-YqKNwdT_HvetusfTJ0H0jAQbA/full_record/delete"))
+        stubFor(delete(urlEqualTo(DELETE_DELTA_URI))
+                .withHeader(X_DELTA_AT, equalTo(DELETE_DELTA_AT))
                 .willReturn(aResponse().withStatus(responseCode)));
     }
 

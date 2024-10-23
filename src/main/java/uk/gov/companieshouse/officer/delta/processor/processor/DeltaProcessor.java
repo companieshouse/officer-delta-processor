@@ -99,14 +99,14 @@ public class DeltaProcessor implements Processor<ChsDelta> {
         try {
             officersDelete = objectMapper.readValue(chsDelta.getData(),
                     OfficerDeleteDelta.class);
-        final String companyNumber = officersDelete.getCompanyNumber();
-        DataMapHolder.get()
-                .companyNumber(companyNumber)
-                .officerId(officersDelete.getOfficerId())
-                .internalId(officersDelete.getInternalId());
+            final String companyNumber = officersDelete.getCompanyNumber();
+            DataMapHolder.get()
+                    .companyNumber(companyNumber)
+                    .officerId(officersDelete.getOfficerId())
+                    .internalId(officersDelete.getInternalId());
 
-        final String internalId = TransformerUtils.encode(officersDelete.getInternalId());
-            apiClientService.deleteAppointment(logContext, internalId, companyNumber);
+            final String internalId = TransformerUtils.encode(officersDelete.getInternalId());
+            apiClientService.deleteAppointment(logContext, internalId, companyNumber, officersDelete.getDeltaAt());
         } catch (ResponseStatusException e) {
             handleResponse(e, e.getStatus(), logContext, "Sending officer delete failed");
         } catch (Exception ex) {
