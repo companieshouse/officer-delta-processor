@@ -23,7 +23,7 @@ public class DeltaConsumer {
 
 
     /**
-     * Initialise the consumer
+     * Initialise the consumer.
      *
      * @param processor handles message transformation
      */
@@ -46,7 +46,8 @@ public class DeltaConsumer {
             groupId = "${kafka.odp.group.name}",
             containerFactory = "listenerContainerFactory")
     public void receiveMainMessages(Message<ChsDelta> message,
-                                    @Header(name = RetryTopicHeaders.DEFAULT_HEADER_ATTEMPTS, required = false) Integer attempt,
+                                    @Header(name = RetryTopicHeaders.DEFAULT_HEADER_ATTEMPTS,
+                                            required = false) Integer attempt,
                                     @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
                                     @Header(KafkaHeaders.RECEIVED_PARTITION) Integer partition,
                                     @Header(KafkaHeaders.OFFSET) Long offset) {

@@ -25,11 +25,15 @@ public class IdentificationTransform implements
             identification.setRegistrationNumber(source.getEea().getRegistrationNumber());
 
         } else if (source.getOtherCorporateBodyOrFirm() != null) {
-            identification.setIdentificationType(IdentificationTypeEnum.OTHER_CORPORATE_BODY_OR_FIRM);
-            identification.setLegalAuthority(source.getOtherCorporateBodyOrFirm().getLegalAuthority());
+            identification.setIdentificationType(
+                    IdentificationTypeEnum.OTHER_CORPORATE_BODY_OR_FIRM);
+            identification.setLegalAuthority(
+                    source.getOtherCorporateBodyOrFirm().getLegalAuthority());
             identification.setLegalForm(source.getOtherCorporateBodyOrFirm().getLegalForm());
-            identification.setPlaceRegistered(source.getOtherCorporateBodyOrFirm().getPlaceRegistered());
-            identification.setRegistrationNumber(source.getOtherCorporateBodyOrFirm().getRegistrationNumber());
+            identification.setPlaceRegistered(
+                    source.getOtherCorporateBodyOrFirm().getPlaceRegistered());
+            identification.setRegistrationNumber(
+                    source.getOtherCorporateBodyOrFirm().getRegistrationNumber());
 
         } else if (source.getNonEeaApi() != null) {
             identification.setIdentificationType(IdentificationTypeEnum.NON_EEA);
@@ -38,18 +42,20 @@ public class IdentificationTransform implements
             identification.setPlaceRegistered(source.getNonEeaApi().getPlaceRegistered());
             identification.setRegistrationNumber(source.getNonEeaApi().getRegistrationNumber());
 
-        } else if (source.getUKLimitedCompany() != null) {
+        } else if (source.getUkLimitedCompany() != null) {
             identification.setIdentificationType(IdentificationTypeEnum.UK_LIMITED_COMPANY);
-            identification.setLegalAuthority(source.getUKLimitedCompany().getLegalAuthority());
-            identification.setLegalForm(source.getUKLimitedCompany().getLegalForm());
-            identification.setPlaceRegistered(source.getUKLimitedCompany().getPlaceRegistered());
-            identification.setRegistrationNumber(source.getUKLimitedCompany().getRegistrationNumber());
+            identification.setLegalAuthority(source.getUkLimitedCompany().getLegalAuthority());
+            identification.setLegalForm(source.getUkLimitedCompany().getLegalForm());
+            identification.setPlaceRegistered(source.getUkLimitedCompany().getPlaceRegistered());
+            identification.setRegistrationNumber(
+                    source.getUkLimitedCompany().getRegistrationNumber());
 
         } else if (source.getRegisteredOverseasEntityCorporateManagingOfficer() != null) {
             identification.setIdentificationType(
                     IdentificationTypeEnum.REGISTERED_OVERSEAS_ENTITY_CORPORATE_MANAGING_OFFICER);
 
-            Identification roeIdentification = source.getRegisteredOverseasEntityCorporateManagingOfficer();
+            Identification roeIdentification =
+                    source.getRegisteredOverseasEntityCorporateManagingOfficer();
             identification.setLegalAuthority(roeIdentification.getLegalAuthority());
             identification.setLegalForm(roeIdentification.getLegalForm());
             identification.setPlaceRegistered(roeIdentification.getPlaceRegistered());

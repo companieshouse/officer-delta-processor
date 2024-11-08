@@ -16,6 +16,7 @@ import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OfficersItem {
+
     @JsonProperty("company_number")
     private String companyNumber;
 
@@ -83,7 +84,7 @@ public class OfficersItem {
     private AddressAPI principalOfficeAddress;
 
     @JsonProperty("responsibilities")
-   private String responsibilities;
+    private String responsibilities;
 
     @JsonProperty("contact_details")
     private ContactDetails contactDetails;
@@ -128,52 +129,53 @@ public class OfficersItem {
         this.additionalProperties.put(name, value);
     }
 
-    public void setOccupation(String occupation) {
-        this.occupation = occupation;
-    }
-
     public String getOccupation() {
         return occupation;
     }
 
-    public void setOfficerRole(String officerRole) {
-        this.officerRole = officerRole;
+    public void setOccupation(String occupation) {
+        this.occupation = occupation;
     }
 
     public String getOfficerRole() {
         return officerRole;
     }
 
-    public void setInternalId(String internalId) {
-        this.internalId = internalId;
+    public void setOfficerRole(String officerRole) {
+        this.officerRole = officerRole;
     }
 
     public String getInternalId() {
         return internalId;
     }
 
-    public void setKind(String kind) {
-        this.kind = kind;
+    public void setInternalId(String internalId) {
+        this.internalId = internalId;
     }
 
     public String getKind() {
         return kind;
     }
 
-    public void setDateOfBirth(String dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
+    public void setKind(String kind) {
+        this.kind = kind;
     }
 
     public String getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setServiceAddressSameAsRegisteredAddress(String serviceAddressSameAsRegisteredAddress) {
-        this.serviceAddressSameAsRegisteredAddress = serviceAddressSameAsRegisteredAddress;
+    public void setDateOfBirth(String dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
     }
 
     public String getServiceAddressSameAsRegisteredAddress() {
         return serviceAddressSameAsRegisteredAddress;
+    }
+
+    public void setServiceAddressSameAsRegisteredAddress(
+            String serviceAddressSameAsRegisteredAddress) {
+        this.serviceAddressSameAsRegisteredAddress = serviceAddressSameAsRegisteredAddress;
     }
 
     public String getResidentialAddressSameAsServiceAddress() {
@@ -181,16 +183,16 @@ public class OfficersItem {
     }
 
     public void setResidentialAddressSameAsServiceAddress(
-        final String residentialAddressSameAsServiceAddress) {
+            final String residentialAddressSameAsServiceAddress) {
         this.residentialAddressSameAsServiceAddress = residentialAddressSameAsServiceAddress;
-    }
-
-    public void setAppointmentDate(String appointmentDate) {
-        this.appointmentDate = appointmentDate;
     }
 
     public String getAppointmentDate() {
         return appointmentDate;
+    }
+
+    public void setAppointmentDate(String appointmentDate) {
+        this.appointmentDate = appointmentDate;
     }
 
     public String getApptDatePrefix() {
@@ -209,116 +211,116 @@ public class OfficersItem {
         this.resignationDate = resignationDate;
     }
 
-    public void setOfficerDetailId(String officerDetailId) {
-        this.officerDetailId = officerDetailId;
-    }
-
     public String getOfficerDetailId() {
         return officerDetailId;
     }
 
-    public void setChangedAt(String changedAt) {
-        this.changedAt = changedAt;
+    public void setOfficerDetailId(String officerDetailId) {
+        this.officerDetailId = officerDetailId;
     }
 
     public String getChangedAt() {
         return changedAt;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setChangedAt(String changedAt) {
+        this.changedAt = changedAt;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setHonours(String honours) {
-        this.honours = honours;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getHonours() {
         return honours;
     }
 
-    public void setMiddleName(String middleName) {
-        this.middleName = middleName;
+    public void setHonours(String honours) {
+        this.honours = honours;
     }
 
     public String getMiddleName() {
         return middleName;
     }
 
-    public void setCorporateInd(String corporateInd) {
-        this.corporateInd = corporateInd;
+    public void setMiddleName(String middleName) {
+        this.middleName = middleName;
     }
 
     public String getCorporateInd() {
         return corporateInd;
     }
 
-    public void setServiceAddress(AddressAPI serviceAddress) {
-        this.serviceAddress = serviceAddress;
+    public void setCorporateInd(String corporateInd) {
+        this.corporateInd = corporateInd;
     }
 
     public AddressAPI getServiceAddress() {
         return serviceAddress;
     }
 
-    public void setUsualResidentialAddress(AddressAPI usualResidentialAddress) {
-        this.usualResidentialAddress = usualResidentialAddress;
+    public void setServiceAddress(AddressAPI serviceAddress) {
+        this.serviceAddress = serviceAddress;
     }
 
     public AddressAPI getUsualResidentialAddress() {
         return usualResidentialAddress;
     }
 
-    public void setPrincipalOfficeAddress(AddressAPI principalOfficeAddress) {
-        this.principalOfficeAddress = principalOfficeAddress;
+    public void setUsualResidentialAddress(AddressAPI usualResidentialAddress) {
+        this.usualResidentialAddress = usualResidentialAddress;
     }
 
     public AddressAPI getPrincipalOfficeAddress() {
         return principalOfficeAddress;
     }
 
-    public void setResponsibilities(String responsibilities) {
-        this.responsibilities = responsibilities;
+    public void setPrincipalOfficeAddress(AddressAPI principalOfficeAddress) {
+        this.principalOfficeAddress = principalOfficeAddress;
     }
 
     public String getResponsibilities() {
         return responsibilities;
     }
 
-    public void setContactDetails(ContactDetails contactDetails) {
-        this.contactDetails = contactDetails;
+    public void setResponsibilities(String responsibilities) {
+        this.responsibilities = responsibilities;
     }
 
     public ContactDetails getContactDetails() {
         return contactDetails;
     }
 
-    public void setForename(String forename) {
-        this.forename = forename;
+    public void setContactDetails(ContactDetails contactDetails) {
+        this.contactDetails = contactDetails;
     }
 
     public String getForename() {
         return forename;
     }
 
-    public void setCompanyNumber(String companyNumber) {
-        this.companyNumber = companyNumber;
+    public void setForename(String forename) {
+        this.forename = forename;
     }
 
     public String getCompanyNumber() {
         return companyNumber;
     }
 
-    public void setOfficerId(String officerId) {
-        this.officerId = officerId;
+    public void setCompanyNumber(String companyNumber) {
+        this.companyNumber = companyNumber;
     }
 
     public String getOfficerId() {
         return officerId;
+    }
+
+    public void setOfficerId(String officerId) {
+        this.officerId = officerId;
     }
 
     public String getPreviousOfficerId() {
@@ -329,36 +331,36 @@ public class OfficersItem {
         this.previousOfficerId = previousOfficerId;
     }
 
-    public void setIdentification(DeltaIdentification identification) {
-        this.identification = identification;
-    }
-
     public DeltaIdentification getIdentification() {
         return identification;
     }
 
-    public void setNationality(String nationality) {
-        this.nationality = nationality;
+    public void setIdentification(DeltaIdentification identification) {
+        this.identification = identification;
     }
 
     public String getNationality() {
         return nationality;
     }
 
-    public void setSurname(String surname) {
-        this.surname = surname;
+    public void setNationality(String nationality) {
+        this.nationality = nationality;
     }
 
     public String getSurname() {
         return surname;
     }
 
-    public void setSecureDirector(String secureDirector) {
-        this.secureDirector = secureDirector;
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
     public String getSecureDirector() {
         return secureDirector;
+    }
+
+    public void setSecureDirector(String secureDirector) {
+        this.secureDirector = secureDirector;
     }
 
     public List<PreviousNameArray> getPreviousNameArray() {
@@ -369,9 +371,13 @@ public class OfficersItem {
         this.previousNameArray = previousNameArray;
     }
 
-    public String getExternalNumber() { return externalNumber; }
+    public String getExternalNumber() {
+        return externalNumber;
+    }
 
-    public void setExternalNumber(String externalNumber) { this.externalNumber = externalNumber; }
+    public void setExternalNumber(String externalNumber) {
+        this.externalNumber = externalNumber;
+    }
 
     public String getCompanyName() {
         return companyName;
@@ -390,92 +396,59 @@ public class OfficersItem {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
+    public boolean equals(final Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final OfficersItem that = (OfficersItem) o;
-        return Objects.equals(getCompanyNumber(), that.getCompanyNumber())
-                && Objects.equals(getOccupation(),
-                that.getOccupation())
-                && Objects.equals(getOfficerRole(), that.getOfficerRole())
-                && Objects.equals(getInternalId(),
-                that.getInternalId())
-                && Objects.equals(getKind(), that.getKind())
-                && Objects.equals(getDateOfBirth(),
-                that.getDateOfBirth())
-                && Objects.equals(getServiceAddressSameAsRegisteredAddress(),
-                that.getServiceAddressSameAsRegisteredAddress())
-               && Objects.equals(getResidentialAddressSameAsServiceAddress(),
-            that.getResidentialAddressSameAsServiceAddress())
-                && Objects.equals(getAppointmentDate(),
-                that.getAppointmentDate())
-                && Objects.equals(getApptDatePrefix(), that.getApptDatePrefix())
-                && Objects.equals(getResignationDate(), that.getResignationDate())
-                && Objects.equals(getOfficerDetailId(), that.getOfficerDetailId())
-                && Objects.equals(getChangedAt(), that.getChangedAt())
-                && Objects.equals(getTitle(), that.getTitle())
-                && Objects.equals(getHonours(), that.getHonours())
-                && Objects.equals(getMiddleName(), that.getMiddleName())
-                && Objects.equals(getCorporateInd(), that.getCorporateInd())
-                && Objects.equals(getServiceAddress(), that.getServiceAddress())
-                && Objects.equals(getUsualResidentialAddress(), that.getUsualResidentialAddress())
-                && Objects.equals(getPrincipalOfficeAddress(), that.getPrincipalOfficeAddress())
-                && Objects.equals(getResponsibilities(), that.getResponsibilities())
-                && Objects.equals(getContactDetails(), that.getContactDetails())
-                && Objects.equals(getForename(), that.getForename())
-                && Objects.equals(getOfficerId(), that.getOfficerId())
-                && Objects.equals(getPreviousOfficerId(), that.getPreviousOfficerId())
-                && Objects.equals(getIdentification(), that.getIdentification())
-                && Objects.equals(getNationality(), that.getNationality())
-                && Objects.equals(getSurname(), that.getSurname())
-                && Objects.equals(getExternalNumber(), that.getExternalNumber())
-                && Objects.equals(getSecureDirector(), that.getSecureDirector())
-                && Objects.equals(getPreviousNameArray(), that.getPreviousNameArray())
-                && Objects.equals(getAdditionalProperties(), that.getAdditionalProperties())
-                && Objects.equals(getCompanyName(), that.getCompanyName())
-                && Objects.equals(getCompanyStatus(), that.getCompanyStatus());
+        final OfficersItem that = (OfficersItem) obj;
+        return Objects.equals(getCompanyNumber(), that.getCompanyNumber()) && Objects.equals(
+                getOccupation(), that.getOccupation()) && Objects.equals(getOfficerRole(),
+                that.getOfficerRole()) && Objects.equals(getInternalId(), that.getInternalId())
+                && Objects.equals(getKind(), that.getKind()) && Objects.equals(getDateOfBirth(),
+                that.getDateOfBirth()) && Objects.equals(getServiceAddressSameAsRegisteredAddress(),
+                that.getServiceAddressSameAsRegisteredAddress()) && Objects.equals(
+                getResidentialAddressSameAsServiceAddress(),
+                that.getResidentialAddressSameAsServiceAddress()) && Objects.equals(
+                getAppointmentDate(), that.getAppointmentDate()) && Objects.equals(
+                getApptDatePrefix(), that.getApptDatePrefix()) && Objects.equals(
+                getResignationDate(), that.getResignationDate()) && Objects.equals(
+                getOfficerDetailId(), that.getOfficerDetailId()) && Objects.equals(getChangedAt(),
+                that.getChangedAt()) && Objects.equals(getTitle(), that.getTitle())
+                && Objects.equals(getHonours(), that.getHonours()) && Objects.equals(
+                getMiddleName(), that.getMiddleName()) && Objects.equals(getCorporateInd(),
+                that.getCorporateInd()) && Objects.equals(getServiceAddress(),
+                that.getServiceAddress()) && Objects.equals(getUsualResidentialAddress(),
+                that.getUsualResidentialAddress()) && Objects.equals(getPrincipalOfficeAddress(),
+                that.getPrincipalOfficeAddress()) && Objects.equals(getResponsibilities(),
+                that.getResponsibilities()) && Objects.equals(getContactDetails(),
+                that.getContactDetails()) && Objects.equals(getForename(), that.getForename())
+                && Objects.equals(getOfficerId(), that.getOfficerId()) && Objects.equals(
+                getPreviousOfficerId(), that.getPreviousOfficerId()) && Objects.equals(
+                getIdentification(), that.getIdentification()) && Objects.equals(getNationality(),
+                that.getNationality()) && Objects.equals(getSurname(), that.getSurname())
+                && Objects.equals(getExternalNumber(), that.getExternalNumber()) && Objects.equals(
+                getSecureDirector(), that.getSecureDirector()) && Objects.equals(
+                getPreviousNameArray(), that.getPreviousNameArray()) && Objects.equals(
+                getAdditionalProperties(), that.getAdditionalProperties()) && Objects.equals(
+                getCompanyName(), that.getCompanyName()) && Objects.equals(getCompanyStatus(),
+                that.getCompanyStatus());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getCompanyNumber(),
-                getOccupation(),
-                getOfficerRole(),
-                getInternalId(),
-                getKind(),
-                getDateOfBirth(),
-                getServiceAddressSameAsRegisteredAddress(),
-                getResidentialAddressSameAsServiceAddress(),
-                getAppointmentDate(),
-                getApptDatePrefix(),
-                getResignationDate(),
-                getOfficerDetailId(),
-                getChangedAt(),
-                getTitle(),
-                getHonours(),
-                getMiddleName(),
-                getCorporateInd(),
-                getServiceAddress(),
-                getUsualResidentialAddress(),
-                getPrincipalOfficeAddress(),
-                getResponsibilities(),
-                getContactDetails(),
-                getForename(),
-                getOfficerId(),
-                getPreviousOfficerId(),
-                getIdentification(),
-                getNationality(),
-                getSurname(),
-                getExternalNumber(),
-                getSecureDirector(),
-                getPreviousNameArray(),
-                getAdditionalProperties(),
-                getCompanyName(),
-                getCompanyStatus());
+        return Objects.hash(getCompanyNumber(), getOccupation(), getOfficerRole(), getInternalId(),
+                getKind(), getDateOfBirth(), getServiceAddressSameAsRegisteredAddress(),
+                getResidentialAddressSameAsServiceAddress(), getAppointmentDate(),
+                getApptDatePrefix(), getResignationDate(), getOfficerDetailId(), getChangedAt(),
+                getTitle(), getHonours(), getMiddleName(), getCorporateInd(), getServiceAddress(),
+                getUsualResidentialAddress(), getPrincipalOfficeAddress(), getResponsibilities(),
+                getContactDetails(), getForename(), getOfficerId(), getPreviousOfficerId(),
+                getIdentification(), getNationality(), getSurname(), getExternalNumber(),
+                getSecureDirector(), getPreviousNameArray(), getAdditionalProperties(),
+                getCompanyName(), getCompanyStatus());
     }
 
     @Override

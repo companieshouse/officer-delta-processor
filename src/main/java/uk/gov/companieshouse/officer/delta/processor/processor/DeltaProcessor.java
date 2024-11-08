@@ -5,6 +5,9 @@ import static uk.gov.companieshouse.officer.delta.processor.tranformer.Transform
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,20 +27,32 @@ import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientService;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.AppointmentTransform;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 
+/**
+ * The type Delta processor.
+ */
 @Component
 public class DeltaProcessor implements Processor<ChsDelta> {
-    public static final Pattern PARSE_MESSAGE_PATTERN = Pattern.compile("Source.*line", Pattern.DOTALL);
+
+    /**
+     * The constant PARSE_MESSAGE_PATTERN.
+     */
+    public static final Pattern PARSE_MESSAGE_PATTERN = Pattern.compile("Source.*line",
+            Pattern.DOTALL);
     private static final Logger logger = LoggerFactory.getLogger(NAMESPACE);
 
     private final AppointmentTransform transformer;
     private final ApiClientService apiClientService;
     private final ObjectMapper objectMapper;
 
+    /**
+     * Instantiates a new Delta processor.
+     *
+     * @param transformer      the transformer
+     * @param apiClientService the api client service
+     * @param objectMapper     the object mapper
+     */
     @Autowired
     public DeltaProcessor(AppointmentTransform transformer, ApiClientService apiClientService,
             ObjectMapper objectMapper) {
@@ -56,40 +71,40 @@ public class DeltaProcessor implements Processor<ChsDelta> {
             final List<OfficersItem> officersList = officers.getOfficers();
 
             for (OfficersItem officer : officersList) {
-                DataMapHolder.get()
-                        .companyNumber(officer.getCompanyNumber())
-                        .officerId(officer.getOfficerId())
-                        .internalId(officer.getInternalId());
+                DataMapHolder.get().companyNumber(officer.getCompanyNumber())
+                        .officerId(officer.getOfficerId()).internalId(officer.getInternalId());
 
-                FullRecordCompanyOfficerApi appointmentAPI = transformer.transform(officer);
-                appointmentAPI
-                        .getInternalData()
+                FullRecordCompanyOfficerApi appointmentApi = transformer.transform(officer);
+                appointmentApi.getInternalData()
                         .setDeltaAt(parseOffsetDateTime("deltaAt", officers.getDeltaAt()));
 
-                apiClientService.putAppointment(logContext, officer.getCompanyNumber(), appointmentAPI);
+                apiClientService.putAppointment(logContext, officer.getCompanyNumber(),
+                        appointmentApi);
             }
-        }
-        catch (JsonProcessingException e) {
-            /* IMPORTANT: do not propagate the original cause as it contains the full source JSON with
+        } catch (JsonProcessingException ex) {
+            /* IMPORTANT: do not propagate the original cause as it contains the full source JSON
+             with
              * potentially sensitive data.
              */
-            final String cleanMessage = PARSE_MESSAGE_PATTERN.matcher(e.getMessage()).replaceAll("Source line");
-            final NonRetryableErrorException cause = new NonRetryableErrorException(cleanMessage, null);
+            final String cleanMessage = PARSE_MESSAGE_PATTERN.matcher(ex.getMessage())
+                    .replaceAll("Source line");
+            final NonRetryableErrorException cause = new NonRetryableErrorException(cleanMessage,
+                    null);
             logger.errorContext(logContext,
-                    "Unable to read JSON from delta: " + ExceptionUtils.getRootCauseMessage(cause), cause,
-                    DataMapHolder.getLogMap());
+                    "Unable to read JSON from delta: " + ExceptionUtils.getRootCauseMessage(cause),
+                    cause, DataMapHolder.getLogMap());
 
             throw new NonRetryableErrorException("Unable to JSON parse CHSDelta", cause);
-        }
-        catch (ResponseStatusException e) {
-            handleResponse(e, e.getStatusCode(), logContext, "Sending officer data failed");
-        }
-        catch (IllegalArgumentException e) {
-            // Workaround for Docker router. When service is unavailable: "IllegalArgumentException: expected numeric
-            // type but got class uk.gov.companieshouse.api.error.ApiErrorResponse" is thrown when the SDK parses
+        } catch (ResponseStatusException ex) {
+            handleResponse(ex, ex.getStatusCode(), logContext, "Sending officer data failed");
+        } catch (IllegalArgumentException ex) {
+            // Workaround for Docker router. When service is unavailable:
+            // "IllegalArgumentException: expected numeric
+            // type but got class uk.gov.companieshouse.api.error.ApiErrorResponse" is thrown
+            // when the SDK parses
             // ApiErrorResponseException.
             logger.info("Failed to process officer delta", DataMapHolder.getLogMap());
-            throw new RetryableErrorException("Failed to send data for officer, retry", e);
+            throw new RetryableErrorException("Failed to send data for officer, retry", ex);
         }
     }
 
@@ -98,35 +113,33 @@ public class DeltaProcessor implements Processor<ChsDelta> {
         final String logContext = chsDelta.getContextId();
         OfficerDeleteDelta officersDelete;
         try {
-            officersDelete = objectMapper.readValue(chsDelta.getData(),
-                    OfficerDeleteDelta.class);
+            officersDelete = objectMapper.readValue(chsDelta.getData(), OfficerDeleteDelta.class);
             final String companyNumber = officersDelete.getCompanyNumber();
-            DataMapHolder.get()
-                    .companyNumber(companyNumber)
+            DataMapHolder.get().companyNumber(companyNumber)
                     .officerId(officersDelete.getOfficerId())
                     .internalId(officersDelete.getInternalId());
 
             final String internalId = TransformerUtils.encode(officersDelete.getInternalId());
-            apiClientService.deleteAppointment(logContext, internalId, companyNumber, officersDelete.getDeltaAt());
-        } catch (ResponseStatusException e) {
-            handleResponse(e, e.getStatusCode(), logContext, "Sending officer delete failed");
+            apiClientService.deleteAppointment(logContext, internalId, companyNumber,
+                    officersDelete.getDeltaAt());
+        } catch (ResponseStatusException ex) {
+            handleResponse(ex, ex.getStatusCode(), logContext, "Sending officer delete failed");
         } catch (Exception ex) {
-            logger.error("Error when extracting officers delete delta", ex, DataMapHolder.getLogMap());
-            throw new NonRetryableErrorException(
-                    "Error when extracting officers delete delta", ex);
+            logger.error("Error when extracting officers delete delta", ex,
+                    DataMapHolder.getLogMap());
+            throw new NonRetryableErrorException("Error when extracting officers delete delta", ex);
         }
     }
 
-    private void handleResponse(final ResponseStatusException ex, final HttpStatusCode httpStatus, final String logContext,
-            final String msg)
+    private void handleResponse(final ResponseStatusException ex, final HttpStatusCode httpStatus,
+            final String logContext, final String msg)
             throws NonRetryableErrorException, RetryableErrorException {
         Map<String, Object> logMap = DataMapHolder.getLogMap();
         logMap.put("status", httpStatus.toString());
         if (HttpStatus.BAD_REQUEST == httpStatus || HttpStatus.CONFLICT == httpStatus) {
             logger.errorContext(logContext, msg, ex, logMap);
             throw new NonRetryableErrorException(msg, ex);
-        }
-        else {
+        } else {
             // any other client or server status is retryable
             logger.infoContext(logContext, msg + ", retry", logMap);
             throw new RetryableErrorException(msg, ex);

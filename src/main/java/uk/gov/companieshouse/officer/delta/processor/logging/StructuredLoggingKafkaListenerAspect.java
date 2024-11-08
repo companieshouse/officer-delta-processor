@@ -28,24 +28,22 @@ class StructuredLoggingKafkaListenerAspect {
 
     private final int maxAttempts;
 
-    public StructuredLoggingKafkaListenerAspect(@Value("${officer.delta.processor.attempts}") int maxAttempts) {
+    public StructuredLoggingKafkaListenerAspect(
+            @Value("${officer.delta.processor.attempts}") int maxAttempts) {
         this.maxAttempts = maxAttempts;
     }
 
     @Around("@annotation(org.springframework.kafka.annotation.KafkaListener)")
-    public Object manageStructuredLogging(ProceedingJoinPoint joinPoint)
-        throws Throwable {
+    public Object manageStructuredLogging(ProceedingJoinPoint joinPoint) throws Throwable {
 
         int retryCount = 0;
         try {
             Message<?> message = (Message<?>) joinPoint.getArgs()[0];
             retryCount = Optional.ofNullable((Integer) joinPoint.getArgs()[1]).orElse(1) - 1;
-            DataMapHolder.initialise(extractContextId(message.getPayload())
-                    .orElse(UUID.randomUUID().toString()));
+            DataMapHolder.initialise(
+                    extractContextId(message.getPayload()).orElse(UUID.randomUUID().toString()));
 
-            DataMapHolder.get()
-                    .retryCount(retryCount)
-                    .topic((String) joinPoint.getArgs()[2])
+            DataMapHolder.get().retryCount(retryCount).topic((String) joinPoint.getArgs()[2])
                     .partition((Integer) joinPoint.getArgs()[3])
                     .offset((Long) joinPoint.getArgs()[4]);
 
@@ -58,12 +56,11 @@ class StructuredLoggingKafkaListenerAspect {
             return result;
         } catch (RetryableErrorException ex) {
             // maxAttempts includes first attempt which is not a retry
-            if (retryCount >= maxAttempts -1){
+            if (retryCount >= maxAttempts - 1) {
                 LOGGER.error("Max retry attempts reached", ex, DataMapHolder.getLogMap());
             } else {
-                LOGGER.info(String.format(EXCEPTION_MESSAGE,
-                                ex.getClass().getSimpleName(), Arrays.toString(ex.getStackTrace())),
-                        DataMapHolder.getLogMap());
+                LOGGER.info(String.format(EXCEPTION_MESSAGE, ex.getClass().getSimpleName(),
+                        Arrays.toString(ex.getStackTrace())), DataMapHolder.getLogMap());
             }
             throw ex;
         } catch (Exception ex) {
@@ -76,7 +73,7 @@ class StructuredLoggingKafkaListenerAspect {
 
     private Optional<String> extractContextId(Object payload) {
         if (payload instanceof ChsDelta) {
-            return Optional.of(((ChsDelta)payload).getContextId());
+            return Optional.of(((ChsDelta) payload).getContextId());
         }
         return Optional.empty();
     }

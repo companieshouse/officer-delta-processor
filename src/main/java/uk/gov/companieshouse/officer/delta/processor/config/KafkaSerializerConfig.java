@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.officer.delta.processor.config;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -22,9 +24,6 @@ import uk.gov.companieshouse.officer.delta.processor.exception.RetryableTopicErr
 import uk.gov.companieshouse.officer.delta.processor.serialization.ChsDeltaDeserializer;
 import uk.gov.companieshouse.officer.delta.processor.serialization.ChsDeltaSerializer;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Configuration
 @EnableKafka
 @Profile("!test")
@@ -40,9 +39,9 @@ public class KafkaSerializerConfig {
      * Constructor.
      */
     public KafkaSerializerConfig(ChsDeltaDeserializer chsDeltaDeserializer,
-                                 ChsDeltaSerializer chsDeltaSerializer,
-                                 @Value("${kafka.broker.addr}") String bootstrapServers,
-                                 @Value("${kafka.listener.concurrency}") Integer listenerConcurrency) {
+            ChsDeltaSerializer chsDeltaSerializer,
+            @Value("${kafka.broker.addr}") String bootstrapServers,
+            @Value("${kafka.listener.concurrency}") Integer listenerConcurrency) {
         this.chsDeltaDeserializer = chsDeltaDeserializer;
         this.chsDeltaSerializer = chsDeltaSerializer;
         this.bootstrapServers = bootstrapServers;
@@ -70,8 +69,7 @@ public class KafkaSerializerConfig {
         props.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
                 RetryableTopicErrorInterceptor.class.getName());
 
-        return new DefaultKafkaProducerFactory<>(
-                props, new StringSerializer(), chsDeltaSerializer);
+        return new DefaultKafkaProducerFactory<>(props, new StringSerializer(), chsDeltaSerializer);
     }
 
     @Bean
@@ -84,8 +82,8 @@ public class KafkaSerializerConfig {
      */
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, ChsDelta> listenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, ChsDelta> factory
-                = new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, ChsDelta> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(kafkaConsumerFactory());
         factory.setConcurrency(listenerConcurrency);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);

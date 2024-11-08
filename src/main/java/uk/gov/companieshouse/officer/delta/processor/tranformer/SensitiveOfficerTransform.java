@@ -17,11 +17,12 @@ import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithReside
 @Component
 public class SensitiveOfficerTransform implements Transformative<OfficersItem, SensitiveData> {
 
-    UsualResidentialAddressTransform usualResidentialAddressTransform;
     private static final String DOB_IDENTIFIER = "dateOfBirth";
+    UsualResidentialAddressTransform usualResidentialAddressTransform;
 
     @Autowired
-    public SensitiveOfficerTransform(UsualResidentialAddressTransform usualResidentialAddressTransform) {
+    public SensitiveOfficerTransform(
+            UsualResidentialAddressTransform usualResidentialAddressTransform) {
         this.usualResidentialAddressTransform = usualResidentialAddressTransform;
     }
 
@@ -31,13 +32,15 @@ public class SensitiveOfficerTransform implements Transformative<OfficersItem, S
     }
 
     @Override
-    public SensitiveData transform(OfficersItem source, SensitiveData officer) throws NonRetryableErrorException {
+    public SensitiveData transform(OfficersItem source, SensitiveData officer)
+            throws NonRetryableErrorException {
         final String officerRole = lookupOfficerRole(source.getKind(), source.getCorporateInd());
         if (RolesWithResidentialAddress.includes(officerRole)) {
-        officer.setUsualResidentialAddress(usualResidentialAddressTransform.transform(source.getUsualResidentialAddress()));
-            officer.setResidentialAddressIsSameAsServiceAddress(
-                    BooleanUtils.toBooleanObject(source.getResidentialAddressSameAsServiceAddress()));
-         }
+            officer.setUsualResidentialAddress(usualResidentialAddressTransform.transform(
+                    source.getUsualResidentialAddress()));
+            officer.setResidentialAddressIsSameAsServiceAddress(BooleanUtils.toBooleanObject(
+                    source.getResidentialAddressSameAsServiceAddress()));
+        }
 
         if (RolesWithDateOfBirth.includes(officerRole) && isNotEmpty(source.getDateOfBirth())) {
             var dobFromString = parseLocalDate(DOB_IDENTIFIER, source.getDateOfBirth());

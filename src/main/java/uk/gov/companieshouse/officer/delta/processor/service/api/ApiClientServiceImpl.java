@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.officer.delta.processor.service.api;
 
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
@@ -10,8 +11,6 @@ import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
 import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.logging.Logger;
-
-import java.util.Map;
 import uk.gov.companieshouse.officer.delta.processor.logging.DataMapHolder;
 
 /**
@@ -58,17 +57,17 @@ public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements Ap
     }
 
     @Override
-    public ApiResponse<Void> putAppointment(final String logContext, String companyNumber, FullRecordCompanyOfficerApi appointment) {
-        final var uri =
-                String.format("/company/%s/appointments/%s/full_record", companyNumber, appointment.getExternalData().getAppointmentId());
+    public ApiResponse<Void> putAppointment(final String logContext, String companyNumber,
+            FullRecordCompanyOfficerApi appointment) {
+        final var uri = String.format("/company/%s/appointments/%s/full_record", companyNumber,
+                appointment.getExternalData().getAppointmentId());
 
-        Map<String,Object> logMap = createLogMap(companyNumber,"PUT", uri);
+        Map<String, Object> logMap = createLogMap(companyNumber, "PUT", uri);
         logger.infoContext(logContext, String.format("PUT %s", uri), logMap);
 
         return executeOp(logContext, "putCompanyAppointment", uri,
                 getApiClient(logContext).privateDeltaCompanyAppointmentResourceHandler()
-                        .putAppointment()
-                        .upsert(uri, appointment));
+                        .putAppointment().upsert(uri, appointment));
     }
 
     @Override
@@ -79,20 +78,19 @@ public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements Ap
             throw new IllegalArgumentException("delta_at null or empty");
         }
         final String uri = String.format("/company/%s/appointments/%s/full_record/delete",
-                        companyNumber, internalId);
+                companyNumber, internalId);
 
-        Map<String,Object> logMap = createLogMap(companyNumber,"DELETE", uri);
+        Map<String, Object> logMap = createLogMap(companyNumber, "DELETE", uri);
         logger.infoContext(logContext, String.format("DELETE %s", uri), logMap);
 
         return executeOp(logContext, "deleteOfficer", uri,
-                getApiClient(logContext).privateDeltaResourceHandler()
-                        .deleteOfficer(uri, deltaAt));
+                getApiClient(logContext).privateDeltaResourceHandler().deleteOfficer(uri, deltaAt));
     }
 
-    private Map<String,Object> createLogMap(String companyNumber, String method, String path){
+    private Map<String, Object> createLogMap(String companyNumber, String method, String path) {
         final Map<String, Object> logMap = DataMapHolder.getLogMap();
         logMap.put("company_number", companyNumber);
-        logMap.put("method",method);
+        logMap.put("method", method);
         logMap.put("path", path);
         logMap.put("request_id", DataMapHolder.getRequestId());
         return logMap;
