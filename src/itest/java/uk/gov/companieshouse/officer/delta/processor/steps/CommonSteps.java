@@ -20,6 +20,7 @@ import uk.gov.companieshouse.logging.Logger;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.StreamSupport;
+import uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
@@ -36,8 +37,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class CommonSteps {
 
+    private static final String ENCODED_OFFICER_ID = TransformerUtils.encode("3001237435");
     private static final String DELETE_DELTA_URI =
-            "/company/09876543/appointments/N-YqKNwdT_HvetusfTJ0H0jAQbA/full_record/delete";
+            String.format("/company/09876543/appointments/N-YqKNwdT_HvetusfTJ0H0jAQbA/full_record/%s", ENCODED_OFFICER_ID);
     private static final String DELETE_DELTA_AT = "20230724093435661593";
     private static final String X_DELTA_AT = "X-DELTA-AT";
 
