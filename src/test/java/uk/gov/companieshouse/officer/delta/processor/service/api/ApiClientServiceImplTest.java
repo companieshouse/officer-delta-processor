@@ -1,92 +1,224 @@
 package uk.gov.companieshouse.officer.delta.processor.service.api;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.appointment.ExternalData;
 import uk.gov.companieshouse.api.appointment.FullRecordCompanyOfficerApi;
+import uk.gov.companieshouse.api.error.ApiErrorResponseException;
+import uk.gov.companieshouse.api.handler.delta.PrivateDeltaResourceHandler;
 import uk.gov.companieshouse.api.handler.delta.company.appointment.request.PrivateOfficerDelete;
 import uk.gov.companieshouse.api.handler.delta.company.appointment.request.PrivateOfficersUpsert;
-import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.logging.Logger;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
-
+import uk.gov.companieshouse.api.handler.delta.company.appointment.request.PrivateOfficersUpsertResourceHandler;
+import uk.gov.companieshouse.api.handler.exception.URIValidationException;
+import uk.gov.companieshouse.officer.delta.processor.apiclient.InternalApiClientFactory;
+import uk.gov.companieshouse.officer.delta.processor.apiclient.ResponseHandler;
+import uk.gov.companieshouse.officer.delta.processor.model.DeleteAppointmentParameters;
 
 @ExtendWith(MockitoExtension.class)
 class ApiClientServiceImplTest {
 
     private static final String DELTA_AT = "20220925171003950844";
+    private static final String APPOINTMENT_ID = "appointmentId";
+    private static final String OFFICER_ID = "officerId";
+    private static final String COMPANY_NUMBER = "12345678";
 
-    @Mock
-    Logger logger;
-
+    @InjectMocks
     private ApiClientServiceImpl apiClientService;
 
-    @BeforeEach
-    void setup() {
-        apiClientService = new ApiClientServiceImpl(logger);
-        ReflectionTestUtils.setField(apiClientService, "chsApiKey", "apiKey");
-        ReflectionTestUtils.setField(apiClientService, "apiUrl", "https://api.companieshouse.gov.uk");
-    }
+    @Mock
+    private InternalApiClientFactory internalApiClientFactory;
+    @Mock
+    private ResponseHandler responseHandler;
+
+    @Mock
+    private FullRecordCompanyOfficerApi appointment;
+    @Mock
+    private InternalApiClient client;
+    @Mock
+    private PrivateDeltaResourceHandler privateDeltaResourceHandler;
+    @Mock
+    private PrivateOfficersUpsertResourceHandler privateOfficersUpsertResourceHandler;
+    @Mock
+    private PrivateOfficersUpsert privateOfficersUpsert;
+    @Mock
+    private PrivateOfficerDelete privateOfficerDelete;
 
     @Test
     void putAppointment() {
-        final ApiResponse<Void> expectedResponse = new ApiResponse<>(HttpStatus.OK.value(), null, null);
-        ApiClientServiceImpl apiClientServiceSpy = Mockito.spy(apiClientService);
-        doReturn(expectedResponse).when(apiClientServiceSpy).executeOp(anyString(), anyString(),
-                anyString(),
-                any(PrivateOfficersUpsert.class));
-        var appointmentApi = new FullRecordCompanyOfficerApi();
-        ExternalData externalData = new ExternalData();
-        appointmentApi.setExternalData(externalData);
-        appointmentApi.getExternalData().setAppointmentId("3102598777");
-        ApiResponse<Void> response = apiClientServiceSpy.putAppointment("context_id",
-                "09876543",
-                appointmentApi);
-        verify(apiClientServiceSpy).executeOp(anyString(), eq("putCompanyAppointment"),
-                eq("/company/09876543/appointments/3102598777/full_record"),
-                any(PrivateOfficersUpsert.class));
+        // given
+        when(appointment.getExternalData()).thenReturn(new ExternalData().appointmentId(APPOINTMENT_ID));
+        when(internalApiClientFactory.get()).thenReturn(client);
+        when(client.privateDeltaCompanyAppointmentResourceHandler()).thenReturn(privateDeltaResourceHandler);
+        when(privateDeltaResourceHandler.putAppointment()).thenReturn(privateOfficersUpsertResourceHandler);
+        when(privateOfficersUpsertResourceHandler.upsert(anyString(), any())).thenReturn(privateOfficersUpsert);
 
-        assertThat(response).isEqualTo(expectedResponse);
+        final String expectedUri = String.format("/company/%s/appointments/%s/full_record", COMPANY_NUMBER,
+                APPOINTMENT_ID);
+
+        // when
+        apiClientService.putAppointment(COMPANY_NUMBER, appointment);
+
+        // then
+        verify(privateOfficersUpsertResourceHandler).upsert(expectedUri, appointment);
+        verifyNoInteractions(responseHandler);
     }
 
     @Test
-    void deleteDisqualification() {
-        final ApiResponse<Void> expectedResponse = new ApiResponse<>(HttpStatus.OK.value(), null, null);
-        ApiClientServiceImpl apiClientServiceSpy = Mockito.spy(apiClientService);
-        doReturn(expectedResponse).when(apiClientServiceSpy).executeOp(anyString(), anyString(),
-                anyString(),
-                any(PrivateOfficerDelete.class));
+    void shouldCallResponseHandlerWhenApiErrorResponseExceptionCaughtDuringPUT() throws Exception {
+        // given
+        when(appointment.getExternalData()).thenReturn(new ExternalData().appointmentId(APPOINTMENT_ID));
+        when(internalApiClientFactory.get()).thenReturn(client);
+        when(client.privateDeltaCompanyAppointmentResourceHandler()).thenReturn(privateDeltaResourceHandler);
+        when(privateDeltaResourceHandler.putAppointment()).thenReturn(privateOfficersUpsertResourceHandler);
+        when(privateOfficersUpsertResourceHandler.upsert(anyString(), any())).thenReturn(privateOfficersUpsert);
+        when(privateOfficersUpsert.execute()).thenThrow(ApiErrorResponseException.class);
 
-        ApiResponse<Void> response = apiClientServiceSpy.deleteAppointment("context_id",
-                "N-YqKNwdT_HvetusfTJ0H0jAQbA", "09876543", DELTA_AT);
-        verify(apiClientServiceSpy).executeOp(anyString(), eq("deleteOfficer"),
-                eq("/company/09876543/appointments/N-YqKNwdT_HvetusfTJ0H0jAQbA/full_record/delete"),
-                any(PrivateOfficerDelete.class));
+        final String expectedUri = String.format("/company/%s/appointments/%s/full_record", COMPANY_NUMBER,
+                APPOINTMENT_ID);
+        // when
+        apiClientService.putAppointment(COMPANY_NUMBER, appointment);
 
-        assertThat(response).isEqualTo(expectedResponse);
+        // then
+        verify(privateOfficersUpsertResourceHandler).upsert(expectedUri, appointment);
+        verify(responseHandler).handle(any(ApiErrorResponseException.class));
+        verify(responseHandler, times(0)).handle(any(URIValidationException.class));
     }
 
     @Test
-    void shouldFailDeleteOfficerWhenMissingDeltaAt() {
-        ApiClientServiceImpl apiClientServiceSpy = Mockito.spy(apiClientService);
+    void shouldCallResponseHandlerWhenURIValidationExceptionCaughtDuringPUT() throws Exception {
+        // given
+        when(appointment.getExternalData()).thenReturn(new ExternalData().appointmentId(APPOINTMENT_ID));
+        when(internalApiClientFactory.get()).thenReturn(client);
+        when(client.privateDeltaCompanyAppointmentResourceHandler()).thenReturn(privateDeltaResourceHandler);
+        when(privateDeltaResourceHandler.putAppointment()).thenReturn(privateOfficersUpsertResourceHandler);
+        when(privateOfficersUpsertResourceHandler.upsert(anyString(), any())).thenReturn(privateOfficersUpsert);
+        when(privateOfficersUpsert.execute()).thenThrow(URIValidationException.class);
 
-        Executable executable = () ->  apiClientServiceSpy.deleteAppointment("context_id",
-                "N-YqKNwdT_HvetusfTJ0H0jAQbA", "09876543", null);
+        final String expectedUri = String.format("/company/%s/appointments/%s/full_record", COMPANY_NUMBER,
+                APPOINTMENT_ID);
+        // when
+        apiClientService.putAppointment(COMPANY_NUMBER, appointment);
 
-        Assertions.assertThrows(IllegalArgumentException.class, executable, "delta_at null or empty");
+        // then
+        verify(privateOfficersUpsertResourceHandler).upsert(expectedUri, appointment);
+        verify(responseHandler).handle(any(URIValidationException.class));
+        verify(responseHandler, times(0)).handle(any(ApiErrorResponseException.class));
+    }
+
+    @Test
+    void deleteOfficer() {
+        // given
+        when(internalApiClientFactory.get()).thenReturn(client);
+        when(client.privateDeltaResourceHandler()).thenReturn(privateDeltaResourceHandler);
+        when(privateDeltaResourceHandler.deleteOfficer(anyString(), anyString())).thenReturn(privateOfficerDelete);
+
+        DeleteAppointmentParameters deleteAppointmentParameters = DeleteAppointmentParameters.builder()
+                .encodedOfficerId(OFFICER_ID)
+                .deltaAt(DELTA_AT)
+                .encodedInternalId(APPOINTMENT_ID)
+                .companyNumber(COMPANY_NUMBER)
+                .build();
+
+        final String expectedUri = String.format("/company/%s/appointments/%s/full_record/%s", COMPANY_NUMBER,
+                APPOINTMENT_ID, OFFICER_ID);
+
+        // when
+        apiClientService.deleteAppointment(deleteAppointmentParameters);
+
+        // then
+        verify(privateDeltaResourceHandler).deleteOfficer(expectedUri, DELTA_AT);
+        verifyNoInteractions(responseHandler);
+    }
+
+    @Test
+    void shouldCallResponseHandlerWhenApiErrorResponseExceptionCaughtDuringDELETE() throws Exception {
+        // given
+        when(internalApiClientFactory.get()).thenReturn(client);
+        when(client.privateDeltaResourceHandler()).thenReturn(privateDeltaResourceHandler);
+        when(privateDeltaResourceHandler.deleteOfficer(anyString(), anyString())).thenReturn(privateOfficerDelete);
+        when(privateOfficerDelete.execute()).thenThrow(ApiErrorResponseException.class);
+
+        DeleteAppointmentParameters deleteAppointmentParameters = DeleteAppointmentParameters.builder()
+                .encodedOfficerId(OFFICER_ID)
+                .deltaAt(DELTA_AT)
+                .encodedInternalId(APPOINTMENT_ID)
+                .companyNumber(COMPANY_NUMBER)
+                .build();
+
+        final String expectedUri = String.format("/company/%s/appointments/%s/full_record/%s", COMPANY_NUMBER,
+                APPOINTMENT_ID, OFFICER_ID);
+
+        // when
+        apiClientService.deleteAppointment(deleteAppointmentParameters);
+
+        // then
+        verify(privateDeltaResourceHandler).deleteOfficer(expectedUri, DELTA_AT);
+        verify(responseHandler).handle(any(ApiErrorResponseException.class));
+        verify(responseHandler, times(0)).handle(any(URIValidationException.class));
+    }
+
+    @Test
+    void shouldCallResponseHandlerWhenURIValidationExceptionCaughtDuringDELETE() throws Exception {
+        // given
+        when(internalApiClientFactory.get()).thenReturn(client);
+        when(client.privateDeltaResourceHandler()).thenReturn(privateDeltaResourceHandler);
+        when(privateDeltaResourceHandler.deleteOfficer(anyString(), anyString())).thenReturn(privateOfficerDelete);
+        when(privateOfficerDelete.execute()).thenThrow(URIValidationException.class);
+
+        DeleteAppointmentParameters deleteAppointmentParameters = DeleteAppointmentParameters.builder()
+                .encodedOfficerId(OFFICER_ID)
+                .deltaAt(DELTA_AT)
+                .encodedInternalId(APPOINTMENT_ID)
+                .companyNumber(COMPANY_NUMBER)
+                .build();
+
+        final String expectedUri = String.format("/company/%s/appointments/%s/full_record/%s", COMPANY_NUMBER,
+                APPOINTMENT_ID, OFFICER_ID);
+
+        // when
+        apiClientService.deleteAppointment(deleteAppointmentParameters);
+
+        // then
+        verify(privateDeltaResourceHandler).deleteOfficer(expectedUri, DELTA_AT);
+        verify(responseHandler).handle(any(URIValidationException.class));
+        verify(responseHandler, times(0)).handle(any(ApiErrorResponseException.class));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "''",
+            "null"
+    }, nullValues = "null")
+    void shouldFailDeleteOfficerWhenMissingDeltaAt(final String deltaAt) {
+        // given
+        DeleteAppointmentParameters deleteAppointmentParameters = DeleteAppointmentParameters.builder()
+                .encodedOfficerId(OFFICER_ID)
+                .deltaAt(deltaAt)
+                .encodedInternalId(APPOINTMENT_ID)
+                .companyNumber(COMPANY_NUMBER)
+                .build();
+
+        // when
+        Executable executable = () -> apiClientService.deleteAppointment(deleteAppointmentParameters);
+
+        // then
+        assertThrows(IllegalArgumentException.class, executable, "delta_at null or empty");
+        verifyNoInteractions(internalApiClientFactory);
+        verifyNoInteractions(responseHandler);
     }
 }

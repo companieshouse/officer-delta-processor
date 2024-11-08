@@ -1,100 +1,77 @@
 package uk.gov.companieshouse.officer.delta.processor.service.api;
 
+import static uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication.NAMESPACE;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.appointment.FullRecordCompanyOfficerApi;
-import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
-import uk.gov.companieshouse.api.http.HttpClient;
-import uk.gov.companieshouse.api.model.ApiResponse;
+import uk.gov.companieshouse.api.error.ApiErrorResponseException;
+import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.logging.Logger;
-
-import java.util.Map;
+import uk.gov.companieshouse.logging.LoggerFactory;
+import uk.gov.companieshouse.officer.delta.processor.apiclient.InternalApiClientFactory;
+import uk.gov.companieshouse.officer.delta.processor.apiclient.ResponseHandler;
 import uk.gov.companieshouse.officer.delta.processor.logging.DataMapHolder;
+import uk.gov.companieshouse.officer.delta.processor.model.DeleteAppointmentParameters;
 
-/**
- * Service that sends REST requests via private SDK.
- */
-@Primary
-@Service
-public class ApiClientServiceImpl extends BaseApiClientServiceImpl implements ApiClientService {
+@Component
+public class ApiClientServiceImpl implements ApiClientService {
 
-    @Value("${chs.internal.api.key}")
-    private String chsApiKey;
+    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
 
-    @Value("${api.url}")
-    private String apiUrl;
+    private final InternalApiClientFactory internalApiClientFactory;
+    private final ResponseHandler responseHandler;
 
-    @Value("${payments.api.url}")
-    private String paymentsApiUrl;
-
-    @Value("${internal.api.url}")
-    private String internalApiUrl;
-
-    /**
-     * Construct an {@link ApiClientServiceImpl}.
-     *
-     * @param logger the CH logger
-     */
-    public ApiClientServiceImpl(final Logger logger) {
-        super(logger);
+    public ApiClientServiceImpl(InternalApiClientFactory internalApiClientFactory, ResponseHandler responseHandler) {
+        this.internalApiClientFactory = internalApiClientFactory;
+        this.responseHandler = responseHandler;
     }
 
-    private InternalApiClient getApiClient(String contextId) {
-        InternalApiClient internalApiClient = new InternalApiClient(getHttpClient(contextId));
-        internalApiClient.setBasePath(apiUrl);
-        internalApiClient.setBasePaymentsPath(paymentsApiUrl);
-        internalApiClient.setInternalBasePath(internalApiUrl);
+    public void putAppointment(String companyNumber, FullRecordCompanyOfficerApi appointment) {
+        final String uri = String.format("/company/%s/appointments/%s/full_record", companyNumber,
+                appointment.getExternalData().getAppointmentId());
 
-        return internalApiClient;
+        LOGGER.info(String.format("PUT %s", uri), DataMapHolder.getLogMap());
+
+        InternalApiClient client = internalApiClientFactory.get();
+        try {
+            client.privateDeltaCompanyAppointmentResourceHandler()
+                    .putAppointment()
+                    .upsert(uri, appointment)
+                    .execute();
+        } catch (ApiErrorResponseException ex) {
+            responseHandler.handle(ex);
+        } catch (URIValidationException ex) {
+            responseHandler.handle(ex);
+        }
     }
 
-    private HttpClient getHttpClient(String contextId) {
-        ApiKeyHttpClient httpClient = new ApiKeyHttpClient(chsApiKey);
-        httpClient.setRequestId(contextId);
-        return httpClient;
-    }
+    public void deleteAppointment(DeleteAppointmentParameters deleteAppointmentParameters) {
+        final String deltaAt = deleteAppointmentParameters.getDeltaAt();
+        final String companyNumber = deleteAppointmentParameters.getCompanyNumber();
+        final String encodedInternalId = deleteAppointmentParameters.getEncodedInternalId();
+        final String encodedOfficerId = deleteAppointmentParameters.getEncodedOfficerId();
 
-    @Override
-    public ApiResponse<Void> putAppointment(final String logContext, String companyNumber, FullRecordCompanyOfficerApi appointment) {
-        final var uri =
-                String.format("/company/%s/appointments/%s/full_record", companyNumber, appointment.getExternalData().getAppointmentId());
-
-        Map<String,Object> logMap = createLogMap(companyNumber,"PUT", uri);
-        logger.infoContext(logContext, String.format("PUT %s", uri), logMap);
-
-        return executeOp(logContext, "putCompanyAppointment", uri,
-                getApiClient(logContext).privateDeltaCompanyAppointmentResourceHandler()
-                        .putAppointment()
-                        .upsert(uri, appointment));
-    }
-
-    @Override
-    public ApiResponse<Void> deleteAppointment(final String logContext, final String internalId,
-            final String companyNumber, String deltaAt) {
         if (StringUtils.isBlank(deltaAt)) {
-            logger.error("Missing delta_at in request", DataMapHolder.getLogMap());
+            LOGGER.error("Missing delta_at in request", DataMapHolder.getLogMap());
             throw new IllegalArgumentException("delta_at null or empty");
         }
-        final String uri = String.format("/company/%s/appointments/%s/full_record/delete",
-                        companyNumber, internalId);
 
-        Map<String,Object> logMap = createLogMap(companyNumber,"DELETE", uri);
-        logger.infoContext(logContext, String.format("DELETE %s", uri), logMap);
+        final String uri = String.format("/company/%s/appointments/%s/full_record/%s",
+                companyNumber, encodedInternalId, encodedOfficerId);
 
-        return executeOp(logContext, "deleteOfficer", uri,
-                getApiClient(logContext).privateDeltaResourceHandler()
-                        .deleteOfficer(uri, deltaAt));
-    }
+        LOGGER.info(String.format("DELETE %s", uri), DataMapHolder.getLogMap());
 
-    private Map<String,Object> createLogMap(String companyNumber, String method, String path){
-        final Map<String, Object> logMap = DataMapHolder.getLogMap();
-        logMap.put("company_number", companyNumber);
-        logMap.put("method",method);
-        logMap.put("path", path);
-        logMap.put("request_id", DataMapHolder.getRequestId());
-        return logMap;
+        InternalApiClient client = internalApiClientFactory.get();
+        try {
+            client.privateDeltaResourceHandler()
+                    .deleteOfficer(uri, deltaAt)
+                    .execute();
+        } catch (ApiErrorResponseException ex) {
+            responseHandler.handle(ex);
+        } catch (URIValidationException ex) {
+            responseHandler.handle(ex);
+        }
     }
 }

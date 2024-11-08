@@ -20,7 +20,7 @@
 
 		<ch-kafka.version>1.4.8</ch-kafka.version>
 		<kafka-models.version>1.0.31</kafka-models.version>
-		<private.sdk.version>2.0.449</private.sdk.version>
+		<private.sdk.version>unversioned</private.sdk.version>
 		<spring.boot.version>2.7.14</spring.boot.version>
 
 		<!-- Logging -->
@@ -28,7 +28,7 @@
 		<api-sdk-manager-java-library.version>1.0.11</api-sdk-manager-java-library.version>
 
 		<!-- Test -->
-		<equalsverifier.version>3.1.9</equalsverifier.version>
+		<equalsverifier.version>3.17.3</equalsverifier.version>
 		<testcontainers.version>1.18.1</testcontainers.version>
 		<system-lambda.version>1.2.1</system-lambda.version>
 		<maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
@@ -80,6 +80,14 @@
 	</dependencyManagement>
 
 	<dependencies>
+		<dependency>
+			<!--Explicitly declaring transitive dep because higher version required for mockito unit tests to work-->
+			<!--Can probably remove this when Java 21 upgrade happens-->
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy</artifactId>
+			<version>1.15.10</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
