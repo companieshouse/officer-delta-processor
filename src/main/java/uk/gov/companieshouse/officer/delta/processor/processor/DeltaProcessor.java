@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.appointment.FullRecordCompanyOfficerApi;
@@ -81,7 +82,7 @@ public class DeltaProcessor implements Processor<ChsDelta> {
             throw new NonRetryableErrorException("Unable to JSON parse CHSDelta", cause);
         }
         catch (ResponseStatusException e) {
-            handleResponse(e, e.getStatus(), logContext, "Sending officer data failed");
+            handleResponse(e, e.getStatusCode(), logContext, "Sending officer data failed");
         }
         catch (IllegalArgumentException e) {
             // Workaround for Docker router. When service is unavailable: "IllegalArgumentException: expected numeric
@@ -108,7 +109,7 @@ public class DeltaProcessor implements Processor<ChsDelta> {
             final String internalId = TransformerUtils.encode(officersDelete.getInternalId());
             apiClientService.deleteAppointment(logContext, internalId, companyNumber, officersDelete.getDeltaAt());
         } catch (ResponseStatusException e) {
-            handleResponse(e, e.getStatus(), logContext, "Sending officer delete failed");
+            handleResponse(e, e.getStatusCode(), logContext, "Sending officer delete failed");
         } catch (Exception ex) {
             logger.error("Error when extracting officers delete delta", ex, DataMapHolder.getLogMap());
             throw new NonRetryableErrorException(
@@ -116,7 +117,7 @@ public class DeltaProcessor implements Processor<ChsDelta> {
         }
     }
 
-    private void handleResponse(final ResponseStatusException ex, final HttpStatus httpStatus, final String logContext,
+    private void handleResponse(final ResponseStatusException ex, final HttpStatusCode httpStatus, final String logContext,
             final String msg)
             throws NonRetryableErrorException, RetryableErrorException {
         Map<String, Object> logMap = DataMapHolder.getLogMap();

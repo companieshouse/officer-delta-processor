@@ -242,7 +242,7 @@
     </dependency>
     <dependency>
       <groupId>org.wiremock</groupId>
-      <artifactId>wiremock</artifactId>
+      <artifactId>wiremock-standalone</artifactId>
       <version>${wiremock.standalone.version}</version>
       <scope>test</scope>
       <exclusions>
