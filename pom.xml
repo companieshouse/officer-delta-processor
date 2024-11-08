@@ -18,30 +18,32 @@
 		<skip.integration.tests>false</skip.integration.tests>
 		<skip.unit.tests>false</skip.unit.tests>
 
-		<ch-kafka.version>1.4.8</ch-kafka.version>
-		<kafka-models.version>1.0.31</kafka-models.version>
-		<private.sdk.version>2.0.449</private.sdk.version>
-		<spring.boot.version>2.7.14</spring.boot.version>
+    <java.version>21</java.version>
+
+		<ch-kafka.version>3.0.3</ch-kafka.version>
+		<kafka-models.version>3.0.8</kafka-models.version>
+		<private.sdk.version>4.0.236</private.sdk.version>
+		<spring.boot.version>3.3.5</spring.boot.version>
 
 		<!-- Logging -->
-		<structured-logging.version>1.9.34</structured-logging.version>
-		<api-sdk-manager-java-library.version>1.0.11</api-sdk-manager-java-library.version>
+		<structured-logging.version>3.0.20</structured-logging.version>
+		<api-sdk-manager-java-library.version>3.0.6</api-sdk-manager-java-library.version>
 
 		<!-- Test -->
-		<equalsverifier.version>3.1.9</equalsverifier.version>
-		<testcontainers.version>1.18.1</testcontainers.version>
+		<equalsverifier.version>3.17.3</equalsverifier.version>
+		<testcontainers.version>1.20.3</testcontainers.version>
 		<system-lambda.version>1.2.1</system-lambda.version>
-		<maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
-		<maven-failsafe-plugin.version>3.0.0</maven-failsafe-plugin.version>
-		<io-cucumber.version>7.11.2</io-cucumber.version>
-		<wiremock.standalone.version>2.35.0</wiremock.standalone.version>
-		<maven-build-helper-plugin.version>3.4.0</maven-build-helper-plugin.version>
-		<maven-resources-plugin.version>3.3.1	</maven-resources-plugin.version>
+		<maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
+		<maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
+		<io-cucumber.version>7.20.1</io-cucumber.version>
+		<wiremock.standalone.version>3.9.2</wiremock.standalone.version>
+		<maven-build-helper-plugin.version>3.6.0</maven-build-helper-plugin.version>
+		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
 
 		<!-- Maven -->
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
-		<jib-maven-plugin.version>3.4.2</jib-maven-plugin.version>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<jib-maven-plugin.version>3.4.4</jib-maven-plugin.version>
 
 		<!-- Sonar dependency -->
 		<sonar.projectKey>uk.gov.companieshouse:officer-delta-processor</sonar.projectKey>
@@ -153,11 +155,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-inline</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
@@ -234,39 +231,23 @@
 					<groupId>org.scala-lang</groupId>
 					<artifactId>scala-library</artifactId>
 				</exclusion>
+        <exclusion>
+          <groupId>org.pcollections</groupId>
+          <artifactId>pcollections</artifactId>
+        </exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.github.tomakehurst</groupId>
-			<artifactId>wiremock-jre8</artifactId>
+			<groupId>org.wiremock</groupId>
+			<artifactId>wiremock</artifactId>
 			<version>${wiremock.standalone.version}</version>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.conscrypt</groupId>
-					<artifactId>conscrypt-openjdk-uber</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.javacrumbs.json-unit</groupId>
-					<artifactId>json-unit-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.github.jknack</groupId>
-					<artifactId>handlebars</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.github.jknack</groupId>
-					<artifactId>handlebars-helpers</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>commons-fileupload</groupId>
-					<artifactId>commons-fileupload</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.eclipse.jetty</groupId>
-					<artifactId>jetty-xml</artifactId>
-				</exclusion>
-			</exclusions>
+      <exclusions>
+        <exclusion>
+          <groupId>com.ethlo.time</groupId>
+          <artifactId>itu</artifactId>
+        </exclusion>
+      </exclusions>
 		</dependency>
 	</dependencies>
 
