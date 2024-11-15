@@ -43,7 +43,7 @@ endif
 .PHONY: build
 build:
 	# Temporary workaround for failure on concourse - waiting for artifactory request of new version to be actioned by platform
-	mvn org.codehaus.mojo:versions-maven-plugin:2.17.1:set -DnewVersion=$(version) -DgenerateBackupPoms=false
+	mvn org.codehaus.mojo:versions-maven-plugin:2.16.2:set -DnewVersion=$(version) -DgenerateBackupPoms=false
 	#mvn versions:set -DnewVersion=$(version) -DgenerateBackupPoms=false
 	mvn package -Dmaven.test.skip=true
 	cp ./target/$(artifact_name)-$(version).jar ./$(artifact_name).jar
