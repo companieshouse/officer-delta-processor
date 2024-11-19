@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
+import uk.gov.companieshouse.officer.delta.processor.logging.DataMapHolder;
 
 @Component
 public class InternalApiClientFactory implements Supplier<InternalApiClient> {
@@ -30,6 +31,7 @@ public class InternalApiClientFactory implements Supplier<InternalApiClient> {
         internalApiClient.setBasePath(apiUrl);
         internalApiClient.setBasePaymentsPath(paymentsApiUrl);
         internalApiClient.setInternalBasePath(internalApiUrl);
+        internalApiClient.getHttpClient().setRequestId(DataMapHolder.getRequestId());
         return internalApiClient;
     }
 }
