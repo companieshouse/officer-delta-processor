@@ -37,11 +37,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class CommonSteps {
 
-    private static final String ENCODED_OFFICER_ID = TransformerUtils.encode("3001237435");
-    private static final String DELETE_DELTA_URI =
-            String.format("/company/09876543/appointments/N-YqKNwdT_HvetusfTJ0H0jAQbA/full_record/%s", ENCODED_OFFICER_ID);
+    private static final String DELETE_DELTA_URI = "/company/09876543/appointments/N-YqKNwdT_HvetusfTJ0H0jAQbA/full_record";
     private static final String DELETE_DELTA_AT = "20230724093435661593";
+    private static final String OFFICER_ID = TransformerUtils.encode("3001237435");
     private static final String X_DELTA_AT = "X-DELTA-AT";
+    private static final String X_OFFICER_ID = "X-OFFICER-ID";
 
     @Value("${officer.delta.processor.topic}")
     private String mainTopic;
@@ -155,7 +155,8 @@ public class CommonSteps {
     @Then("a DELETE request is sent to the appointments api with the encoded Id and company number")
     public void deleteRequestIsSent() {
         verify(1, deleteRequestedFor(urlMatching(DELETE_DELTA_URI))
-                .withHeader(X_DELTA_AT, equalTo(DELETE_DELTA_AT)));
+                .withHeader(X_DELTA_AT, equalTo(DELETE_DELTA_AT))
+                .withHeader(X_OFFICER_ID, equalTo(OFFICER_ID)));
     }
 
     @After
@@ -182,6 +183,7 @@ public class CommonSteps {
     private void stubDeleteOfficer(int responseCode) {
         stubFor(delete(urlEqualTo(DELETE_DELTA_URI))
                 .withHeader(X_DELTA_AT, equalTo(DELETE_DELTA_AT))
+                .withHeader(X_OFFICER_ID, equalTo(OFFICER_ID))
                 .willReturn(aResponse().withStatus(responseCode)));
     }
 
@@ -190,4 +192,5 @@ public class CommonSteps {
         countDownLatch.await(5, TimeUnit.SECONDS);
     }
 }
+
 

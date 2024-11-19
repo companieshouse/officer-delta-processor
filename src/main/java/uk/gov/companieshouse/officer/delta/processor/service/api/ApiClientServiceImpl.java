@@ -58,15 +58,14 @@ public class ApiClientServiceImpl implements ApiClientService {
             throw new IllegalArgumentException("delta_at null or empty");
         }
 
-        final String uri = String.format("/company/%s/appointments/%s/full_record/%s",
-                companyNumber, encodedInternalId, encodedOfficerId);
+        final String uri = String.format("/company/%s/appointments/%s/full_record", companyNumber, encodedInternalId);
 
         LOGGER.info(String.format("DELETE %s", uri), DataMapHolder.getLogMap());
 
         InternalApiClient client = internalApiClientFactory.get();
         try {
             client.privateDeltaResourceHandler()
-                    .deleteOfficer(uri, deltaAt)
+                    .deleteOfficer(uri, deltaAt, encodedOfficerId)
                     .execute();
         } catch (ApiErrorResponseException ex) {
             responseHandler.handle(ex);
