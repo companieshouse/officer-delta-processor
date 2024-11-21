@@ -26,11 +26,11 @@ public class ResponseHandler {
         HttpStatus httpStatus = HttpStatus.valueOf(statusCode);
 
         if (HttpStatus.CONFLICT.equals(httpStatus) || HttpStatus.BAD_REQUEST.equals(httpStatus)) {
-            final String msg = API_ERROR_RESPONSE_MESSAGE.formatted(statusCode);
+            final String msg = String.format(API_ERROR_RESPONSE_MESSAGE, statusCode);
             LOGGER.error(msg, ex, DataMapHolder.getLogMap());
             throw new NonRetryableErrorException(msg, ex);
         } else {
-            final String msg = API_INFO_RESPONSE_MESSAGE.formatted(statusCode, Arrays.toString(ex.getStackTrace()));
+            final String msg = String.format(API_INFO_RESPONSE_MESSAGE, statusCode, Arrays.toString(ex.getStackTrace()));
             LOGGER.info(msg, DataMapHolder.getLogMap());
             throw new RetryableErrorException(msg, ex);
         }
