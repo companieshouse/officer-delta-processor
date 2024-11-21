@@ -20,7 +20,7 @@
 
 		<ch-kafka.version>1.4.8</ch-kafka.version>
 		<kafka-models.version>1.0.40</kafka-models.version>
-		<private.sdk.version>unversioned</private.sdk.version>
+		<private.sdk.version>2.0.461</private.sdk.version>
 		<spring.boot.version>2.7.18</spring.boot.version>
 
 		<!-- Logging -->
