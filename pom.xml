@@ -31,8 +31,8 @@
 		<equalsverifier.version>3.17.3</equalsverifier.version>
 		<testcontainers.version>1.20.3</testcontainers.version>
 		<system-lambda.version>1.2.1</system-lambda.version>
-		<maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
-		<maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
+		<maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
+		<maven-failsafe-plugin.version>3.0.0</maven-failsafe-plugin.version>
 		<io-cucumber.version>7.20.1</io-cucumber.version>
 		<wiremock.version>3.9.2</wiremock.version>
 		<maven-build-helper-plugin.version>3.3.0</maven-build-helper-plugin.version>
