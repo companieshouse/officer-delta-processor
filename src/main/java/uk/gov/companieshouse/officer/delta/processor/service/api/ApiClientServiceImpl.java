@@ -19,6 +19,7 @@ import uk.gov.companieshouse.officer.delta.processor.model.DeleteAppointmentPara
 public class ApiClientServiceImpl implements ApiClientService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+    private static final String URI = "/company/%s/appointments/%s/full_record";
 
     private final InternalApiClientFactory internalApiClientFactory;
     private final ResponseHandler responseHandler;
@@ -29,8 +30,7 @@ public class ApiClientServiceImpl implements ApiClientService {
     }
 
     public void putAppointment(String companyNumber, FullRecordCompanyOfficerApi appointment) {
-        final String uri = String.format("/company/%s/appointments/%s/full_record", companyNumber,
-                appointment.getExternalData().getAppointmentId());
+        final String uri = String.format(URI, companyNumber, appointment.getExternalData().getAppointmentId());
 
         LOGGER.info(String.format("PUT %s", uri), DataMapHolder.getLogMap());
 
@@ -58,7 +58,7 @@ public class ApiClientServiceImpl implements ApiClientService {
             throw new IllegalArgumentException("delta_at null or empty");
         }
 
-        final String uri = String.format("/company/%s/appointments/%s/full_record", companyNumber, encodedInternalId);
+        final String uri = String.format(URI, companyNumber, encodedInternalId);
 
         LOGGER.info(String.format("DELETE %s", uri), DataMapHolder.getLogMap());
 

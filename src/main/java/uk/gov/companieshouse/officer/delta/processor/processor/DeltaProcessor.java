@@ -53,7 +53,8 @@ public class DeltaProcessor implements Processor<ChsDelta> {
                 DataMapHolder.get()
                         .companyNumber(officer.getCompanyNumber())
                         .officerId(officer.getOfficerId())
-                        .internalId(officer.getInternalId());
+                        .internalId(officer.getInternalId())
+                        .appointmentId(TransformerUtils.encode(officer.getInternalId()));
 
                 FullRecordCompanyOfficerApi appointmentAPI = transformer.transform(officer);
                 appointmentAPI
@@ -96,12 +97,13 @@ public class DeltaProcessor implements Processor<ChsDelta> {
         final String companyNumber = officersDelete.getCompanyNumber();
         final String officerId = officersDelete.getOfficerId();
         final String internalId = officersDelete.getInternalId();
+        final String encodedInternalId = TransformerUtils.encode(internalId);
         DataMapHolder.get()
                 .companyNumber(companyNumber)
                 .officerId(officerId)
-                .internalId(internalId);
+                .internalId(internalId)
+                .appointmentId(encodedInternalId);
 
-        final String encodedInternalId = TransformerUtils.encode(internalId);
         final String encodedOfficerId = TransformerUtils.encode(officerId);
         apiClientService.deleteAppointment(DeleteAppointmentParameters.builder()
                 .encodedInternalId(encodedInternalId)

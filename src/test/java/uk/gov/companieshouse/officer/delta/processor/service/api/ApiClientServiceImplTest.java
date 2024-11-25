@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
@@ -125,7 +126,8 @@ class ApiClientServiceImplTest {
         // given
         when(internalApiClientFactory.get()).thenReturn(client);
         when(client.privateDeltaResourceHandler()).thenReturn(privateDeltaResourceHandler);
-        when(privateDeltaResourceHandler.deleteOfficer(anyString(), anyString(), anyString())).thenReturn(privateOfficerDelete);
+        when(privateDeltaResourceHandler.deleteOfficer(anyString(), anyString(), anyString())).thenReturn(
+                privateOfficerDelete);
 
         DeleteAppointmentParameters deleteAppointmentParameters = DeleteAppointmentParameters.builder()
                 .encodedOfficerId(OFFICER_ID)
@@ -134,7 +136,8 @@ class ApiClientServiceImplTest {
                 .companyNumber(COMPANY_NUMBER)
                 .build();
 
-        final String expectedUri = String.format("/company/%s/appointments/%s/full_record", COMPANY_NUMBER, APPOINTMENT_ID);
+        final String expectedUri = String.format("/company/%s/appointments/%s/full_record", COMPANY_NUMBER,
+                APPOINTMENT_ID);
 
         // when
         apiClientService.deleteAppointment(deleteAppointmentParameters);
@@ -149,7 +152,8 @@ class ApiClientServiceImplTest {
         // given
         when(internalApiClientFactory.get()).thenReturn(client);
         when(client.privateDeltaResourceHandler()).thenReturn(privateDeltaResourceHandler);
-        when(privateDeltaResourceHandler.deleteOfficer(anyString(), anyString(), anyString())).thenReturn(privateOfficerDelete);
+        when(privateDeltaResourceHandler.deleteOfficer(anyString(), anyString(), anyString())).thenReturn(
+                privateOfficerDelete);
         when(privateOfficerDelete.execute()).thenThrow(ApiErrorResponseException.class);
 
         DeleteAppointmentParameters deleteAppointmentParameters = DeleteAppointmentParameters.builder()
@@ -159,7 +163,8 @@ class ApiClientServiceImplTest {
                 .companyNumber(COMPANY_NUMBER)
                 .build();
 
-        final String expectedUri = String.format("/company/%s/appointments/%s/full_record", COMPANY_NUMBER, APPOINTMENT_ID);
+        final String expectedUri = String.format("/company/%s/appointments/%s/full_record", COMPANY_NUMBER,
+                APPOINTMENT_ID);
 
         // when
         apiClientService.deleteAppointment(deleteAppointmentParameters);
@@ -175,7 +180,8 @@ class ApiClientServiceImplTest {
         // given
         when(internalApiClientFactory.get()).thenReturn(client);
         when(client.privateDeltaResourceHandler()).thenReturn(privateDeltaResourceHandler);
-        when(privateDeltaResourceHandler.deleteOfficer(anyString(), anyString(), anyString())).thenReturn(privateOfficerDelete);
+        when(privateDeltaResourceHandler.deleteOfficer(anyString(), anyString(), anyString())).thenReturn(
+                privateOfficerDelete);
         when(privateOfficerDelete.execute()).thenThrow(URIValidationException.class);
 
         DeleteAppointmentParameters deleteAppointmentParameters = DeleteAppointmentParameters.builder()
@@ -185,7 +191,8 @@ class ApiClientServiceImplTest {
                 .companyNumber(COMPANY_NUMBER)
                 .build();
 
-        final String expectedUri = String.format("/company/%s/appointments/%s/full_record", COMPANY_NUMBER, APPOINTMENT_ID);
+        final String expectedUri = String.format("/company/%s/appointments/%s/full_record", COMPANY_NUMBER,
+                APPOINTMENT_ID);
 
         // when
         apiClientService.deleteAppointment(deleteAppointmentParameters);
@@ -193,7 +200,7 @@ class ApiClientServiceImplTest {
         // then
         verify(privateDeltaResourceHandler).deleteOfficer(expectedUri, DELTA_AT, OFFICER_ID);
         verify(responseHandler).handle(any(URIValidationException.class));
-        verify(responseHandler, times(0)).handle(any(ApiErrorResponseException.class));
+        verifyNoMoreInteractions(responseHandler);
     }
 
     @ParameterizedTest
