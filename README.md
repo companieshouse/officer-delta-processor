@@ -14,6 +14,13 @@ To build officer-delta-processor, you will need:
 
 You will also need a REST client (e.g. Postman or cURL) if you want to interact with any officer-delta-processor service endpoints.
 
+### Building a docker image locally
+This will allow you to build local changes and test them using `chs-dev`.
+
+```bash
+mvn compile jib:dockerBuild -Dimage=169942020521.dkr.ecr.eu-west-2.amazonaws.com/local/officer-delta-processor:latest
+```
+
 ## Building and Running Locally
 
 1. From the command line, in the same folder as the Makefile run `make clean build`

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>uk.gov.companieshouse</groupId>
 		<artifactId>companies-house-parent</artifactId>
-		<version>2.1.6</version>
+		<version>2.1.9</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<artifactId>officer-delta-processor</artifactId>
@@ -19,24 +19,24 @@
 		<skip.unit.tests>false</skip.unit.tests>
 
 		<ch-kafka.version>1.4.8</ch-kafka.version>
-		<kafka-models.version>1.0.31</kafka-models.version>
-		<private.sdk.version>2.0.449</private.sdk.version>
-		<spring.boot.version>2.7.14</spring.boot.version>
+		<kafka-models.version>1.0.40</kafka-models.version>
+		<private.sdk.version>2.0.461</private.sdk.version>
+		<spring.boot.version>2.7.18</spring.boot.version>
 
 		<!-- Logging -->
-		<structured-logging.version>1.9.34</structured-logging.version>
+		<structured-logging.version>1.9.41</structured-logging.version>
 		<api-sdk-manager-java-library.version>1.0.11</api-sdk-manager-java-library.version>
 
 		<!-- Test -->
-		<equalsverifier.version>3.1.9</equalsverifier.version>
-		<testcontainers.version>1.18.1</testcontainers.version>
+		<equalsverifier.version>3.17.3</equalsverifier.version>
+		<testcontainers.version>1.20.3</testcontainers.version>
 		<system-lambda.version>1.2.1</system-lambda.version>
 		<maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
 		<maven-failsafe-plugin.version>3.0.0</maven-failsafe-plugin.version>
-		<io-cucumber.version>7.11.2</io-cucumber.version>
-		<wiremock.standalone.version>2.35.0</wiremock.standalone.version>
-		<maven-build-helper-plugin.version>3.4.0</maven-build-helper-plugin.version>
-		<maven-resources-plugin.version>3.3.1	</maven-resources-plugin.version>
+		<io-cucumber.version>7.20.1</io-cucumber.version>
+		<wiremock.version>3.9.2</wiremock.version>
+		<maven-build-helper-plugin.version>3.3.0</maven-build-helper-plugin.version>
+		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
 
 		<!-- Maven -->
 		<maven.compiler.source>11</maven.compiler.source>
@@ -80,6 +80,14 @@
 	</dependencyManagement>
 
 	<dependencies>
+		<dependency>
+			<!--Explicitly declaring transitive dep because higher version required for mockito unit tests to work-->
+			<!--Can probably remove this when Java 21 upgrade happens-->
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy</artifactId>
+			<version>1.15.10</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
@@ -237,34 +245,14 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.github.tomakehurst</groupId>
-			<artifactId>wiremock-jre8</artifactId>
-			<version>${wiremock.standalone.version}</version>
+			<groupId>org.wiremock</groupId>
+			<artifactId>wiremock</artifactId>
+			<version>${wiremock.version}</version>
 			<scope>test</scope>
 			<exclusions>
 				<exclusion>
-					<groupId>org.conscrypt</groupId>
-					<artifactId>conscrypt-openjdk-uber</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.javacrumbs.json-unit</groupId>
-					<artifactId>json-unit-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.github.jknack</groupId>
-					<artifactId>handlebars</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.github.jknack</groupId>
-					<artifactId>handlebars-helpers</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>commons-fileupload</groupId>
-					<artifactId>commons-fileupload</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.eclipse.jetty</groupId>
-					<artifactId>jetty-xml</artifactId>
+					<groupId>com.ethlo.time</groupId>
+					<artifactId>itu</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
