@@ -24,7 +24,7 @@
 
     <ch-kafka.version>3.0.3</ch-kafka.version>
     <kafka-models.version>3.0.8</kafka-models.version>
-    <private.sdk.version>4.0.236</private.sdk.version>
+    <private-sdk.version>4.0.251</private-sdk.version>
     <spring.boot.version>3.3.5</spring.boot.version>
     <apache-avro.version>1.12.0</apache-avro.version>
 
@@ -173,7 +173,7 @@
     <dependency>
       <groupId>uk.gov.companieshouse</groupId>
       <artifactId>private-api-sdk-java</artifactId>
-      <version>${private.sdk.version}</version>
+      <version>${private-sdk.version}</version>
     </dependency>
     <dependency>
       <groupId>uk.gov.companieshouse</groupId>
