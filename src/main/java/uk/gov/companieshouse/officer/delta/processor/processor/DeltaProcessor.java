@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.officer.delta.processor.processor;
 
-import static uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication.NAMESPACE;
+import static uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication.APPLICATION_NAME_SPACE;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseOffsetDateTime;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -34,7 +34,7 @@ public class DeltaProcessor implements Processor<ChsDelta> {
 
     public static final Pattern PARSE_MESSAGE_PATTERN = Pattern.compile("Source.*line",
             Pattern.DOTALL);
-    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
 
     private final AppointmentTransform transformer;
     private final ApiClientService apiClientService;

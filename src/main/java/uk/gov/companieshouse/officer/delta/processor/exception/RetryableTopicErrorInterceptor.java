@@ -19,7 +19,7 @@ import uk.gov.companieshouse.officer.delta.processor.logging.DataMapHolder;
 public class RetryableTopicErrorInterceptor implements ProducerInterceptor<String, Object> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(
-            OfficerDeltaProcessorApplication.NAMESPACE);
+            OfficerDeltaProcessorApplication.APPLICATION_NAME_SPACE);
 
     @Override
     public ProducerRecord<String, Object> onSend(ProducerRecord<String, Object> kafkaRecord) {

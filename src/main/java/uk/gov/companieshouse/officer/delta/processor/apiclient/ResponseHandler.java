@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.officer.delta.processor.apiclient;
 
-import static uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication.NAMESPACE;
+import static uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication.APPLICATION_NAME_SPACE;
 
 import java.util.Arrays;
 import org.springframework.http.HttpStatus;
@@ -19,7 +19,7 @@ import uk.gov.companieshouse.officer.delta.processor.logging.DataMapHolder;
 @Component
 public class ResponseHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
     private static final String API_INFO_RESPONSE_MESSAGE =
             "Call to Company Appointments API " + "failed, status code: %d. %s";
     private static final String API_ERROR_RESPONSE_MESSAGE =

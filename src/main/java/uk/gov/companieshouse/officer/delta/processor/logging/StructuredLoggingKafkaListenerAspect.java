@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.officer.delta.processor.logging;
 
-import static uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication.NAMESPACE;
+import static uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication.APPLICATION_NAME_SPACE;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -20,7 +20,7 @@ import uk.gov.companieshouse.officer.delta.processor.exception.RetryableErrorExc
 @Aspect
 class StructuredLoggingKafkaListenerAspect {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
 
     private static final String LOG_MESSAGE_RECEIVED = "Processing delta";
     private static final String LOG_MESSAGE_PROCESSED = "Processed delta";

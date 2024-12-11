@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.officer.delta.processor.service.api;
 
-import static uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication.NAMESPACE;
+import static uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication.APPLICATION_NAME_SPACE;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,7 @@ import uk.gov.companieshouse.officer.delta.processor.model.DeleteAppointmentPara
 @Component
 public class ApiClientServiceImpl implements ApiClientService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
     private static final String URI = "/company/%s/appointments/%s/full_record";
 
     private final InternalApiClientFactory internalApiClientFactory;
