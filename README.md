@@ -68,7 +68,7 @@ immediately to the <br>`officer-delta-invalid` topic and are not retried.
 ## Building the docker image
 
 ```bash
-mvn package -Dskip.unit.tests=true -Dskip.integration.tests=true jib:dockerBuild
+mvn compile jib:dockerBuild -Dimage=169942020521.dkr.ecr.eu-west-2.amazonaws.com/local/officer-delta-processor:latest
 ```
 
 ## To make local changes
