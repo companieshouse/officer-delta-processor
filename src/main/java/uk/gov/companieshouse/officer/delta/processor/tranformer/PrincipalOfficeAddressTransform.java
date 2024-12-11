@@ -5,24 +5,36 @@ import uk.gov.companieshouse.api.appointment.PrincipalOfficeAddress;
 import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 
+/**
+ * The type Principal office address transform.
+ */
 @Component
-public class PrincipalOfficeAddressTransform implements Transformative<AddressAPI, PrincipalOfficeAddress> {
+public class PrincipalOfficeAddressTransform implements
+        Transformative<AddressAPI, PrincipalOfficeAddress> {
 
     @Override
     public PrincipalOfficeAddress factory() {
         return new PrincipalOfficeAddress();
     }
 
-    public PrincipalOfficeAddress transform(AddressAPI addressAPI, PrincipalOfficeAddress principalOfficeAddress) throws NonRetryableErrorException {
-        principalOfficeAddress.setAddressLine1(addressAPI.getAddressLine1());
-        principalOfficeAddress.setAddressLine2(addressAPI.getAddressLine2());
-        principalOfficeAddress.setCareOf(addressAPI.getCareOfName());
-        principalOfficeAddress.setCountry(addressAPI.getCountry());
-        principalOfficeAddress.setLocality(addressAPI.getLocality());
-        principalOfficeAddress.setPoBox(addressAPI.getPoBox());
-        principalOfficeAddress.setPostalCode(addressAPI.getPostcode());
-        principalOfficeAddress.setPremises(addressAPI.getPremises());
-        principalOfficeAddress.setRegion(addressAPI.getRegion());
+    /**
+     * Transform.
+     * @param addressApi                    the addressApi
+     * @param principalOfficeAddress        the principalOfficeAddress
+     * @return                              PrincipalOfficeAddress
+     * @throws NonRetryableErrorException   NonRetryableErrorException
+     */
+    public PrincipalOfficeAddress transform(AddressAPI addressApi,
+            PrincipalOfficeAddress principalOfficeAddress) throws NonRetryableErrorException {
+        principalOfficeAddress.setAddressLine1(addressApi.getAddressLine1());
+        principalOfficeAddress.setAddressLine2(addressApi.getAddressLine2());
+        principalOfficeAddress.setCareOf(addressApi.getCareOfName());
+        principalOfficeAddress.setCountry(addressApi.getCountry());
+        principalOfficeAddress.setLocality(addressApi.getLocality());
+        principalOfficeAddress.setPoBox(addressApi.getPoBox());
+        principalOfficeAddress.setPostalCode(addressApi.getPostcode());
+        principalOfficeAddress.setPremises(addressApi.getPremises());
+        principalOfficeAddress.setRegion(addressApi.getRegion());
 
         return principalOfficeAddress;
     }

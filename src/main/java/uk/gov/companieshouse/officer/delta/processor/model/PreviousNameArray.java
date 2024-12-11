@@ -5,12 +5,11 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PreviousNameArray {
@@ -23,6 +22,8 @@ public class PreviousNameArray {
 
     @JsonProperty("previous_surname")
     private String previousSurname;
+    @JsonIgnore
+    private Map<String, Object> additionalProperties = new HashMap<>();
 
     public PreviousNameArray() {
     }
@@ -31,9 +32,6 @@ public class PreviousNameArray {
         this.previousForename = previousForename;
         this.previousSurname = previousSurname;
     }
-
-    @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<>();
 
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
@@ -45,42 +43,42 @@ public class PreviousNameArray {
         this.additionalProperties.put(name, value);
     }
 
-    public void setPreviousForename(String previousForename) {
-        this.previousForename = previousForename;
-    }
-
     public String getPreviousForename() {
         return previousForename;
     }
 
-    public void setPreviousTimestamp(String previousTimestamp) {
-        this.previousTimestamp = previousTimestamp;
+    public void setPreviousForename(String previousForename) {
+        this.previousForename = previousForename;
     }
 
     public String getPreviousTimestamp() {
         return previousTimestamp;
     }
 
-    public void setPreviousSurname(String previousSurname) {
-        this.previousSurname = previousSurname;
+    public void setPreviousTimestamp(String previousTimestamp) {
+        this.previousTimestamp = previousTimestamp;
     }
 
     public String getPreviousSurname() {
         return previousSurname;
     }
 
+    public void setPreviousSurname(String previousSurname) {
+        this.previousSurname = previousSurname;
+    }
+
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        PreviousNameArray that = (PreviousNameArray) o;
-        return Objects.equals(getPreviousForename(), that.getPreviousForename())
-                && Objects.equals(getPreviousTimestamp(), that.getPreviousTimestamp())
-                && Objects.equals(getPreviousSurname(), that.getPreviousSurname());
+        PreviousNameArray that = (PreviousNameArray) obj;
+        return Objects.equals(getPreviousForename(), that.getPreviousForename()) && Objects.equals(
+                getPreviousTimestamp(), that.getPreviousTimestamp()) && Objects.equals(
+                getPreviousSurname(), that.getPreviousSurname());
     }
 
     @Override

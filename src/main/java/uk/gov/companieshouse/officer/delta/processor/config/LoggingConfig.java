@@ -21,6 +21,6 @@ public class LoggingConfig {
      */
     @Bean
     public Logger logger() {
-        return LoggerFactory.getLogger(OfficerDeltaProcessorApplication.NAMESPACE);
+        return LoggerFactory.getLogger(OfficerDeltaProcessorApplication.APPLICATION_NAME_SPACE);
     }
 }
