@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------
 variable "environment" {
   type        = string
-  description = "The environment name, defined in environments vars."
+  description = "The environment name, defined in envrionments vars."
 }
 variable "aws_region" {
   default     = "eu-west-2"
@@ -41,23 +41,12 @@ variable "required_memory" {
   type = number
   description = "The required memory for this service"
   default = 512 # defaulted low for node service in dev environments, override for production
-}
 
-variable "eric_cpus" {
-  type = number
-  description = "The required cpu resource for eric. 1024 here is 1 vCPU"
-  default = 256
 }
-variable "eric_memory" {
-  type = number
-  description = "The required memory for eric"
-  default = 512
-}
-
 variable "max_task_count" {
   type        = number
   description = "The maximum number of tasks for this service."
-  default     = 1
+  default     = 3
 }
 
 variable "use_fargate" {
@@ -96,25 +85,21 @@ variable "service_scaleup_schedule" {
 
   default     = ""
 }
-
-# ----------------------------------------------------------------------
-# Cloudwatch alerts
-# ----------------------------------------------------------------------
-variable "cloudwatch_alarms_enabled" {
-  description = "Whether to create a standard set of cloudwatch alarms for the service.  Requires an SNS topic to have already been created for the stack."
-  type        = bool
-  default     = false
+variable "service_autoscale_scale_in_cooldown" {
+  type        = number
+  description = "Cooldown in seconds for ECS Service scale in (run fewer tasks)"
+  default     = 300
 }
-
-variable "multilb_cloudwatch_alarms_enabled" {
-  description = "Whether to create a standard set of cloudwatch alarms for the service in multilb setup.  Requires an SNS topic to have already been created for the stack."
-  type        = bool
-  default     = true
+variable "service_autoscale_scale_out_cooldown" {
+  type        = number
+  description = "Cooldown in seconds for ECS Service scale out (add more tasks)"
+  default     = 300
 }
 
 # ------------------------------------------------------------------------------
 # Service environment variable configs
 # ------------------------------------------------------------------------------
+
 variable "ssm_version_prefix" {
   type        = string
   description = "String to use as a prefix to the names of the variables containing variables and secrets version."
@@ -127,12 +112,7 @@ variable "use_set_environment_files" {
   description = "Toggle default global and shared environment files"
 }
 
-variable "officer_delta_processor_version" {
+variable "chips_filing_consumer_version" {
   type        = string
   description = "The version of the officer-delta-processor container to run."
-}
-
-variable "eric_version" {
-  type        = string
-  description = "The version of the eric container to run."
 }

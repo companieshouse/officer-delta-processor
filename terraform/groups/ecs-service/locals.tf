@@ -1,15 +1,12 @@
 # Define all hardcoded local variable and local variables looked up from data resources
 locals {
-  stack_name                 = "data-sync" # this must match the stack name (cluster) the service deploys into
+  stack_name                 = "data-sync" # this must match the stack name the service deploys into
   name_prefix                = "${local.stack_name}-${var.environment}"
   global_prefix              = "global-${var.environment}"
   service_name               = "officer-delta-processor"
   container_port             = "8080"
-  eric_port                  = "10000"
   docker_repo                = "officer-delta-processor"
   kms_alias                  = "alias/${var.aws_profile}/environment-services-kms"
-  lb_listener_rule_priority  = 181
-  lb_listener_paths          = ["/officer-delta-processor"]
   healthcheck_path           = "/officer-delta-processor/healthcheck" # healthcheck path for officer-delta-processor
   healthcheck_matcher        = "200"
   vpc_name                   = local.stack_secrets["vpc_name"]
@@ -48,14 +45,6 @@ locals {
     trimprefix(sec.name, "/${local.service_name}-${var.environment}/") => sec.arn
   }
 
-  # get eric secrets from global secrets map
-  eric_secrets = [
-    { "name": "API_KEY", "valueFrom": local.global_secrets_arn_map.eric_api_key },
-    { "name": "AES256_KEY", "valueFrom": local.global_secrets_arn_map.eric_aes256_key }
-  ]
-  eric_environment_filename = "eric.env"
-
-
   service_secret_list = flatten([for key, value in local.service_secrets_arn_map :
     { "name" = upper(key), "valueFrom" = value }
   ])
@@ -68,7 +57,7 @@ locals {
   # secrets to go in list
   task_secrets = concat(local.global_secret_list,local.service_secret_list)
 
-  task_environment = concat(local.ssm_global_version_map,local.ssm_service_version_map, [
-    { name : "PORT", value : local.container_port }
+  task_environment = concat(local.ssm_global_version_map,local.ssm_service_version_map,[
+    { "name" : "PORT", "value" : local.container_port }
   ])
 }
