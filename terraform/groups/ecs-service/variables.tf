@@ -112,7 +112,7 @@ variable "use_set_environment_files" {
   description = "Toggle default global and shared environment files"
 }
 
-variable "chips_filing_consumer_version" {
+variable "officer_delta_processor_version" {
   type        = string
   description = "The version of the officer-delta-processor container to run."
 }
