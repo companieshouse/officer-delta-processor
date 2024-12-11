@@ -5,25 +5,28 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseOffsetDateTime;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InOrder;
@@ -33,50 +36,39 @@ import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.appointment.FullRecordCompanyOfficerApi;
 import uk.gov.companieshouse.api.delta.OfficerDeleteDelta;
-import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.officer.delta.processor.config.OfficerRoleConfig;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.exception.RetryableErrorException;
+import uk.gov.companieshouse.officer.delta.processor.model.DeleteAppointmentParameters;
 import uk.gov.companieshouse.officer.delta.processor.model.Officers;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientService;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.AppointmentTransform;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.IdentificationTransform;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.PrincipalOfficeAddressTransform;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.ServiceAddressTransform;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.FormerNameTransform;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.UsualResidentialAddressTransform;
+import uk.gov.companieshouse.officer.delta.processor.tranformer.IdentificationTransform;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.OfficerTransform;
+import uk.gov.companieshouse.officer.delta.processor.tranformer.PrincipalOfficeAddressTransform;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.SensitiveOfficerTransform;
+import uk.gov.companieshouse.officer.delta.processor.tranformer.ServiceAddressTransform;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import uk.gov.companieshouse.officer.delta.processor.tranformer.UsualResidentialAddressTransform;
 
 @ExtendWith(MockitoExtension.class)
 class DeltaProcessorTest {
+
     private static final String CONTEXT_ID = "context_id";
     private static final String DELTA_AT = "20230724093435661593";
-
-    private static final ObjectMapper objectMapper = new ObjectMapper()
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .registerModule(new JavaTimeModule());
 
     private static AppointmentTransform appointmentTransform;
     private static String json;
     private static FullRecordCompanyOfficerApi expectedAppointment;
 
-    private DeltaProcessor testProcessor;
+    private DeltaProcessor deltaProcessor;
 
     @Mock
     private ApiClientService apiClientService;
@@ -102,7 +94,7 @@ class DeltaProcessorTest {
     private static FullRecordCompanyOfficerApi jsonToAppointment(final String json)
             throws JsonProcessingException, NonRetryableErrorException {
 
-        final Officers officers = objectMapper.readValue(json, Officers.class);
+        final Officers officers = OBJECT_MAPPER.readValue(json, Officers.class);
         final List<OfficersItem> officersOfficers = officers.getOfficers();
         final OfficersItem officer = officersOfficers.get(0);
         final FullRecordCompanyOfficerApi appointmentAPI = appointmentTransform.transform(officer);
@@ -114,13 +106,13 @@ class DeltaProcessorTest {
 
     private static OfficerDeleteDelta jsonToDelete(final String json)
             throws JsonProcessingException, NonRetryableErrorException {
-        return objectMapper.readValue(json, OfficerDeleteDelta.class);
+        return OBJECT_MAPPER.readValue(json, OfficerDeleteDelta.class);
     }
 
     @BeforeEach
     void setUp() {
-        testProcessor = new DeltaProcessor(appointmentTransform, apiClientService,
-                objectMapper);
+        deltaProcessor = new DeltaProcessor(appointmentTransform, apiClientService,
+                OBJECT_MAPPER);
     }
 
     @Test
@@ -128,13 +120,10 @@ class DeltaProcessorTest {
     void process(CapturedOutput capture) {
         final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID, false);
         final String expectedNumber = expectedAppointment.getExternalData().getCompanyNumber();
-        final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.OK.value(), null, null);
 
-        when(apiClientService.putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment)).thenReturn(response);
+        deltaProcessor.process(delta);
 
-        testProcessor.process(delta);
-
-        verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
+        verify(apiClientService).putAppointment(expectedNumber, expectedAppointment);
         verifyNoMoreInteractions(apiClientService);
         assertThat(capture.getOut()).doesNotContain("event: error");
     }
@@ -145,7 +134,7 @@ class DeltaProcessorTest {
         final ChsDelta delta = new ChsDelta(badJson, 0, CONTEXT_ID, false);
 
         final NonRetryableErrorException exception =
-                assertThrows(NonRetryableErrorException.class, () -> testProcessor.process(delta));
+                assertThrows(NonRetryableErrorException.class, () -> deltaProcessor.process(delta));
         final String redactedMessage = "Unexpected character ('-' (code 45)): was expecting a colon"
                 + " to separate field name and value\n at [Source line: 2, column: 13]";
 
@@ -157,63 +146,20 @@ class DeltaProcessorTest {
         inOrder.verifyNoMoreInteractions();
     }
 
-    @ParameterizedTest
-    @MethodSource("provideRetryableStatuses")
-    void processWhenResponseStatusRetryable(final HttpStatus responseStatus) {
-        final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID, false);
-        final String expectedNumber = expectedAppointment.getExternalData().getCompanyNumber();
-
-        when(apiClientService.putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment)).thenThrow(
-                new ResponseStatusException(responseStatus));
-
-        assertThrows(RetryableErrorException.class, () -> testProcessor.process(delta));
-
-        final InOrder inOrder = inOrder(apiClientService);
-
-        inOrder.verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
-        inOrder.verifyNoMoreInteractions();
-
-    }
-
-    private static Stream<HttpStatus> provideRetryableStatuses() {
-        return EnumSet.allOf(HttpStatus.class).stream().filter(s -> s.value() != HttpStatus.BAD_REQUEST.value() && s.value() != HttpStatus.CONFLICT.value());
-    }
-
     @Test
     void processWhenClientServiceThrowsIllegalArgumentException() {
         final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID, false);
         final String expectedNumber = expectedAppointment.getExternalData().getCompanyNumber();
 
         doThrow(new IllegalArgumentException("simulate parsing error in api SDK")).when(apiClientService)
-                .putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
+                .putAppointment(expectedNumber, expectedAppointment);
 
-        assertThrows(RetryableErrorException.class, () -> testProcessor.process(delta));
-
-        final InOrder inOrder = inOrder(apiClientService);
-
-        inOrder.verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
-        inOrder.verifyNoMoreInteractions();
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideNonRetryableStatuses")
-    void processWhenResponseStatusNonRetryable(final HttpStatus responseStatus) {
-        final ChsDelta delta = new ChsDelta(json, 0, CONTEXT_ID, false);
-        final String expectedNumber = expectedAppointment.getExternalData().getCompanyNumber();
-
-        when(apiClientService.putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment)).thenThrow(
-                new ResponseStatusException(responseStatus));
-
-        assertThrows(NonRetryableErrorException.class, () -> testProcessor.process(delta));
+        assertThrows(RetryableErrorException.class, () -> deltaProcessor.process(delta));
 
         final InOrder inOrder = inOrder(apiClientService);
 
-        inOrder.verify(apiClientService).putAppointment(CONTEXT_ID, expectedNumber, expectedAppointment);
+        inOrder.verify(apiClientService).putAppointment(expectedNumber, expectedAppointment);
         inOrder.verifyNoMoreInteractions();
-    }
-
-    private static Stream<HttpStatus> provideNonRetryableStatuses() {
-        return Stream.of(HttpStatus.BAD_REQUEST, HttpStatus.CONFLICT);
     }
 
     @Test
@@ -222,16 +168,20 @@ class DeltaProcessorTest {
         String deleteJson = loadJson("officer_delete_delta.json");
         OfficerDeleteDelta expectedDelete = jsonToDelete(deleteJson);
         final ChsDelta delta = new ChsDelta(deleteJson, 0, CONTEXT_ID, true);
-        final String expectedNumber = expectedDelete.getCompanyNumber();
-        final String expectedInternalId = TransformerUtils.encode(expectedDelete.getInternalId());
-        final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.OK.value(), null, null);
+        final String companyNumber = expectedDelete.getCompanyNumber();
+        final String encodedInternalId = TransformerUtils.encode(expectedDelete.getInternalId());
+        final String encodedOfficerId = TransformerUtils.encode(expectedDelete.getOfficerId());
 
-        when(apiClientService.deleteAppointment(CONTEXT_ID, expectedInternalId, expectedNumber, DELTA_AT))
-                .thenReturn(response);
+        DeleteAppointmentParameters deleteAppointmentParameters = DeleteAppointmentParameters.builder()
+                .encodedInternalId(encodedInternalId)
+                .companyNumber(companyNumber)
+                .deltaAt(DELTA_AT)
+                .encodedOfficerId(encodedOfficerId)
+                .build();
 
-        testProcessor.processDelete(delta);
+        deltaProcessor.processDelete(delta);
 
-        verify(apiClientService).deleteAppointment(CONTEXT_ID, expectedInternalId, expectedNumber, DELTA_AT);
+        verify(apiClientService).deleteAppointment(deleteAppointmentParameters);
         verifyNoMoreInteractions(apiClientService);
         assertThat(capture.getOut()).doesNotContain("event: error");
     }
@@ -241,13 +191,13 @@ class DeltaProcessorTest {
         String brokendelete = loadJson("broken_delta.json");
         final ChsDelta delta = new ChsDelta(brokendelete, 0, CONTEXT_ID, true);
 
-        assertThrows(NonRetryableErrorException.class, ()->testProcessor.processDelete(delta));
+        assertThrows(NonRetryableErrorException.class, () -> deltaProcessor.processDelete(delta));
     }
 
     private static String loadJson(String filename) throws IOException {
         final Resource jsonFile = new ClassPathResource(filename);
-         return new BufferedReader(new InputStreamReader(jsonFile.getInputStream())).lines()
-                    .collect(Collectors.joining("\n"));
+        return new BufferedReader(new InputStreamReader(jsonFile.getInputStream())).lines()
+                .collect(Collectors.joining("\n"));
     }
 
     @ParameterizedTest
@@ -264,14 +214,12 @@ class DeltaProcessorTest {
                 String.format("\"delta_at\": \"%s\"", chipsDeltaAt));
 
         final ChsDelta delta = new ChsDelta(deltaMessage, 0, CONTEXT_ID, false);
-        final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.OK.value(), null, null);
 
-        when(apiClientService.putAppointment(eq(CONTEXT_ID), any(), any())).thenReturn(response);
+        deltaProcessor.process(delta);
 
-        testProcessor.process(delta);
-
-        verify(apiClientService).putAppointment(eq(CONTEXT_ID), any(), appointmentCapture.capture());
+        verify(apiClientService).putAppointment(any(), appointmentCapture.capture());
         assertThat(appointmentCapture.getValue().getInternalData().getDeltaAt().toInstant().toEpochMilli(),
                 is(serialisedDeltaAt));
     }
 }
+

@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.appointment.FullRecordCompanyOfficerApi;
 import uk.gov.companieshouse.api.delta.OfficerDeleteDelta;
 import uk.gov.companieshouse.delta.ChsDelta;
@@ -22,11 +21,15 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.exception.RetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.logging.DataMapHolder;
+import uk.gov.companieshouse.officer.delta.processor.model.DeleteAppointmentParameters;
 import uk.gov.companieshouse.officer.delta.processor.model.Officers;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientService;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.AppointmentTransform;
 import uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 
 /**
@@ -35,12 +38,8 @@ import uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils
 @Component
 public class DeltaProcessor implements Processor<ChsDelta> {
 
-    /**
-     * The constant PARSE_MESSAGE_PATTERN.
-     */
-    public static final Pattern PARSE_MESSAGE_PATTERN = Pattern.compile("Source.*line",
-            Pattern.DOTALL);
-    private static final Logger logger = LoggerFactory.getLogger(NAMESPACE);
+    public static final Pattern PARSE_MESSAGE_PATTERN = Pattern.compile("Source.*line", Pattern.DOTALL);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
 
     private final AppointmentTransform transformer;
     private final ApiClientService apiClientService;
@@ -62,87 +61,72 @@ public class DeltaProcessor implements Processor<ChsDelta> {
     }
 
     @Override
-    public void process(ChsDelta delta) throws RetryableErrorException, NonRetryableErrorException {
-
-        String logContext = delta.getContextId();
-
+    public void process(ChsDelta delta) {
         try {
             Officers officers = objectMapper.readValue(delta.getData(), Officers.class);
             final List<OfficersItem> officersList = officers.getOfficers();
 
             for (OfficersItem officer : officersList) {
-                DataMapHolder.get().companyNumber(officer.getCompanyNumber())
-                        .officerId(officer.getOfficerId()).internalId(officer.getInternalId());
+                DataMapHolder.get()
+                        .companyNumber(officer.getCompanyNumber())
+                        .officerId(officer.getOfficerId())
+                        .internalId(officer.getInternalId())
+                        .appointmentId(TransformerUtils.encode(officer.getInternalId()));
 
                 FullRecordCompanyOfficerApi appointmentApi = transformer.transform(officer);
                 appointmentApi.getInternalData()
                         .setDeltaAt(parseOffsetDateTime("deltaAt", officers.getDeltaAt()));
 
-                apiClientService.putAppointment(logContext, officer.getCompanyNumber(),
-                        appointmentApi);
+                apiClientService.putAppointment(officer.getCompanyNumber(), appointmentAPI);
             }
         } catch (JsonProcessingException ex) {
             /* IMPORTANT: do not propagate the original cause as it contains the full source JSON
              with
              * potentially sensitive data.
              */
-            final String cleanMessage = PARSE_MESSAGE_PATTERN.matcher(ex.getMessage())
-                    .replaceAll("Source line");
-            final NonRetryableErrorException cause = new NonRetryableErrorException(cleanMessage,
-                    null);
-            logger.errorContext(logContext,
-                    "Unable to read JSON from delta: " + ExceptionUtils.getRootCauseMessage(cause),
-                    cause, DataMapHolder.getLogMap());
+            final String cleanMessage = PARSE_MESSAGE_PATTERN.matcher(ex.getMessage()).replaceAll("Source line");
+            final NonRetryableErrorException cause = new NonRetryableErrorException(cleanMessage, null);
+            LOGGER.error("Unable to read JSON from delta: " + ExceptionUtils.getRootCauseMessage(cause), cause,
+                    DataMapHolder.getLogMap());
 
             throw new NonRetryableErrorException("Unable to JSON parse CHSDelta", cause);
-        } catch (ResponseStatusException ex) {
-            handleResponse(ex, ex.getStatusCode(), logContext, "Sending officer data failed");
         } catch (IllegalArgumentException ex) {
-            // Workaround for Docker router. When service is unavailable:
-            // "IllegalArgumentException: expected numeric
-            // type but got class uk.gov.companieshouse.api.error.ApiErrorResponse" is thrown
-            // when the SDK parses
+            // Workaround for Docker router. When service is unavailable: "IllegalArgumentException: expected numeric
+            // type but got class uk.gov.companieshouse.api.error.ApiErrorResponse" is thrown when the SDK parses
             // ApiErrorResponseException.
-            logger.info("Failed to process officer delta", DataMapHolder.getLogMap());
-            throw new RetryableErrorException("Failed to send data for officer, retry", ex);
+            LOGGER.info("Failed to process officer delta", DataMapHolder.getLogMap());
+            throw new RetryableErrorException("Failed to send data for officer, retry", e);
         }
     }
 
     @Override
     public void processDelete(ChsDelta chsDelta) {
-        final String logContext = chsDelta.getContextId();
         OfficerDeleteDelta officersDelete;
         try {
-            officersDelete = objectMapper.readValue(chsDelta.getData(), OfficerDeleteDelta.class);
-            final String companyNumber = officersDelete.getCompanyNumber();
-            DataMapHolder.get().companyNumber(companyNumber)
-                    .officerId(officersDelete.getOfficerId())
-                    .internalId(officersDelete.getInternalId());
-
-            final String internalId = TransformerUtils.encode(officersDelete.getInternalId());
-            apiClientService.deleteAppointment(logContext, internalId, companyNumber,
-                    officersDelete.getDeltaAt());
-        } catch (ResponseStatusException ex) {
-            handleResponse(ex, ex.getStatusCode(), logContext, "Sending officer delete failed");
-        } catch (Exception ex) {
-            logger.error("Error when extracting officers delete delta", ex,
-                    DataMapHolder.getLogMap());
-            throw new NonRetryableErrorException("Error when extracting officers delete delta", ex);
+            officersDelete = objectMapper.readValue(chsDelta.getData(),
+                    OfficerDeleteDelta.class);
+        } catch (JsonProcessingException ex) {
+            LOGGER.error("Error when extracting officers delete delta", ex, DataMapHolder.getLogMap());
+            throw new NonRetryableErrorException(
+                    "Error when extracting officers delete delta", ex);
         }
-    }
 
-    private void handleResponse(final ResponseStatusException ex, final HttpStatusCode httpStatus,
-            final String logContext, final String msg)
-            throws NonRetryableErrorException, RetryableErrorException {
-        Map<String, Object> logMap = DataMapHolder.getLogMap();
-        logMap.put("status", httpStatus.toString());
-        if (HttpStatus.BAD_REQUEST == httpStatus || HttpStatus.CONFLICT == httpStatus) {
-            logger.errorContext(logContext, msg, ex, logMap);
-            throw new NonRetryableErrorException(msg, ex);
-        } else {
-            // any other client or server status is retryable
-            logger.infoContext(logContext, msg + ", retry", logMap);
-            throw new RetryableErrorException(msg, ex);
-        }
+        final String companyNumber = officersDelete.getCompanyNumber();
+        final String officerId = officersDelete.getOfficerId();
+        final String internalId = officersDelete.getInternalId();
+        final String encodedInternalId = TransformerUtils.encode(internalId);
+        DataMapHolder.get()
+                .companyNumber(companyNumber)
+                .officerId(officerId)
+                .internalId(internalId)
+                .appointmentId(encodedInternalId);
+
+        final String encodedOfficerId = TransformerUtils.encode(officerId);
+        apiClientService.deleteAppointment(DeleteAppointmentParameters.builder()
+                .encodedInternalId(encodedInternalId)
+                .companyNumber(companyNumber)
+                .deltaAt(officersDelete.getDeltaAt())
+                .encodedOfficerId(encodedOfficerId)
+                .build());
     }
 }
