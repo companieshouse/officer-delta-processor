@@ -1,11 +1,10 @@
 package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import static uk.gov.companieshouse.api.appointment.ExternalData.CompanyStatusEnum;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseLocalDateTime;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.appointment.ExternalData;
 import uk.gov.companieshouse.api.appointment.FullRecordCompanyOfficerApi;
 import uk.gov.companieshouse.api.appointment.InternalData;
@@ -14,14 +13,35 @@ import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableError
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.CompanyStatus;
 
+/**
+ * The type Appointment transform.
+ */
 @Component
-public class AppointmentTransform implements Transformative<OfficersItem, FullRecordCompanyOfficerApi> {
+public class AppointmentTransform implements
+        Transformative<OfficersItem, FullRecordCompanyOfficerApi> {
+
+    /**
+     * The Officer transform.
+     */
     OfficerTransform officerTransform;
+    /**
+     * The Sensitive officer transform.
+     */
     SensitiveOfficerTransform sensitiveOfficerTransform;
+    /**
+     * The Officer role config.
+     */
     OfficerRoleConfig officerRoleConfig;
 
+    /**
+     * Instantiates a new Appointment transform.
+     *
+     * @param officerTransform          the officer transform
+     * @param sensitiveOfficerTransform the sensitive officer transform
+     * @param officerRoleConfig         the officer role config
+     */
     @Autowired
-    public AppointmentTransform(OfficerTransform officerTransform, 
+    public AppointmentTransform(OfficerTransform officerTransform,
             SensitiveOfficerTransform sensitiveOfficerTransform,
             OfficerRoleConfig officerRoleConfig) {
         this.officerTransform = officerTransform;
@@ -35,8 +55,8 @@ public class AppointmentTransform implements Transformative<OfficersItem, FullRe
     }
 
     @Override
-    public FullRecordCompanyOfficerApi transform(OfficersItem inputOfficer, FullRecordCompanyOfficerApi outputAppointment)
-            throws NonRetryableErrorException {
+    public FullRecordCompanyOfficerApi transform(OfficersItem inputOfficer,
+            FullRecordCompanyOfficerApi outputAppointment) throws NonRetryableErrorException {
 
         var externalData = new ExternalData();
         var internalData = new InternalData();
@@ -52,7 +72,8 @@ public class AppointmentTransform implements Transformative<OfficersItem, FullRe
         final String encodedOfficerId = TransformerUtils.encode(inputOfficer.getOfficerId());
         externalData.setOfficerId(encodedOfficerId);
 
-        final String encodedPreviousOfficerId = TransformerUtils.encode(inputOfficer.getPreviousOfficerId());
+        final String encodedPreviousOfficerId = TransformerUtils.encode(
+                inputOfficer.getPreviousOfficerId());
         externalData.setPreviousOfficerId(encodedPreviousOfficerId);
 
         externalData.setCompanyNumber(inputOfficer.getCompanyNumber());
@@ -74,9 +95,9 @@ public class AppointmentTransform implements Transformative<OfficersItem, FullRe
     private int getOfficerSortOrder(FullRecordCompanyOfficerApi outputAppointment) {
 
         var officerRole = outputAppointment.getExternalData().getData().getOfficerRole().toString();
-        Integer order = outputAppointment.getExternalData().getData().getResignedOn() == null ?
-                officerRoleConfig.getNonResigned().get(officerRole) : 
-                officerRoleConfig.getResigned().get(officerRole);
+        Integer order = outputAppointment.getExternalData().getData().getResignedOn() == null
+                ? officerRoleConfig.getNonResigned().get(officerRole)
+                : officerRoleConfig.getResigned().get(officerRole);
         return order.intValue();
     }
 }

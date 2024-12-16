@@ -7,6 +7,9 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import uk.gov.companieshouse.api.appointment.Identification;
 
+/**
+ * The type Delta identification.
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeltaIdentification {
 
@@ -25,57 +28,108 @@ public class DeltaIdentification {
     @JsonProperty("registered_overseas_entity_corporate_managing_officer")
     private Identification registeredOverseasEntityCorporateManagingOfficer;
 
+    /**
+     * Gets eea.
+     *
+     * @return the eea
+     */
     public Identification getEea() {
         return eea;
     }
 
+    /**
+     * Sets eea.
+     *
+     * @param eea the eea
+     */
     public void setEea(Identification eea) {
         this.eea = eea;
     }
 
+    /**
+     * Gets other corporate body or firm.
+     *
+     * @return the other corporate body or firm
+     */
     public Identification getOtherCorporateBodyOrFirm() {
         return otherCorporateBodyOrFirm;
     }
 
-    public void setOtherCorporateBodyOrFirm(
-            Identification otherCorporateBodyOrFirm) {
+    /**
+     * Sets other corporate body or firm.
+     *
+     * @param otherCorporateBodyOrFirm the other corporate body or firm
+     */
+    public void setOtherCorporateBodyOrFirm(Identification otherCorporateBodyOrFirm) {
         this.otherCorporateBodyOrFirm = otherCorporateBodyOrFirm;
     }
 
+    /**
+     * Gets non eea api.
+     *
+     * @return the non eea api
+     */
     public Identification getNonEeaApi() {
         return nonEeaApi;
     }
 
+    /**
+     * Sets non eea api.
+     *
+     * @param nonEeaApi the non eea api
+     */
     public void setNonEeaApi(Identification nonEeaApi) {
         this.nonEeaApi = nonEeaApi;
     }
 
-    public Identification getUKLimitedCompany() {
+    /**
+     * Gets uk limited company.
+     *
+     * @return the uk limited company
+     */
+    public Identification getUkLimitedCompany() {
         return ukLimitedCompany;
     }
 
-    public void setUKLimitedCompany(Identification ukLimitedCompany) {
+    /**
+     * Sets uk limited company.
+     *
+     * @param ukLimitedCompany the uk limited company
+     */
+    public void setUkLimitedCompany(Identification ukLimitedCompany) {
         this.ukLimitedCompany = ukLimitedCompany;
     }
 
+    /**
+     * Gets registered overseas entity corporate managing officer.
+     *
+     * @return the registered overseas entity corporate managing officer
+     */
     public Identification getRegisteredOverseasEntityCorporateManagingOfficer() {
         return registeredOverseasEntityCorporateManagingOfficer;
     }
 
+    /**
+     * Sets registered overseas entity corporate managing officer.
+     *
+     * @param registeredOverseasEntityCorporateManagingOfficer the registered overseas entity
+     *                                                         corporate managing officer
+     */
     public void setRegisteredOverseasEntityCorporateManagingOfficer(
             Identification registeredOverseasEntityCorporateManagingOfficer) {
-        this.registeredOverseasEntityCorporateManagingOfficer = registeredOverseasEntityCorporateManagingOfficer;
+        this.registeredOverseasEntityCorporateManagingOfficer =
+                registeredOverseasEntityCorporateManagingOfficer;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        DeltaIdentification that = (DeltaIdentification) o;
+        DeltaIdentification that = (DeltaIdentification) obj;
         return Objects.equals(eea, that.eea) && Objects.equals(otherCorporateBodyOrFirm,
                 that.otherCorporateBodyOrFirm) && Objects.equals(nonEeaApi, that.nonEeaApi)
                 && Objects.equals(ukLimitedCompany, that.ukLimitedCompany) && Objects.equals(

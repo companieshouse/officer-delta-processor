@@ -1,14 +1,13 @@
 package uk.gov.companieshouse.officer.delta.processor.config;
 
 import java.util.Map;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties(prefix = "officer-role-ordinal")
 public class OfficerRoleConfig {
-    
+
     private final Map<String, Integer> nonResigned;
     private final Map<String, Integer> resigned;
 
