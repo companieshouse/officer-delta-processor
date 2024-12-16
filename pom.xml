@@ -17,7 +17,8 @@
   </description>
   <packaging>jar</packaging>
   <properties>
-    <skip.integration.tests>false</skip.integration.tests>
+    <!--    Not available until pipeline docker instance is updated-->
+    <skip.integration.tests>true</skip.integration.tests>
     <skip.unit.tests>false</skip.unit.tests>
 
     <java.version>21</java.version>
@@ -375,6 +376,7 @@
           <argLine>${surefireArgLine}</argLine>
           <excludes>
             <exclude>**/*ITest.java</exclude>
+            <exclude>**/*IntegrationTest.java</exclude>
           </excludes>
           <skipTests>${skip.unit.tests}</skipTests>
         </configuration>

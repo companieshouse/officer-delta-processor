@@ -28,14 +28,14 @@ clean:
 
 .PHONY: test-unit
 test-unit: clean
-	mvn verify -Dskip.unit.tests=false -Dskip.integration.tests=false
+	mvn verify -Dskip.unit.tests=false
 
 .PHONY: test
 test: clean test-integration test-unit
 
+# Not available until pipeline docker instance is updated
 .PHONY: test-integration
 test-integration:
-	mvn integration-test -Dskip.unit.tests=true failsafe:verify
 
 .PHONY: verify
 verify: test-unit test-integration
