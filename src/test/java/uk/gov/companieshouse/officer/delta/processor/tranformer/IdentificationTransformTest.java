@@ -69,7 +69,7 @@ class IdentificationTransformTest {
         final DeltaIdentification identification = new DeltaIdentification();
         final Identification identificationAPI = createIdentificationAPI("uk-limited-company");
 
-        identification.setUKLimitedCompany(identificationAPI);
+        identification.setUkLimitedCompany(identificationAPI);
 
         final Identification result = testTransform.transform(identification, identificationAPI);
 

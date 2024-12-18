@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.officer.delta.processor.service.api;
 
-import static uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication.NAMESPACE;
+import static uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication.APPLICATION_NAME_SPACE;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -15,31 +15,46 @@ import uk.gov.companieshouse.officer.delta.processor.apiclient.ResponseHandler;
 import uk.gov.companieshouse.officer.delta.processor.logging.DataMapHolder;
 import uk.gov.companieshouse.officer.delta.processor.model.DeleteAppointmentParameters;
 
+/**
+ * The type Api client service.
+ */
 @Component
 public class ApiClientServiceImpl implements ApiClientService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
     private static final String URI = "/company/%s/appointments/%s/full_record";
 
     private final InternalApiClientFactory internalApiClientFactory;
     private final ResponseHandler responseHandler;
 
-    public ApiClientServiceImpl(InternalApiClientFactory internalApiClientFactory, ResponseHandler responseHandler) {
+    /**
+     * Instantiates a new Api client service.
+     *
+     * @param internalApiClientFactory the internal api client factory
+     * @param responseHandler          the response handler
+     */
+    public ApiClientServiceImpl(InternalApiClientFactory internalApiClientFactory,
+            ResponseHandler responseHandler) {
         this.internalApiClientFactory = internalApiClientFactory;
         this.responseHandler = responseHandler;
     }
 
+    /**
+     * Put appointment.
+     *
+     * @param companyNumber the company number
+     * @param appointment   the FullRecordCompanyOfficerApi
+     */
     public void putAppointment(String companyNumber, FullRecordCompanyOfficerApi appointment) {
-        final String uri = String.format(URI, companyNumber, appointment.getExternalData().getAppointmentId());
+        final String uri = String.format(URI, companyNumber,
+                appointment.getExternalData().getAppointmentId());
 
         LOGGER.info(String.format("PUT %s", uri), DataMapHolder.getLogMap());
 
         InternalApiClient client = internalApiClientFactory.get();
         try {
-            client.privateDeltaCompanyAppointmentResourceHandler()
-                    .putAppointment()
-                    .upsert(uri, appointment)
-                    .execute();
+            client.privateDeltaCompanyAppointmentResourceHandler().putAppointment()
+                    .upsert(uri, appointment).execute();
         } catch (ApiErrorResponseException ex) {
             responseHandler.handle(ex);
         } catch (URIValidationException ex) {
@@ -47,6 +62,12 @@ public class ApiClientServiceImpl implements ApiClientService {
         }
     }
 
+    /**
+     * Delete appointment.
+     *
+     * @param deleteAppointmentParameters the DeleteAppointmentParameters
+     * @throws IllegalArgumentException an IllegalArgumentException
+     */
     public void deleteAppointment(DeleteAppointmentParameters deleteAppointmentParameters) {
         final String deltaAt = deleteAppointmentParameters.getDeltaAt();
         final String companyNumber = deleteAppointmentParameters.getCompanyNumber();
@@ -64,8 +85,7 @@ public class ApiClientServiceImpl implements ApiClientService {
 
         InternalApiClient client = internalApiClientFactory.get();
         try {
-            client.privateDeltaResourceHandler()
-                    .deleteOfficer(uri, deltaAt, encodedOfficerId)
+            client.privateDeltaResourceHandler().deleteOfficer(uri, deltaAt, encodedOfficerId)
                     .execute();
         } catch (ApiErrorResponseException ex) {
             responseHandler.handle(ex);

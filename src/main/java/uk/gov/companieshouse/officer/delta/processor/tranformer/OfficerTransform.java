@@ -1,9 +1,11 @@
 package uk.gov.companieshouse.officer.delta.processor.tranformer;
 
+import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.lookupOfficerRole;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseLocalDate;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseYesOrNo;
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.lookupOfficerRole;
 
+import java.util.Collections;
+import java.util.stream.Collectors;
 import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,13 +21,23 @@ import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithOccupa
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithPre1992Appointment;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.RolesWithResidentialAddress;
 
-import java.util.Collections;
-import java.util.stream.Collectors;
-
+/**
+ * The type Officer transform.
+ */
 @Component
 public class OfficerTransform implements Transformative<OfficersItem, Data> {
+
+    /**
+     * The constant COMPANY.
+     */
     public static final String COMPANY = "/company";
+    /**
+     * The constant APPOINTMENTS.
+     */
     public static final String APPOINTMENTS = "/appointments";
+    /**
+     * The constant OFFICERS.
+     */
     public static final String OFFICERS = "/officers";
     private final IdentificationTransform idTransform;
 
@@ -35,9 +47,19 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
 
     private final PrincipalOfficeAddressTransform principalOfficeAddressTransform;
 
+    /**
+     * Instantiates a new Officer transform.
+     *
+     * @param idTransform                     the id transform
+     * @param serviceAddressTransform         the service address transform
+     * @param formerNameTransform             the former name transform
+     * @param principalOfficeAddressTransform the principal office address transform
+     */
     @Autowired
-    public OfficerTransform(IdentificationTransform idTransform, ServiceAddressTransform serviceAddressTransform,
-                            FormerNameTransform formerNameTransform, PrincipalOfficeAddressTransform principalOfficeAddressTransform) {
+    public OfficerTransform(IdentificationTransform idTransform,
+            ServiceAddressTransform serviceAddressTransform,
+            FormerNameTransform formerNameTransform,
+            PrincipalOfficeAddressTransform principalOfficeAddressTransform) {
         this.idTransform = idTransform;
         this.serviceAddressTransform = serviceAddressTransform;
         this.formerNameTransform = formerNameTransform;
@@ -81,12 +103,12 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
         }
 
         if (RolesWithFormerNames.includes(officerRole) && source.getPreviousNameArray() != null) {
-            officer.setFormerNames(source.getPreviousNameArray().stream()
-                    .map(formerNameTransform::transform).collect(Collectors.toList()));
+            officer.setFormerNames(
+                    source.getPreviousNameArray().stream().map(formerNameTransform::transform)
+                            .collect(Collectors.toList()));
         }
 
-        final var appointmentDate = parseLocalDate(
-                "appointmentDate", source.getAppointmentDate());
+        final var appointmentDate = parseLocalDate("appointmentDate", source.getAppointmentDate());
 
         handleManagingOfficerFields(source, officer, officerRole);
 
@@ -111,44 +133,44 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
             officer.setIsSecureOfficer(BooleanUtils.toBooleanObject(source.getSecureDirector()));
         }
 
-        if (RolesWithCountryOfResidence.includes(officerRole) && source.getServiceAddress() != null) {
+        if (RolesWithCountryOfResidence.includes(officerRole)
+                && source.getServiceAddress() != null) {
             officer.setCountryOfResidence(source.getServiceAddress().getUsualCountryOfResidence());
         }
 
-        if (source.getIdentification() != null)
+        if (source.getIdentification() != null) {
             officer.setIdentification(idTransform.transform(source.getIdentification()));
-
-        String selfLink = COMPANY.concat("/")
-            .concat(source.getCompanyNumber())
-            .concat(APPOINTMENTS).concat("/")
-            .concat(TransformerUtils.encode(source.getInternalId()));
-
-        String officerSelf = OFFICERS.concat("/")
-            .concat(TransformerUtils.encode(source.getOfficerId()));
-
-        String officerAppointments = OFFICERS.concat("/")
-            .concat(TransformerUtils.encode(source.getOfficerId()))
-            .concat(APPOINTMENTS);
+        }
 
         var itemLinkTypes = new ItemLinkTypes();
-        var officerLinkTypes = new OfficerLinkTypes();
-
+        String selfLink = COMPANY.concat("/").concat(source.getCompanyNumber()).concat(APPOINTMENTS)
+                .concat("/").concat(TransformerUtils.encode(source.getInternalId()));
         itemLinkTypes.setSelf(selfLink);
+
+        var officerLinkTypes = new OfficerLinkTypes();
         itemLinkTypes.setOfficer(officerLinkTypes);
+
+        String officerSelf = OFFICERS.concat("/")
+                .concat(TransformerUtils.encode(source.getOfficerId()));
         itemLinkTypes.getOfficer().setSelf(officerSelf);
+
+        String officerAppointments = OFFICERS.concat("/")
+                .concat(TransformerUtils.encode(source.getOfficerId())).concat(APPOINTMENTS);
         itemLinkTypes.getOfficer().setAppointments(officerAppointments);
         officer.setLinks(Collections.singletonList(itemLinkTypes));
 
         return officer;
     }
 
-    private void handleManagingOfficerFields(OfficersItem source, Data officer, String officerRole) {
-        if(officerRole.contains(OfficerRole.MANOFF.getValue())) {
+    private void handleManagingOfficerFields(OfficersItem source, Data officer,
+            String officerRole) {
+        if (officerRole.contains(OfficerRole.MANOFF.getValue())) {
             officer.setResponsibilities(source.getResponsibilities());
         }
 
-        if(OfficerRole.MANOFFCORP.getValue().equals(officerRole)) {
-            officer.setPrincipalOfficeAddress(principalOfficeAddressTransform.transform(source.getPrincipalOfficeAddress()));
+        if (OfficerRole.MANOFFCORP.getValue().equals(officerRole)) {
+            officer.setPrincipalOfficeAddress(
+                    principalOfficeAddressTransform.transform(source.getPrincipalOfficeAddress()));
             officer.setContactDetails(source.getContactDetails());
         }
     }

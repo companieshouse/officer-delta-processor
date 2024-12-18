@@ -20,7 +20,7 @@ import uk.gov.companieshouse.officer.delta.processor.config.KafkaTestContainerCo
 @DirtiesContext
 @Import(KafkaTestContainerConfig.class)
 @ActiveProfiles({"test"})
-class OfficerDeltaProcessorTest {
+class OfficerDeltaProcessorIntegrationTest {
 
     @Autowired
     public KafkaTemplate<String, Object> kafkaTemplate;

@@ -5,13 +5,12 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Officers {
@@ -38,41 +37,42 @@ public class Officers {
         this.additionalProperties.put(name, value);
     }
 
-    public void setCreatedTime(String createdTime) {
-        this.createdTime = createdTime;
-    }
-
     public String getCreatedTime() {
         return createdTime;
     }
 
-    public void setDeltaAt(String deltaAt) {
-        this.deltaAt = deltaAt;
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
     }
 
     public String getDeltaAt() {
         return deltaAt;
     }
 
-    public void setOfficers(List<OfficersItem> officers) {
-        this.officerList = officers;
+    public void setDeltaAt(String deltaAt) {
+        this.deltaAt = deltaAt;
     }
 
     public List<OfficersItem> getOfficers() {
         return officerList;
     }
 
+    public void setOfficers(List<OfficersItem> officers) {
+        this.officerList = officers;
+    }
+
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        Officers that = (Officers) o;
-        return Objects.equals(getCreatedTime(), that.getCreatedTime()) && Objects.equals(getDeltaAt(),
-                that.getDeltaAt()) && Objects.equals(getOfficers(), that.getOfficers());
+        Officers that = (Officers) obj;
+        return Objects.equals(getCreatedTime(), that.getCreatedTime()) && Objects.equals(
+                getDeltaAt(), that.getDeltaAt()) && Objects.equals(getOfficers(),
+                that.getOfficers());
     }
 
     @Override

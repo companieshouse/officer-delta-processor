@@ -136,7 +136,7 @@ class DeltaProcessorTest {
         final NonRetryableErrorException exception =
                 assertThrows(NonRetryableErrorException.class, () -> deltaProcessor.process(delta));
         final String redactedMessage = "Unexpected character ('-' (code 45)): was expecting a colon"
-                + " to separate field name and value\n at [Source line: 2, column: 14]";
+                + " to separate field name and value\n at [Source line: 2, column: 13]";
 
         assertThat(exception.getMessage(), is("Unable to JSON parse CHSDelta"));
         assertThat(exception.getCause().getMessage(), is(redactedMessage));
