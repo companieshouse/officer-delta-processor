@@ -18,7 +18,7 @@
         ],
         "summary": "Service health check",
         "description": "Checks the service is running.",
-        "operationId": "healthCheck",
+        "operationId": "healthcheck",
         "responses": {
           "200": {
             "description": "OK",
@@ -35,7 +35,7 @@
             "content": {}
           }
         },
-        "x-operationName": "healthCheck"
+        "x-operationName": "healthcheck"
       }
     }
   },
