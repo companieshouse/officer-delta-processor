@@ -451,7 +451,7 @@
           </from>
           <to>
             <image>
-              169942020521.dkr.ecr.eu-west-2.amazonaws.com/local/officer-delta-processor:latest
+              416670754337.dkr.ecr.eu-west-2.amazonaws.com/officer-delta-processor:latest
             </image>
           </to>
         </configuration>
