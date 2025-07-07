@@ -1,5 +1,0 @@
-app_name: officer-delta-processor
-group: internalapi
-weight: 900
-routes:
-   1: ^/officer-delta-processor.*
