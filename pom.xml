@@ -18,7 +18,7 @@
   <packaging>jar</packaging>
   <properties>
     <!--    Not available until pipeline docker instance is updated-->
-    <skip.integration.tests>true</skip.integration.tests>
+    <skip.integration.tests>false</skip.integration.tests>
     <skip.unit.tests>false</skip.unit.tests>
 
     <java.version>21</java.version>
@@ -37,10 +37,10 @@
     <equalsverifier.version>4.0.4</equalsverifier.version>
     <testcontainers.version>1.21.3</testcontainers.version>
     <system-lambda.version>1.2.1</system-lambda.version>
-    <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
-    <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
-    <io-cucumber.version>7.23.0</io-cucumber.version>
-    <wiremock.standalone.version>4.0.0-beta.14</wiremock.standalone.version>
+    <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
+    <maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
+    <io-cucumber.version>7.20.1</io-cucumber.version>
+    <wiremock.standalone.version>3.13.1</wiremock.standalone.version>
     <maven-build-helper-plugin.version>3.6.1</maven-build-helper-plugin.version>
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
     <awaitility.version>4.3.0</awaitility.version>

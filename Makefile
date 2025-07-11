@@ -19,6 +19,7 @@ test: clean test-integration test-unit
 # Not available until pipeline docker instance is updated
 .PHONY: test-integration
 test-integration:
+	mvn integration-test verify -Dskip.unit.tests=true failsafe:verify
 
 .PHONY: verify
 verify: test-unit test-integration
