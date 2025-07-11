@@ -19,6 +19,7 @@ test: clean test-integration test-unit
 # Not available until pipeline docker instance is updated
 .PHONY: test-integration
 test-integration:
+	mvn integration-test verify -Dskip.unit.tests=true failsafe:verify
 
 .PHONY: verify
 verify: test-unit test-integration
@@ -34,8 +35,6 @@ endif
 	$(info Packaging version: $(version))
 	@test -s ./$(artifact_name).jar || { echo "ERROR: Service JAR not found"; exit 1; }
 	$(eval tmpdir:=$(shell mktemp -d build-XXXXXXXXXX))
-	cp ./start.sh $(tmpdir)
-	cp ./routes.yaml $(tmpdir)
 	cp ./$(artifact_name).jar $(tmpdir)/$(artifact_name).jar
 	cd $(tmpdir); zip -r ../$(artifact_name)-$(version).zip *
 	rm -rf $(tmpdir)
