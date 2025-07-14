@@ -11,7 +11,7 @@ clean:
 
 .PHONY: test-unit
 test-unit: clean
-	mvn verify -Dskip.unit.tests=false
+	mvn verify -Dskip.integration.tests=true
 
 .PHONY: test
 test: clean test-integration test-unit
