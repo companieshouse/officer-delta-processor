@@ -53,6 +53,11 @@
     <commons-lang3.version>3.18.0</commons-lang3.version>
 
     <!-- Sonar dependency -->
+    <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
+    <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
+    <sonar.login/>
+    <sonar.password/>
+    <sonar.projectName>officer-delta-processor</sonar.projectName>
     <sonar.projectKey>uk.gov.companieshouse:officer-delta-processor</sonar.projectKey>
     <sonar.sources>src/main</sonar.sources>
     <sonar.tests>src/test,src/itest</sonar.tests>
