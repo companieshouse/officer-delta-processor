@@ -4,6 +4,7 @@ import static uk.gov.companieshouse.officer.delta.processor.tranformer.Transform
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseLocalDate;
 import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseYesOrNo;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.BooleanUtils;
@@ -41,6 +42,8 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
     public static final String OFFICERS = "/officers";
     private final IdentificationTransform idTransform;
 
+    private final IdentityVerificationDetailsTransform identityVerificationDetailsTransform;
+
     private final ServiceAddressTransform serviceAddressTransform;
 
     private final FormerNameTransform formerNameTransform;
@@ -57,10 +60,12 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
      */
     @Autowired
     public OfficerTransform(IdentificationTransform idTransform,
-            ServiceAddressTransform serviceAddressTransform,
-            FormerNameTransform formerNameTransform,
-            PrincipalOfficeAddressTransform principalOfficeAddressTransform) {
+                            IdentityVerificationDetailsTransform identityVerificationDetailsTransform,
+                            ServiceAddressTransform serviceAddressTransform,
+                            FormerNameTransform formerNameTransform,
+                            PrincipalOfficeAddressTransform principalOfficeAddressTransform) {
         this.idTransform = idTransform;
+        this.identityVerificationDetailsTransform = identityVerificationDetailsTransform;
         this.serviceAddressTransform = serviceAddressTransform;
         this.formerNameTransform = formerNameTransform;
         this.principalOfficeAddressTransform = principalOfficeAddressTransform;
@@ -112,18 +117,7 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
 
         handleManagingOfficerFields(source, officer, officerRole);
 
-        if (RolesWithPre1992Appointment.includes(officerRole)) {
-            officer.setIsPre1992Appointment(parseYesOrNo(source.getApptDatePrefix()));
-            if (Boolean.TRUE.equals(officer.getIsPre1992Appointment())) {
-                officer.setAppointedOn(null);
-                officer.setAppointedBefore(appointmentDate);
-            } else {
-                officer.setAppointedOn(appointmentDate);
-            }
-        } else {
-            officer.setIsPre1992Appointment(false);
-            officer.setAppointedOn(appointmentDate);
-        }
+        handleRolesWithPre1992Appointment(source, officer, officerRole, appointmentDate);
 
         officer.setServiceAddress(serviceAddressTransform.transform(source.getServiceAddress()));
         officer.serviceAddressIsSameAsRegisteredOfficeAddress(
@@ -140,6 +134,11 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
 
         if (source.getIdentification() != null) {
             officer.setIdentification(idTransform.transform(source.getIdentification()));
+        }
+
+        if (source.getIdentityVerificationDetails() != null) {
+            officer.setIdentityVerificationDetails(
+                    identityVerificationDetailsTransform.transform(source.getIdentityVerificationDetails()));
         }
 
         var itemLinkTypes = new ItemLinkTypes();
@@ -160,6 +159,22 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
         officer.setLinks(Collections.singletonList(itemLinkTypes));
 
         return officer;
+    }
+
+    private static void handleRolesWithPre1992Appointment(OfficersItem source, Data officer,
+                                                          String officerRole, LocalDate appointmentDate) {
+        if (RolesWithPre1992Appointment.includes(officerRole)) {
+            officer.setIsPre1992Appointment(parseYesOrNo(source.getApptDatePrefix()));
+            if (Boolean.TRUE.equals(officer.getIsPre1992Appointment())) {
+                officer.setAppointedOn(null);
+                officer.setAppointedBefore(appointmentDate);
+            } else {
+                officer.setAppointedOn(appointmentDate);
+            }
+        } else {
+            officer.setIsPre1992Appointment(false);
+            officer.setAppointedOn(appointmentDate);
+        }
     }
 
     private void handleManagingOfficerFields(OfficersItem source, Data officer,

@@ -28,6 +28,7 @@ import uk.gov.companieshouse.api.appointment.ServiceAddress;
 import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.DeltaIdentification;
+import uk.gov.companieshouse.officer.delta.processor.model.DeltaIdentityVerificationDetails;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.model.PreviousNameArray;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.OfficerRole;
@@ -68,6 +69,10 @@ class OfficerTransformTest {
     private ServiceAddress serviceAddress;
     @Mock
     private PrincipalOfficeAddress principalOfficeAddress;
+    @Mock
+    private IdentityVerificationDetailsTransform identityVerificationDetailsTransform;
+    @Mock
+    private DeltaIdentityVerificationDetails identityVerificationDetails;
 
     private static Stream<Arguments> provideScenarioParams() {
         return Stream.of(Arguments.of(CHANGED_AT, true),
@@ -79,7 +84,8 @@ class OfficerTransformTest {
 
     @BeforeEach
     void setUp() {
-        testTransform = new OfficerTransform(identificationTransform, serviceAddressTransform, formerNameTransform, principalOfficeAddressTransform);
+        testTransform = new OfficerTransform(identificationTransform, identityVerificationDetailsTransform,
+                serviceAddressTransform, formerNameTransform, principalOfficeAddressTransform);
     }
 
     @Test
