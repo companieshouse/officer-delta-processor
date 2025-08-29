@@ -9,6 +9,8 @@ import com.github.tomakehurst.wiremock.matching.MatchResult;
 import com.github.tomakehurst.wiremock.matching.ValueMatcher;
 import uk.gov.companieshouse.logging.Logger;
 
+import java.util.Iterator;
+
 /**
  *  Custom matcher class used to match requests made by the consumer to the
  *  data api. The url, request type and request body are compared.
@@ -59,33 +61,51 @@ public class OfficerRequestMatcher implements ValueMatcher<Request> {
     }
 
     private MatchResult matchBody(String actualBody) {
-
         ObjectMapper mapper = new ObjectMapper();
 
-        MatchResult bodyResult;
-        JsonNode expectedBody;
         try {
-            expectedBody = mapper.readTree(expectedOutput);
+            JsonNode expectedNode = mapper.readTree(expectedOutput);
+            JsonNode actualNode = mapper.readTree(actualBody);
+
+            boolean match = compareJson(expectedNode, actualNode);
+            if (!match) {
+                logger.error("Body does not match expected:\n<" + expectedNode + ">\nactual:\n<" + actualNode + ">");
+            }
+            return MatchResult.of(match);
         } catch (JsonProcessingException e) {
-            logger.error("Could not process expectedBody JSON: " + e);
+            logger.error("Could not process JSON: " + e.getMessage());
             return MatchResult.of(false);
         }
+    }
 
-        JsonNode actual;
-        try {
-            actual = mapper.readTree(actualBody);
-        } catch (JsonProcessingException e) {
-            logger.error("Could not process actualBody JSON: " + e);
-            return MatchResult.of(false);
+    private boolean compareJson(JsonNode expected, JsonNode actual) {
+        if (expected == null || actual == null) {
+            return expected == actual;
         }
 
-        bodyResult = MatchResult.of(expectedBody.equals(actual));
-
-        if (! bodyResult.isExactMatch()) {
-            logger.error("Body does not match expected: <" + expectedBody + "> actual: <" + actualBody + ">");
+        if (!expected.getNodeType().equals(actual.getNodeType())) {
+            return false;
         }
 
-        return bodyResult;
+        switch (expected.getNodeType()) {
+            case OBJECT:
+                for (Iterator<String> fieldNames = expected.fieldNames(); fieldNames.hasNext(); ) {
+                    String field = fieldNames.next();
+                    if (!actual.has(field)) return false;
+                    if (!compareJson(expected.get(field), actual.get(field))) return false;
+                }
+                return true;
+
+            case ARRAY:
+                if (expected.size() != actual.size()) return false;
+                for (int i = 0; i < expected.size(); i++) {
+                    if (!compareJson(expected.get(i), actual.get(i))) return false;
+                }
+                return true;
+
+            default:
+                return expected.equals(actual);
+        }
     }
 }
 
