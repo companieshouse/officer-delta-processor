@@ -44,6 +44,18 @@
         "place_registered":"United Kingdom",
         "registration_number":"38298"
       },
+      "identity_verification_details": {
+        "anti_money_laundering_supervisory_bodies": [
+          "Supervisory Body"
+        ],
+        "appointment_verification_end_on": [2024,12,12],
+        "appointment_verification_statement_date": [2024,12,13],
+        "appointment_verification_statement_due_on": [2024,12,14],
+        "appointment_verification_start_on": [2024,12,15],
+        "authorised_corporate_service_provider_name": "Service Provider",
+        "identity_verified_on": [2024,12,16],
+        "preferred_name": "Preferred Name"
+      },
       "company_name":"MY BIG OLD COMPANY LIMITED",
       "surname":null,
       "forename":null,
