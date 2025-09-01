@@ -5,7 +5,7 @@ import uk.gov.companieshouse.api.appointment.IdentityVerificationDetails;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.DeltaIdentityVerificationDetails;
 
-import java.time.LocalDate;
+import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseLocalDate;
 
 @Component
 public class IdentityVerificationDetailsTransform implements Transformative<DeltaIdentityVerificationDetails, IdentityVerificationDetails>{
@@ -18,12 +18,16 @@ public class IdentityVerificationDetailsTransform implements Transformative<Delt
     public IdentityVerificationDetails transform(DeltaIdentityVerificationDetails source, IdentityVerificationDetails output)
             throws NonRetryableErrorException {
         output.setAntiMoneyLaunderingSupervisoryBodies(source.getAntiMoneyLaunderingSupervisoryBodies());
-        output.setAppointmentVerificationEndOn(LocalDate.parse(source.getAppointmentVerificationEndOn()));
-        output.setAppointmentVerificationStatementDate(LocalDate.parse(source.getAppointmentVerificationStatementDate()));
-        output.setAppointmentVerificationStatementDueOn(LocalDate.parse(source.getAppointmentVerificationStatementDueOn()));
-        output.setAppointmentVerificationStartOn(LocalDate.parse(source.getAppointmentVerificationStartOn()));
+        output.setAppointmentVerificationEndOn(parseLocalDate("appointment_verification_end_on",
+                source.getAppointmentVerificationEndOn()));
+        output.setAppointmentVerificationStatementDate(parseLocalDate(
+                "appointment_verification_statement_date", source.getAppointmentVerificationStatementDate()));
+        output.setAppointmentVerificationStatementDueOn(parseLocalDate(
+                "appointment_verification_statement_due_on", source.getAppointmentVerificationStatementDueOn()));
+        output.setAppointmentVerificationStartOn(parseLocalDate("appointment_verification_start_on",
+                source.getAppointmentVerificationStartOn()));
         output.setAuthorisedCorporateServiceProviderName(source.getAuthorisedCorporateServiceProviderName());
-        output.setIdentityVerifiedOn(LocalDate.parse(source.getIdentityVerifiedOn()));
+        output.setIdentityVerifiedOn(parseLocalDate("identity_verified_on", source.getIdentityVerifiedOn()));
         output.setPreferredName(source.getPreferredName());
         return output;
     }
