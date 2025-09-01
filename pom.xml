@@ -28,6 +28,8 @@
     <private-sdk.version>4.0.350</private-sdk.version>
     <spring.boot.version>3.5.4</spring.boot.version>
     <apache-avro.version>1.12.0</apache-avro.version>
+    <spring-core.version>6.2.10</spring-core.version>
+    <tomcat-embed-dependencies.version>10.1.44</tomcat-embed-dependencies.version>
 
     <!-- Logging -->
     <structured-logging.version>3.0.37</structured-logging.version>
@@ -195,6 +197,28 @@
       <groupId>uk.gov.companieshouse</groupId>
       <artifactId>api-sdk-manager-java-library</artifactId>
       <version>${api-sdk-manager-java-library.version}</version>
+    </dependency>
+
+    <!-- CVE-2025-41242 and CVE-2025-48989 -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+      <version>${spring-core.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.tomcat.embed</groupId>
+      <artifactId>tomcat-embed-core</artifactId>
+      <version>${tomcat-embed-dependencies.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.tomcat.embed</groupId>
+      <artifactId>tomcat-embed-websocket</artifactId>
+      <version>${tomcat-embed-dependencies.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.tomcat.embed</groupId>
+      <artifactId>tomcat-embed-el</artifactId>
+      <version>${tomcat-embed-dependencies.version}</version>
     </dependency>
 
     <!-- Test -->
