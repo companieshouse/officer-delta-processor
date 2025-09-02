@@ -1,8 +1,8 @@
-package uk.gov.companieshouse.officer.delta.processor.tranformer;
+package uk.gov.companieshouse.officer.delta.processor.transformer;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.lookupOfficerRole;
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseLocalDate;
+import static uk.gov.companieshouse.officer.delta.processor.transformer.TransformerUtils.lookupOfficerRole;
+import static uk.gov.companieshouse.officer.delta.processor.transformer.TransformerUtils.parseLocalDate;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;

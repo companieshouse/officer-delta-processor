@@ -1,7 +1,7 @@
 package uk.gov.companieshouse.officer.delta.processor.processor;
 
 import static uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication.APPLICATION_NAME_SPACE;
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseOffsetDateTime;
+import static uk.gov.companieshouse.officer.delta.processor.transformer.TransformerUtils.parseOffsetDateTime;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,8 +22,8 @@ import uk.gov.companieshouse.officer.delta.processor.model.DeleteAppointmentPara
 import uk.gov.companieshouse.officer.delta.processor.model.Officers;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientService;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.AppointmentTransform;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils;
+import uk.gov.companieshouse.officer.delta.processor.transformer.AppointmentTransform;
+import uk.gov.companieshouse.officer.delta.processor.transformer.TransformerUtils;
 
 
 /**

@@ -1,11 +1,11 @@
-package uk.gov.companieshouse.officer.delta.processor.tranformer;
+package uk.gov.companieshouse.officer.delta.processor.transformer;
 
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.appointment.IdentityVerificationDetails;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.DeltaIdentityVerificationDetails;
 
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseLocalDate;
+import static uk.gov.companieshouse.officer.delta.processor.transformer.TransformerUtils.parseLocalDate;
 
 @Component
 public class IdentityVerificationDetailsTransform implements Transformative<DeltaIdentityVerificationDetails, IdentityVerificationDetails>{

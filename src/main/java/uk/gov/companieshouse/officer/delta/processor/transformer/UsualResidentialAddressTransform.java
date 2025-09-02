@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officer.delta.processor.tranformer;
+package uk.gov.companieshouse.officer.delta.processor.transformer;
 
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.appointment.UsualResidentialAddress;

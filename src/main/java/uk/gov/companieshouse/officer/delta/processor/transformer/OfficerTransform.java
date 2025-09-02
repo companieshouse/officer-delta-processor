@@ -1,8 +1,8 @@
-package uk.gov.companieshouse.officer.delta.processor.tranformer;
+package uk.gov.companieshouse.officer.delta.processor.transformer;
 
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.lookupOfficerRole;
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseLocalDate;
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseYesOrNo;
+import static uk.gov.companieshouse.officer.delta.processor.transformer.TransformerUtils.lookupOfficerRole;
+import static uk.gov.companieshouse.officer.delta.processor.transformer.TransformerUtils.parseLocalDate;
+import static uk.gov.companieshouse.officer.delta.processor.transformer.TransformerUtils.parseYesOrNo;
 
 import java.time.LocalDate;
 import java.util.Collections;
