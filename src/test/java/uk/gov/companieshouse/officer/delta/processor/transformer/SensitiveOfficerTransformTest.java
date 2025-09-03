@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officer.delta.processor.tranformer;
+package uk.gov.companieshouse.officer.delta.processor.transformer;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -87,7 +87,7 @@ class SensitiveOfficerTransformTest {
 
         when(usualResidentialAddressTransform.transform(addressAPI)).thenReturn(usualResidentialAddress);
 
-        officer.setUsualResidentialAddress(addressAPI);;
+        officer.setUsualResidentialAddress(addressAPI);
         officer.setAppointmentDate(VALID_DATE);
         officer.setDateOfBirth(VALID_DATE);
 

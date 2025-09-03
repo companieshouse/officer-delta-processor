@@ -23,6 +23,18 @@
           "legal_form": "Hong Kong"
         }
       },
+      "identity_verification_details": {
+        "anti_money_laundering_supervisory_bodies": [
+          "Supervisory Body"
+        ],
+        "appointment_verification_end_on": "20241212",
+        "appointment_verification_statement_date": "20241213",
+        "appointment_verification_statement_due_on": "20241214",
+        "appointment_verification_start_on": "20241215",
+        "authorised_corporate_service_provider_name": "Service Provider",
+        "identity_verified_on": "20241216",
+        "preferred_name": "Preferred Name"
+      },
       "service_address": {
         "premise": "1",
         "address_line_1" : "1 Crown Way",

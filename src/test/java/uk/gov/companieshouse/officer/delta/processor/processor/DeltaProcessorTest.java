@@ -9,7 +9,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseOffsetDateTime;
+import static uk.gov.companieshouse.officer.delta.processor.transformer.TransformerUtils.parseOffsetDateTime;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,15 +46,16 @@ import uk.gov.companieshouse.officer.delta.processor.model.DeleteAppointmentPara
 import uk.gov.companieshouse.officer.delta.processor.model.Officers;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientService;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.AppointmentTransform;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.FormerNameTransform;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.IdentificationTransform;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.OfficerTransform;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.PrincipalOfficeAddressTransform;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.SensitiveOfficerTransform;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.ServiceAddressTransform;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.UsualResidentialAddressTransform;
+import uk.gov.companieshouse.officer.delta.processor.transformer.AppointmentTransform;
+import uk.gov.companieshouse.officer.delta.processor.transformer.FormerNameTransform;
+import uk.gov.companieshouse.officer.delta.processor.transformer.IdentificationTransform;
+import uk.gov.companieshouse.officer.delta.processor.transformer.IdentityVerificationDetailsTransform;
+import uk.gov.companieshouse.officer.delta.processor.transformer.OfficerTransform;
+import uk.gov.companieshouse.officer.delta.processor.transformer.PrincipalOfficeAddressTransform;
+import uk.gov.companieshouse.officer.delta.processor.transformer.SensitiveOfficerTransform;
+import uk.gov.companieshouse.officer.delta.processor.transformer.ServiceAddressTransform;
+import uk.gov.companieshouse.officer.delta.processor.transformer.TransformerUtils;
+import uk.gov.companieshouse.officer.delta.processor.transformer.UsualResidentialAddressTransform;
 
 @ExtendWith(MockitoExtension.class)
 class DeltaProcessorTest {
@@ -80,6 +81,7 @@ class DeltaProcessorTest {
     static void beforeAll() throws IOException, NonRetryableErrorException {
         json = loadJson("officer_delta_example_2.json");
         OfficerTransform officerTransform = new OfficerTransform(new IdentificationTransform(),
+                new IdentityVerificationDetailsTransform(),
                 new ServiceAddressTransform(),
                 new FormerNameTransform(),
                 new PrincipalOfficeAddressTransform());

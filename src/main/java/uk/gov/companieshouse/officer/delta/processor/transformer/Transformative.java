@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officer.delta.processor.tranformer;
+package uk.gov.companieshouse.officer.delta.processor.transformer;
 
 import java.util.ArrayList;
 import java.util.Collection;

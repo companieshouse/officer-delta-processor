@@ -101,6 +101,9 @@ public class OfficersItem {
     @JsonProperty("identification")
     private DeltaIdentification identification;
 
+    @JsonProperty("identity_verification_details")
+    private DeltaIdentityVerificationDetails identityVerificationDetails;
+
     @JsonProperty("nationality")
     private String nationality;
 
@@ -427,11 +430,11 @@ public class OfficersItem {
                 that.getContactDetails()) && Objects.equals(getForename(), that.getForename())
                 && Objects.equals(getOfficerId(), that.getOfficerId()) && Objects.equals(
                 getPreviousOfficerId(), that.getPreviousOfficerId()) && Objects.equals(
-                getIdentification(), that.getIdentification()) && Objects.equals(getNationality(),
-                that.getNationality()) && Objects.equals(getSurname(), that.getSurname())
-                && Objects.equals(getExternalNumber(), that.getExternalNumber()) && Objects.equals(
-                getSecureDirector(), that.getSecureDirector()) && Objects.equals(
-                getPreviousNameArray(), that.getPreviousNameArray()) && Objects.equals(
+                getIdentification(), that.getIdentification()) && Objects.equals(getIdentityVerificationDetails(),
+                that.getIdentityVerificationDetails()) && Objects.equals(getNationality(), that.getNationality()) &&
+                Objects.equals(getSurname(), that.getSurname()) && Objects.equals(getExternalNumber(),
+                that.getExternalNumber()) && Objects.equals(getSecureDirector(), that.getSecureDirector()) &&
+                Objects.equals(getPreviousNameArray(), that.getPreviousNameArray()) && Objects.equals(
                 getAdditionalProperties(), that.getAdditionalProperties()) && Objects.equals(
                 getCompanyName(), that.getCompanyName()) && Objects.equals(getCompanyStatus(),
                 that.getCompanyStatus());
@@ -446,13 +449,21 @@ public class OfficersItem {
                 getTitle(), getHonours(), getMiddleName(), getCorporateInd(), getServiceAddress(),
                 getUsualResidentialAddress(), getPrincipalOfficeAddress(), getResponsibilities(),
                 getContactDetails(), getForename(), getOfficerId(), getPreviousOfficerId(),
-                getIdentification(), getNationality(), getSurname(), getExternalNumber(),
-                getSecureDirector(), getPreviousNameArray(), getAdditionalProperties(),
+                getIdentification(), getIdentityVerificationDetails(), getNationality(), getSurname(),
+                getExternalNumber(), getSecureDirector(), getPreviousNameArray(), getAdditionalProperties(),
                 getCompanyName(), getCompanyStatus());
     }
 
     @Override
     public String toString() {
         return ReflectionToStringBuilder.toString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    }
+
+    public DeltaIdentityVerificationDetails getIdentityVerificationDetails() {
+        return identityVerificationDetails;
+    }
+
+    public void setIdentityVerificationDetails(DeltaIdentityVerificationDetails identityVerificationDetails) {
+        this.identityVerificationDetails = identityVerificationDetails;
     }
 }

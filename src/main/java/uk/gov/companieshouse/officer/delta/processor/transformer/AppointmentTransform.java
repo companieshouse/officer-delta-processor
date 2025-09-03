@@ -1,7 +1,7 @@
-package uk.gov.companieshouse.officer.delta.processor.tranformer;
+package uk.gov.companieshouse.officer.delta.processor.transformer;
 
 import static uk.gov.companieshouse.api.appointment.ExternalData.CompanyStatusEnum;
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.parseLocalDateTime;
+import static uk.gov.companieshouse.officer.delta.processor.transformer.TransformerUtils.parseLocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

@@ -1,10 +1,10 @@
-package uk.gov.companieshouse.officer.delta.processor.tranformer;
+package uk.gov.companieshouse.officer.delta.processor.transformer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.appointment.UsualResidentialAddress;
+import uk.gov.companieshouse.api.appointment.ServiceAddress;
 import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -13,25 +13,25 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-class UsualResidentialAddressTransformTest {
+class ServiceAddressTransformTest {
 
-    private UsualResidentialAddressTransform testTransform;
+    private ServiceAddressTransform testTransform;
 
     @BeforeEach
     void setUp() {
-        testTransform = new UsualResidentialAddressTransform();
+        testTransform = new ServiceAddressTransform();
     }
 
     @Test
     void factory() {
-        assertThat(testTransform.factory(), is(instanceOf(UsualResidentialAddress.class)));
+        assertThat(testTransform.factory(), is(instanceOf(ServiceAddress.class)));
     }
 
     @Test
     void verifySuccessfulTransformOfAddress() {
         final AddressAPI addressAPI = createAddress();
 
-        final UsualResidentialAddress result = testTransform.transform(addressAPI);
+        final ServiceAddress result = testTransform.transform(addressAPI);
 
         assertThat(result.getAddressLine1(), is(addressAPI.getAddressLine1()));
         assertThat(result.getAddressLine2(), is(addressAPI.getAddressLine2()));
@@ -68,3 +68,4 @@ class UsualResidentialAddressTransformTest {
     }
 
 }
+

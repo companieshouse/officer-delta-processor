@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officer.delta.processor.tranformer;
+package uk.gov.companieshouse.officer.delta.processor.transformer;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -9,7 +9,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils.DATETIME_LENGTH;
+import static uk.gov.companieshouse.officer.delta.processor.transformer.TransformerUtils.DATETIME_LENGTH;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +28,7 @@ import uk.gov.companieshouse.api.appointment.ServiceAddress;
 import uk.gov.companieshouse.api.model.delta.officers.AddressAPI;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.officer.delta.processor.model.DeltaIdentification;
+import uk.gov.companieshouse.officer.delta.processor.model.DeltaIdentityVerificationDetails;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.model.PreviousNameArray;
 import uk.gov.companieshouse.officer.delta.processor.model.enums.OfficerRole;
@@ -68,6 +69,10 @@ class OfficerTransformTest {
     private ServiceAddress serviceAddress;
     @Mock
     private PrincipalOfficeAddress principalOfficeAddress;
+    @Mock
+    private IdentityVerificationDetailsTransform identityVerificationDetailsTransform;
+    @Mock
+    private DeltaIdentityVerificationDetails identityVerificationDetails;
 
     private static Stream<Arguments> provideScenarioParams() {
         return Stream.of(Arguments.of(CHANGED_AT, true),
@@ -79,7 +84,8 @@ class OfficerTransformTest {
 
     @BeforeEach
     void setUp() {
-        testTransform = new OfficerTransform(identificationTransform, serviceAddressTransform, formerNameTransform, principalOfficeAddressTransform);
+        testTransform = new OfficerTransform(identificationTransform, identityVerificationDetailsTransform,
+                serviceAddressTransform, formerNameTransform, principalOfficeAddressTransform);
     }
 
     @Test

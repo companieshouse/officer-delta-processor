@@ -20,7 +20,7 @@ import uk.gov.companieshouse.logging.Logger;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.StreamSupport;
-import uk.gov.companieshouse.officer.delta.processor.tranformer.TransformerUtils;
+import uk.gov.companieshouse.officer.delta.processor.transformer.TransformerUtils;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
