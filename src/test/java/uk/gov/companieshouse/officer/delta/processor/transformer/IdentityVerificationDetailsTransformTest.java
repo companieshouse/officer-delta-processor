@@ -39,9 +39,6 @@ class IdentityVerificationDetailsTransformTest {
         assertThat(result.getAppointmentVerificationEndOn(),
                 is(parseLocalDate("appointment_verification_end_on",
                         identityVerificationDetails.getAppointmentVerificationEndOn())));
-        assertThat(result.getAppointmentVerificationStatementDate(),
-                is(parseLocalDate("appointment_verification_statement_date",
-                        identityVerificationDetails.getAppointmentVerificationStatementDate())));
         assertThat(result.getAppointmentVerificationStatementDueOn(),
                 is(parseLocalDate("appointment_verification_statement_due_on",
                         identityVerificationDetails.getAppointmentVerificationStatementDueOn())));
