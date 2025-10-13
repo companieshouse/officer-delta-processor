@@ -33,7 +33,6 @@ public class IdentityVerificationDetailsTransform implements Transformative<Delt
         Optional<String> identityVerifiedOn = Optional.ofNullable(source.getIdentityVerifiedOn());
 
         appointmentVerificationEndOn.ifPresent(dateString -> output.setAppointmentVerificationEndOn(parseLocalDate(APPOINTMENT_VERIFICATION_END_ON, dateString)));
-        appointmentVerificationStatementDate.ifPresent(dateString -> output.setAppointmentVerificationStatementDate(parseLocalDate(APPOINTMENT_VERIFICATION_STATEMENT_DATE, dateString)));
         appointmentVerificationStatementDueOn.ifPresent(dateString -> output.setAppointmentVerificationStatementDueOn(parseLocalDate(APPOINTMENT_VERIFICATION_STATEMENT_DUE_ON, dateString)));
         appointmentVerificationStartOn.ifPresent(dateString -> output.setAppointmentVerificationStartOn(parseLocalDate(APPOINTMENT_VERIFICATION_START_ON, dateString)));
         identityVerifiedOn.ifPresent(dateString -> output.setIdentityVerifiedOn(parseLocalDate(IDENTITY_VERIFIED_ON, dateString)));
