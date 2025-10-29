@@ -46,7 +46,16 @@ public enum RolesWithResidentialAddress {
     /**
      * Manoff roles with residential address.
      */
-    MANOFF(OfficerRole.MANOFF);
+    MANOFF(OfficerRole.MANOFF),
+    /**
+     * LP General Partner natural person role with residential address.
+     */
+    LLPGENPART(OfficerRole.LLPGENPART),
+    /**
+     * LP Limited Partner natural person role with residential address.
+     */
+    LLPLIMPART(OfficerRole.LLPLIMPART);
+
 
     private final OfficerRole officerRole;
 

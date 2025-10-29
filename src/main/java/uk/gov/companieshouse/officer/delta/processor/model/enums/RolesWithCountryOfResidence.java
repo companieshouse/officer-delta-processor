@@ -38,7 +38,15 @@ public enum RolesWithCountryOfResidence {
     /**
      * Manoff roles with country of residence.
      */
-    MANOFF(OfficerRole.MANOFF);
+    MANOFF(OfficerRole.MANOFF),
+    /**
+     * LP General Partner natural person role with country of residence.
+     */
+    LLPGENPART(OfficerRole.LLPGENPART),
+    /**
+     * LP Limited Partner natural person role with country of residence.
+     */
+    LLPLIMPART(OfficerRole.LLPLIMPART);
 
     private final OfficerRole officerRole;
 

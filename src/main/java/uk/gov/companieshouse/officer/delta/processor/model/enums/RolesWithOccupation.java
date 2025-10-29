@@ -38,7 +38,15 @@ public enum RolesWithOccupation {
     /**
      * Manoff roles with occupation.
      */
-    MANOFF(OfficerRole.MANOFF);
+    MANOFF(OfficerRole.MANOFF),
+    /**
+     * LP General Partner role with occupation.
+     */
+    LLPGENPART(OfficerRole.LLPGENPART),
+    /**
+     * LP Limited Partner role with occupation.
+     */
+    LLPLIMPART(OfficerRole.LLPLIMPART);
 
     private final OfficerRole officerRole;
 
