@@ -37,7 +37,15 @@ public enum RolesWithDateOfBirth {
     /**
      * Manoff roles with date of birth.
      */
-    MANOFF(OfficerRole.MANOFF);
+    MANOFF(OfficerRole.MANOFF),
+    /**
+     * LP General Partner role with date of birth.
+     */
+    LLPGENPART(OfficerRole.LLPGENPART),
+    /**
+     * LP Limited Partner role with date of birth.
+     */
+    LLPLIMPART(OfficerRole.LLPLIMPART);
 
     private final OfficerRole officerRole;
 

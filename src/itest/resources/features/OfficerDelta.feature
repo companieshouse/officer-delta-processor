@@ -54,3 +54,23 @@ Scenario: Can transform and send a managing officer
   Given the application is running
   When the consumer receives a managing officer delta with id EcEKO1YhIKexb0cSDZsn_OHsFw4
   Then a PUT request is sent to the appointments api with the transformed data
+
+Scenario: Can transform and send a limited-partnership-general-partner-natural-person officer
+  Given the application is running
+  When the consumer receives a limited_partnership_general_partner_natural_person officer delta with id EcEKO1YhIKexb0cSDZsn_OHsFw4
+  Then a PUT request is sent to the appointments api with the transformed data
+
+Scenario: Can transform and send a limited-partnership-general-partner-legal-entity officer
+  Given the application is running
+  When the consumer receives a limited_partnership_general_partner_legal_entity officer delta with id EcEKO1YhIKexb0cSDZsn_OHsFw4
+  Then a PUT request is sent to the appointments api with the transformed data
+
+Scenario: Can transform and send a limited-partnership-limited-partner-natural-person officer
+  Given the application is running
+  When the consumer receives a limited_partnership_limited_partner_natural_person officer delta with id EcEKO1YhIKexb0cSDZsn_OHsFw4
+  Then a PUT request is sent to the appointments api with the transformed data
+
+Scenario: Can transform and send a limited-partnership-limited-partner-legal-entity officer
+  Given the application is running
+  When the consumer receives a limited_partnership_limited_partner_legal_entity officer delta with id EcEKO1YhIKexb0cSDZsn_OHsFw4
+  Then a PUT request is sent to the appointments api with the transformed data

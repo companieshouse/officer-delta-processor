@@ -1,38 +1,32 @@
 {
   "officers": [
     {
-      "status": "0",
+      "status": "Q",
       "company_name": "TEST_COMPANY",
       "company_number": "01777777",
       "changed_at": "20170605123030",
-      "kind": "DIRCORP",
+      "kind": "LLPGENPART",
       "internal_id": "0025987375",
       "appointment_date": "20111103",
-      "corporate_ind": "Y",
-      "surname": "MY BIG OLD COMPANY LIMITED",
+      "title": "Mr",
+      "corporate_ind": "N",
+      "external_number": "1234567890",
+      "surname": "GLOVER",
+      "forename": "PHIL",
+      "middle_name": "Peter",
+      "date_of_birth": "19850630",
       "service_address_same_as_registered_address": "Y",
+      "nationality": "British",
       "officer_id": "3001237435",
-      "external_number": "12345",
       "secure_director": "N",
       "officer_detail_id": "3456251385",
       "identification": {
-        "non_EEA": {
+        "EEA": {
           "place_registered": "United Kingdom",
           "registration_number": "38298",
           "legal_authority": "Chapter 32",
           "legal_form": "Hong Kong"
         }
-      },
-      "identity_verification_details": {
-        "anti_money_laundering_supervisory_bodies": [
-          "Supervisory Body"
-        ],
-        "appointment_verification_end_on": "20241212",
-        "appointment_verification_statement_due_on": "20241214",
-        "appointment_verification_start_on": "20241215",
-        "authorised_corporate_service_provider_name": "Service Provider",
-        "identity_verified_on": "20241216",
-        "preferred_name": "Preferred Name"
       },
       "service_address": {
         "premise": "1",
@@ -43,7 +37,8 @@
         "po_box" : "CF14 3UZ",
         "region" : "Cardiff",
         "postal_code" : "CF14 3UZ",
-        "country": "United Kingdom"
+        "country": "United Kingdom",
+        "usual_country_of_residence": "United Kingdom"
       },
       "usual_residential_address": {
         "premise": "URA",

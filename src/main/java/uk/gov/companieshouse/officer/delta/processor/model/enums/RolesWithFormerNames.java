@@ -46,7 +46,15 @@ public enum RolesWithFormerNames {
     /**
      * Manoff roles with former names.
      */
-    MANOFF(OfficerRole.MANOFF);
+    MANOFF(OfficerRole.MANOFF),
+    /**
+     * LP General Partner role with former names.
+     */
+    LLPGENPART(OfficerRole.LLPGENPART),
+    /**
+     * LP Limited Partner role with former names.
+     */
+    LLPLIMPART(OfficerRole.LLPLIMPART);
 
     private final OfficerRole officerRole;
 

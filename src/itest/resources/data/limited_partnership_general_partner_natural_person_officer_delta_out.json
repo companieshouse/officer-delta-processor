@@ -3,7 +3,8 @@
     "company_name": "TEST_COMPANY",
     "company_status": "active",
     "data":{
-      "person_number": "12345",
+      "company_name": null,
+      "person_number":"1234567890",
       "service_address":{
         "address_line_1":"1 Crown Way",
         "address_line_2":"Pavement",
@@ -16,14 +17,13 @@
         "region":"Cardiff"
       },
       "service_address_is_same_as_registered_office_address":true,
-      "country_of_residence":null,
+      "country_of_residence":"United Kingdom",
       "appointed_on":[
         2011,
         11,
         3
       ],
       "appointed_before":null,
-      "is_pre_1992_appointment":false,
       "links":[
         {
           "self":"/company/01777777/appointments/EcEKO1YhIKexb0cSDZsn_OHsFw4",
@@ -33,34 +33,21 @@
           }
         }
       ],
-      "nationality":null,
-      "occupation":null,
-      "officer_role":"corporate-director",
-      "is_secure_officer":null,
+      "nationality":"British",
+      "officer_role":"general-partner-in-a-limited-partnership",
+      "is_secure_officer":false,
       "identification":{
-        "identification_type":"non-eea",
+        "identification_type":"eea",
         "legal_authority":"Chapter 32",
         "legal_form":"Hong Kong",
         "place_registered":"United Kingdom",
         "registration_number":"38298"
       },
-      "identity_verification_details": {
-        "anti_money_laundering_supervisory_bodies": [
-          "Supervisory Body"
-        ],
-        "appointment_verification_end_on": [2024,12,12],
-        "appointment_verification_statement_due_on": [2024,12,14],
-        "appointment_verification_start_on": [2024,12,15],
-        "authorised_corporate_service_provider_name": "Service Provider",
-        "identity_verified_on": [2024,12,16],
-        "preferred_name": "Preferred Name"
-      },
-      "company_name":"MY BIG OLD COMPANY LIMITED",
-      "surname":null,
-      "forename":null,
+      "surname":"GLOVER",
+      "forename":"PHIL",
       "honours":null,
-      "other_forenames":null,
-      "title":null,
+      "other_forenames":"Peter",
+      "title":"Mr",
       "company_number":"01777777",
       "contact_details":null,
       "principal_office_address":null,
@@ -68,7 +55,25 @@
       "responsibilities":null,
       "former_names":null
     },
-    "sensitive_data": null,
+    "sensitive_data":{
+      "usual_residential_address":{
+        "address_line_1":"ura_line1",
+        "address_line_2":"ura_line2",
+        "care_of":"ura_care_of",
+        "country":"United Kingdom",
+        "locality":"Cardiff",
+        "po_box":"ura_po",
+        "postal_code":"CF2 1B6",
+        "premises":"URA",
+        "region":"ura_region"
+      },
+      "residential_address_is_same_as_service_address":null,
+      "date_of_birth":{
+        "day":30,
+        "month":6,
+        "year":1985
+      }
+    },
     "internal_id":"0025987375",
     "appointment_id":"EcEKO1YhIKexb0cSDZsn_OHsFw4",
     "officer_id":"r4Aq2-D3appznoESN24MtsLovfo",
@@ -83,6 +88,6 @@
       6,
       5
     ],
-    "officer_role_sort_order":20
+    "officer_role_sort_order":10
   }
 }

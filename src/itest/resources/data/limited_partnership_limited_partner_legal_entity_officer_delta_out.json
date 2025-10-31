@@ -35,7 +35,7 @@
       ],
       "nationality":null,
       "occupation":null,
-      "officer_role":"corporate-director",
+      "officer_role":"corporate-limited-partner-in-a-limited-partnership",
       "is_secure_officer":null,
       "identification":{
         "identification_type":"non-eea",
@@ -83,6 +83,6 @@
       6,
       5
     ],
-    "officer_role_sort_order":20
+    "officer_role_sort_order":40
   }
 }
