@@ -54,7 +54,11 @@ public enum RolesWithResidentialAddress {
     /**
      * LP Limited Partner natural person role with residential address.
      */
-    LLPLIMPART(OfficerRole.LLPLIMPART);
+    LLPLIMPART(OfficerRole.LLPLIMPART),
+
+    LPGENPART(OfficerRole.LPGENPART),
+    LPLIMPART(OfficerRole.LPLIMPART);
+
 
 
     private final OfficerRole officerRole;

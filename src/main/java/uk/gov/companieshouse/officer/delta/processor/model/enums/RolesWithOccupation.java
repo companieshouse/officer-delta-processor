@@ -46,7 +46,11 @@ public enum RolesWithOccupation {
     /**
      * LP Limited Partner role with occupation.
      */
-    LLPLIMPART(OfficerRole.LLPLIMPART);
+    LLPLIMPART(OfficerRole.LLPLIMPART),
+
+    LPGENPART(OfficerRole.LPGENPART),
+    LPLIMPART(OfficerRole.LPLIMPART);
+
 
     private final OfficerRole officerRole;
 
