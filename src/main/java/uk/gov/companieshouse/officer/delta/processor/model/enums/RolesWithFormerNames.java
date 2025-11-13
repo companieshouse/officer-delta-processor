@@ -54,7 +54,15 @@ public enum RolesWithFormerNames {
     /**
      * LP Limited Partner role with former names.
      */
-    LLPLIMPART(OfficerRole.LLPLIMPART);
+    LLPLIMPART(OfficerRole.LLPLIMPART),
+    /**
+     * LP General Partner role with former names.
+     */
+    LPGENPART(OfficerRole.LPGENPART),
+    /**
+     * LP Limited Partner role with former names.
+     */
+    LPLIMPART(OfficerRole.LPLIMPART);
 
     private final OfficerRole officerRole;
 

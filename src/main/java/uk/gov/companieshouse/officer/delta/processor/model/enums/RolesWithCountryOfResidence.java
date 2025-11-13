@@ -46,7 +46,16 @@ public enum RolesWithCountryOfResidence {
     /**
      * LP Limited Partner natural person role with country of residence.
      */
-    LLPLIMPART(OfficerRole.LLPLIMPART);
+    LLPLIMPART(OfficerRole.LLPLIMPART),
+    /**
+     * LP General Partner natural person role with country of residence.
+     */
+    LPGENPART(OfficerRole.LPGENPART),
+    /**
+     * LP Limited Partner natural person role with country of residence.
+     */
+    LPLIMPART(OfficerRole.LPLIMPART);
+
 
     private final OfficerRole officerRole;
 
