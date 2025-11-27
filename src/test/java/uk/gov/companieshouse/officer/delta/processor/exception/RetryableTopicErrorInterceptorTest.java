@@ -19,26 +19,26 @@ class RetryableTopicErrorInterceptorTest {
 
     @Test
     void when_correct_topic_is_sent_record_is_unchanged() {
-        ProducerRecord<String, Object> record = Util.createRecord("topic", "header");
-        System.out.println(record.toString());
+        ProducerRecord<String, Object> producerRecord = Util.createRecord("topic", "header");
+        System.out.println(producerRecord.toString());
         System.out.println();
-        ProducerRecord<String, Object> newRecord = interceptor.onSend(record);
+        ProducerRecord<String, Object> newRecord = interceptor.onSend(producerRecord);
 
-        assertThat(newRecord).isEqualTo(record);
+        assertThat(newRecord).isEqualTo(producerRecord);
     }
 
     @Test
     void when_error_is_nonretryable_topic_is_set_to_invalid() {
-        ProducerRecord<String, Object> record = Util.createRecord("topic-error", NonRetryableErrorException.class.getName());
-        ProducerRecord<String, Object> newRecord = interceptor.onSend(record);
+        ProducerRecord<String, Object> producerRecord = Util.createRecord("topic-error", NonRetryableErrorException.class.getName());
+        ProducerRecord<String, Object> newRecord = interceptor.onSend(producerRecord);
 
         assertThat(newRecord.topic()).isEqualTo("topic-invalid");
     }
 
     @Test
     void when_error_is_retryable_topic_is_unchanged() {
-        ProducerRecord<String, Object> record = Util.createRecord("topic-error", RetryableErrorException.class.getName());
-        ProducerRecord<String, Object> newRecord = interceptor.onSend(record);
+        ProducerRecord<String, Object> producerRecord = Util.createRecord("topic-error", RetryableErrorException.class.getName());
+        ProducerRecord<String, Object> newRecord = interceptor.onSend(producerRecord);
 
         assertThat(newRecord.topic()).isEqualTo("topic-error");
     }

@@ -13,7 +13,6 @@ public class IdentityVerificationDetailsTransform implements Transformative<Delt
     private static final String IDENTITY_VERIFIED_ON = "identity_verified_on";
     private static final String APPOINTMENT_VERIFICATION_START_ON = "appointment_verification_start_on";
     private static final String APPOINTMENT_VERIFICATION_STATEMENT_DUE_ON = "appointment_verification_statement_due_on";
-    private static final String APPOINTMENT_VERIFICATION_STATEMENT_DATE = "appointment_verification_statement_date";
     private static final String APPOINTMENT_VERIFICATION_END_ON = "appointment_verification_end_on";
 
     @Override
@@ -27,7 +26,6 @@ public class IdentityVerificationDetailsTransform implements Transformative<Delt
         if (source == null) return output;
 
         Optional<String> appointmentVerificationEndOn = Optional.ofNullable(source.getAppointmentVerificationEndOn());
-        Optional<String> appointmentVerificationStatementDate = Optional.ofNullable(source.getAppointmentVerificationStatementDate());
         Optional<String> appointmentVerificationStatementDueOn = Optional.ofNullable(source.getAppointmentVerificationStatementDueOn());
         Optional<String> appointmentVerificationStartOn = Optional.ofNullable(source.getAppointmentVerificationStartOn());
         Optional<String> identityVerifiedOn = Optional.ofNullable(source.getIdentityVerifiedOn());

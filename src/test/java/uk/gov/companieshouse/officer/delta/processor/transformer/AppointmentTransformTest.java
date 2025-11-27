@@ -29,8 +29,10 @@ import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 
 @ExtendWith(MockitoExtension.class)
 class AppointmentTransformTest {
+
     private AppointmentTransform testTransform;
     private static final String CHANGED_AT = "20210909133736012345";
+    private static final String INTERNAL_ID = "internalId";
 
     @Mock
     private OfficerTransform officerTransform;
@@ -62,7 +64,7 @@ class AppointmentTransformTest {
         final FullRecordCompanyOfficerApi appointmentAPI = testTransform.factory();
 
         appointmentAPI.setExternalData(externalData);
-        appointmentAPI.getExternalData().setAppointmentId("internalId");
+        appointmentAPI.getExternalData().setAppointmentId(INTERNAL_ID);
         HashMap<String, Integer> nonResigned = new HashMap<>();
         nonResigned.put("secretary", 10);
 
@@ -75,7 +77,7 @@ class AppointmentTransformTest {
         final FullRecordCompanyOfficerApi result = testTransform.transform(item, appointmentAPI);
 
         assertThat(result, is(sameInstance(appointmentAPI)));
-        assertThat(appointmentAPI.getExternalData().getInternalId(), is("internalId"));
+        assertThat(appointmentAPI.getExternalData().getInternalId(), is(INTERNAL_ID));
         assertThat(appointmentAPI.getExternalData().getAppointmentId(), is("inamTI4b12taUuJyjgA72RNkYbs"));
         assertThat(appointmentAPI.getExternalData().getOfficerId(), is("6zmr-K93Jh_iDBMbWqRj3GuaQwQ"));
         assertThat(appointmentAPI.getExternalData().getPreviousOfficerId(), is("F_kqEbg83lQRIXkF6yUjxZ-wN9E"));
@@ -94,7 +96,7 @@ class AppointmentTransformTest {
         item.setResignationDate("2020-01-01");
         final FullRecordCompanyOfficerApi appointmentAPI = testTransform.factory();
         appointmentAPI.setExternalData(externalData);
-        appointmentAPI.getExternalData().setAppointmentId("internalId");
+        appointmentAPI.getExternalData().setAppointmentId(INTERNAL_ID);
         HashMap<String, Integer> resigned = new HashMap<>();
         resigned.put("secretary", 100);
 
@@ -106,7 +108,7 @@ class AppointmentTransformTest {
         final FullRecordCompanyOfficerApi result = testTransform.transform(item, appointmentAPI);
 
         assertThat(result, is(sameInstance(appointmentAPI)));
-        assertThat(appointmentAPI.getExternalData().getInternalId(), is("internalId"));
+        assertThat(appointmentAPI.getExternalData().getInternalId(), is(INTERNAL_ID));
         verify(officerTransform).transform(item);
         assertThat(appointmentAPI.getExternalData().getData(), is(sameInstance(data)));
         assertThat(appointmentAPI.getInternalData().getUpdatedAt(), is(LocalDate.of(2021, 9, 9)));
@@ -121,7 +123,7 @@ class AppointmentTransformTest {
     private OfficersItem createOfficer() {
         final OfficersItem item = new OfficersItem();
 
-        item.setInternalId("internalId");
+        item.setInternalId(INTERNAL_ID);
         item.setOfficerId("officerId");
         item.setPreviousOfficerId("previousOfficerId");
         item.setCompanyNumber("12345678");

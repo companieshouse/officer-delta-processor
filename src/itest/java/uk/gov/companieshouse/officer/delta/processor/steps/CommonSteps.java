@@ -42,6 +42,7 @@ public class CommonSteps {
     private static final String OFFICER_ID = TransformerUtils.encode("3001237435");
     private static final String X_DELTA_AT = "X-DELTA-AT";
     private static final String X_OFFICER_ID = "X-OFFICER-ID";
+    public static final String COMPANY_NUMBER = "01777777";
 
     @Value("${officer.delta.processor.topic}")
     private String mainTopic;
@@ -58,7 +59,6 @@ public class CommonSteps {
     @Autowired
     private Logger logger;
 
-    private String type;
     private String id;
     private String output;
 
@@ -70,9 +70,8 @@ public class CommonSteps {
     @When("^the consumer receives a (.*) officer delta with id (.*)$")
     public void theConsumerReceivesOfficerDelta(String type, String id) throws Exception {
         configureWiremock();
-        stubPutAppointment("01777777", id);
+        stubPutAppointment(COMPANY_NUMBER, id);
         this.output = TestData.getOutputData(type);
-        this.type = type;
         this.id = id;
 
         ChsDelta delta = new ChsDelta(TestData.getInputData(type), 1, "1", false);
@@ -99,7 +98,7 @@ public class CommonSteps {
     @When("^the consumer receives a message but the data api returns a (\\d*)$")
     public void theConsumerReceivesMessageButDataApiReturns(int responseCode) throws Exception{
         configureWiremock();
-        stubPutAppointment("01777777", "EcEKO1YhIKexb0cSDZsn_OHsFw4", responseCode);
+        stubPutAppointment(COMPANY_NUMBER, "EcEKO1YhIKexb0cSDZsn_OHsFw4", responseCode);
 
         ChsDelta delta = new ChsDelta(
                 TestData.getInputData("natural"), 1, "1", false);
@@ -119,7 +118,7 @@ public class CommonSteps {
 
     @Then("a PUT request is sent to the appointments api with the transformed data")
     public void putRequestIsSentToTheAppointmentsApi() {
-        verify(1, requestMadeFor(new OfficerRequestMatcher(logger, "01777777", output, id)));
+        verify(1, requestMadeFor(new OfficerRequestMatcher(logger, COMPANY_NUMBER, output, id)));
     }
 
     @Then("^the message should be moved to topic (.*)$")

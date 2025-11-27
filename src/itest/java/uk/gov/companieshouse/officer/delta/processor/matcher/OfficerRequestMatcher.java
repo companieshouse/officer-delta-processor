@@ -87,25 +87,33 @@ public class OfficerRequestMatcher implements ValueMatcher<Request> {
             return false;
         }
 
-        switch (expected.getNodeType()) {
-            case OBJECT:
-                for (Iterator<String> fieldNames = expected.fieldNames(); fieldNames.hasNext(); ) {
-                    String field = fieldNames.next();
-                    if (!actual.has(field)) return false;
-                    if (!compareJson(expected.get(field), actual.get(field))) return false;
-                }
-                return true;
+        return switch (expected.getNodeType()) {
+            case OBJECT -> compareJsonObjects(expected, actual);
+            case ARRAY -> compareJsonArrays(expected, actual);
+            default -> expected.equals(actual);
+        };
+    }
 
-            case ARRAY:
-                if (expected.size() != actual.size()) return false;
-                for (int i = 0; i < expected.size(); i++) {
-                    if (!compareJson(expected.get(i), actual.get(i))) return false;
-                }
-                return true;
-
-            default:
-                return expected.equals(actual);
+    private boolean compareJsonObjects(JsonNode expected, JsonNode actual) {
+        for (Iterator<String> fieldNames = expected.fieldNames(); fieldNames.hasNext(); ) {
+            String field = fieldNames.next();
+            if (!actual.has(field) || !compareJson(expected.get(field), actual.get(field))) {
+                return false;
+            }
         }
+        return true;
+    }
+
+    private boolean compareJsonArrays(JsonNode expected, JsonNode actual) {
+        if (expected.size() != actual.size()) {
+            return false;
+        }
+        for (int i = 0; i < expected.size(); i++) {
+            if (!compareJson(expected.get(i), actual.get(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 }
 

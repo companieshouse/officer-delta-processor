@@ -20,6 +20,7 @@ import java.io.IOException;
 @ExtendWith(MockitoExtension.class)
 class DeltaConsumerTest {
 
+    public static final String TOPIC = "officer-delta";
     @Mock
     Processor<ChsDelta> processor;
     private DeltaConsumer consumer;
@@ -30,23 +31,23 @@ class DeltaConsumerTest {
     }
 
     @Test
-    void When_consumer_receives_valid_payload_process_is_called() throws IOException {
+    void whenConsumerReceivesValidPayloadProcessIsCalled() throws IOException {
         Message<ChsDelta> message = Util.createChsDeltaMessage("officer_delta_example.json", false);
-        consumer.receiveMainMessages(message,0, "officer-delta", 10, 1L);
+        consumer.receiveMainMessages(message,0, TOPIC, 10, 1L);
 
         verify(processor).process(any());
     }
 
     @Test
-    void When_consumer_receives_valid_delete_payload_processDelete_is_called() throws IOException {
+    void whenConsumerReceivesValidDeletePayloadProcessDeleteIsCalled() throws IOException {
         Message<ChsDelta> message = Util.createChsDeltaMessage("officer_delete_delta.json", true);
-        consumer.receiveMainMessages(message, 0, "officer-delta", 10, 1L);
+        consumer.receiveMainMessages(message, 0, TOPIC, 10, 1L);
 
         verify(processor).processDelete(any());
     }
 
     @Test
-    void When_processor_throws_exception_consumer_throws_exception() throws IOException {
+    void whenProcessorThrowsExceptionConsumerThrowsException() throws IOException {
         Message<ChsDelta> message = Util.createChsDeltaMessage("broken_delta.json", false);
         ChsDelta brokenMessage = message.getPayload();
 
@@ -54,6 +55,6 @@ class DeltaConsumerTest {
                 .when(processor).process(brokenMessage);
 
         Assert.assertThrows(Exception.class, ()->consumer
-                .receiveMainMessages(message, 0, "officer-delta", 10, 1L));
+                .receiveMainMessages(message, 0, TOPIC, 10, 1L));
     }
 }

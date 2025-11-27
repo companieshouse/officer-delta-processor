@@ -37,6 +37,7 @@ class ApiClientServiceImplTest {
     private static final String APPOINTMENT_ID = "appointmentId";
     private static final String OFFICER_ID = "officerId";
     private static final String COMPANY_NUMBER = "12345678";
+    private static final String COMPANY_APPOINTMENTS_FULL_RECORD = "/company/%s/appointments/%s/full_record";
 
     @InjectMocks
     private ApiClientServiceImpl apiClientService;
@@ -68,7 +69,7 @@ class ApiClientServiceImplTest {
         when(privateDeltaResourceHandler.putAppointment()).thenReturn(privateOfficersUpsertResourceHandler);
         when(privateOfficersUpsertResourceHandler.upsert(anyString(), any())).thenReturn(privateOfficersUpsert);
 
-        final String expectedUri = String.format("/company/%s/appointments/%s/full_record", COMPANY_NUMBER,
+        final String expectedUri = String.format(COMPANY_APPOINTMENTS_FULL_RECORD, COMPANY_NUMBER,
                 APPOINTMENT_ID);
 
         // when
@@ -89,7 +90,7 @@ class ApiClientServiceImplTest {
         when(privateOfficersUpsertResourceHandler.upsert(anyString(), any())).thenReturn(privateOfficersUpsert);
         when(privateOfficersUpsert.execute()).thenThrow(ApiErrorResponseException.class);
 
-        final String expectedUri = String.format("/company/%s/appointments/%s/full_record", COMPANY_NUMBER,
+        final String expectedUri = String.format(COMPANY_APPOINTMENTS_FULL_RECORD, COMPANY_NUMBER,
                 APPOINTMENT_ID);
         // when
         apiClientService.putAppointment(COMPANY_NUMBER, appointment);
@@ -110,7 +111,7 @@ class ApiClientServiceImplTest {
         when(privateOfficersUpsertResourceHandler.upsert(anyString(), any())).thenReturn(privateOfficersUpsert);
         when(privateOfficersUpsert.execute()).thenThrow(URIValidationException.class);
 
-        final String expectedUri = String.format("/company/%s/appointments/%s/full_record", COMPANY_NUMBER,
+        final String expectedUri = String.format(COMPANY_APPOINTMENTS_FULL_RECORD, COMPANY_NUMBER,
                 APPOINTMENT_ID);
         // when
         apiClientService.putAppointment(COMPANY_NUMBER, appointment);
@@ -136,7 +137,7 @@ class ApiClientServiceImplTest {
                 .companyNumber(COMPANY_NUMBER)
                 .build();
 
-        final String expectedUri = String.format("/company/%s/appointments/%s/full_record", COMPANY_NUMBER,
+        final String expectedUri = String.format(COMPANY_APPOINTMENTS_FULL_RECORD, COMPANY_NUMBER,
                 APPOINTMENT_ID);
 
         // when
@@ -163,7 +164,7 @@ class ApiClientServiceImplTest {
                 .companyNumber(COMPANY_NUMBER)
                 .build();
 
-        final String expectedUri = String.format("/company/%s/appointments/%s/full_record", COMPANY_NUMBER,
+        final String expectedUri = String.format(COMPANY_APPOINTMENTS_FULL_RECORD, COMPANY_NUMBER,
                 APPOINTMENT_ID);
 
         // when
@@ -191,7 +192,7 @@ class ApiClientServiceImplTest {
                 .companyNumber(COMPANY_NUMBER)
                 .build();
 
-        final String expectedUri = String.format("/company/%s/appointments/%s/full_record", COMPANY_NUMBER,
+        final String expectedUri = String.format(COMPANY_APPOINTMENTS_FULL_RECORD, COMPANY_NUMBER,
                 APPOINTMENT_ID);
 
         // when
