@@ -20,8 +20,6 @@ class RetryableTopicErrorInterceptorTest {
     @Test
     void when_correct_topic_is_sent_record_is_unchanged() {
         ProducerRecord<String, Object> producerRecord = Util.createRecord("topic", "header");
-        System.out.println(producerRecord.toString());
-        System.out.println();
         ProducerRecord<String, Object> newRecord = interceptor.onSend(producerRecord);
 
         assertThat(newRecord).isEqualTo(producerRecord);
