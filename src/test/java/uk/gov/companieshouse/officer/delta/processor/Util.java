@@ -13,6 +13,7 @@ import uk.gov.companieshouse.kafka.consumer.ConsumerConfig;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collections;
+import java.util.Objects;
 
 import static com.github.stefanbirkner.systemlambda.SystemLambda.withEnvironmentVariable;
 import static org.springframework.kafka.support.KafkaHeaders.EXCEPTION_CAUSE_FQCN;
@@ -49,14 +50,13 @@ public class Util {
         Object recordObj = new Object();
         RecordHeaders headers = new RecordHeaders();
         headers.add(EXCEPTION_CAUSE_FQCN, header.getBytes());
-        ProducerRecord<String, Object> record = new ProducerRecord<>(topic, 1,1L ,null, recordObj, headers);
+        return new ProducerRecord<>(topic, 1,1L ,null, recordObj, headers);
 
-        return record;
     }
 
     public static Message<ChsDelta> createChsDeltaMessage(String filename, boolean isDelete) throws IOException {
         InputStreamReader exampleJsonPayload = new InputStreamReader(
-                ClassLoader.getSystemClassLoader().getResourceAsStream(filename));
+            Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResourceAsStream(filename)));
         String data = FileCopyUtils.copyToString(exampleJsonPayload);
 
         return buildMessage(data, isDelete);

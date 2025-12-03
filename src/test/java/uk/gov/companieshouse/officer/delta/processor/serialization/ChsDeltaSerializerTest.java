@@ -23,7 +23,7 @@ class ChsDeltaSerializerTest {
     }
 
     @Test
-    void When_serialize_Expect_chsDeltaBytes() {
+    void whenSerializeExpectChsDeltaBytes() {
         ChsDelta chsDelta = new ChsDelta("{\"key\": \"value\"}", 1, "context_id", false);
 
         byte[] result = serializer.serialize("", chsDelta);
@@ -32,20 +32,20 @@ class ChsDeltaSerializerTest {
     }
 
     @Test
-    void When_serialize_null_returns_null() {
+    void whenSerializeNullReturnsNull() {
         byte[] serialize = serializer.serialize("", null);
         assertThat(serialize).isEqualTo("".getBytes());
     }
 
     @Test
-    void When_serialize_receivesBytes_returnsBytes() {
+    void whenSerializeReceivesBytesReturnsBytes() {
         byte[] byteExample = "Example bytes".getBytes();
         byte[] serialize = serializer.serialize("", byteExample);
         assertThat(serialize).isEqualTo(byteExample);
     }
 
     private ChsDelta decodedData(byte[] chsDelta) {
-        ChsDeltaDeserializer serializer = new ChsDeltaDeserializer(this.logger);
-        return serializer.deserialize("", chsDelta);
+        ChsDeltaDeserializer deltaSerializer = new ChsDeltaDeserializer(this.logger);
+        return deltaSerializer.deserialize("", chsDelta);
     }
 }

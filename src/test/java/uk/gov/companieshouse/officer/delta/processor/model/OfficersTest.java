@@ -33,8 +33,8 @@ class OfficersTest {
         Officers officers = objectMapper.readValue(rawJSON, Officers.class);
 
         assertThat(officers.getCreatedTime(), is("07-JUN-21 15.26.17.000000"));
-        assertThat(officers.getOfficers().get(0).getServiceAddress().getPremises(), is("SA"));
-        // TODO: complete all fields
+        assertThat(officers.getOfficers().getFirst().getServiceAddress().getPremises(), is("SA"));
+        assertThat(officers.getDeltaAt(), is("20140925171003950844"));
     }
 
 

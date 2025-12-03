@@ -6,7 +6,6 @@ import static uk.gov.companieshouse.officer.delta.processor.transformer.Transfor
 
 import java.time.LocalDate;
 import java.util.Collections;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -110,7 +109,7 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
         if (RolesWithFormerNames.includes(officerRole) && source.getPreviousNameArray() != null) {
             officer.setFormerNames(
                     source.getPreviousNameArray().stream().map(formerNameTransform::transform)
-                            .collect(Collectors.toList()));
+                        .toList());
         }
 
         final var appointmentDate = parseLocalDate("appointmentDate", source.getAppointmentDate());

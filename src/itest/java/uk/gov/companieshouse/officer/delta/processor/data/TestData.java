@@ -16,12 +16,12 @@ public class TestData {
 
     public static String getOutputData(String officerType) {
         String path = "src/itest/resources/data/" + officerType + "_officer_delta_out.json";
-        return readFile(path).replaceAll("\n", "");
+        return readFile(path).replace("\n", "");
     }
 
     public static String getDeleteData() {
         String path = "src/itest/resources/data/delete_delta.json";
-        return readFile(path).replaceAll("\n", "");
+        return readFile(path).replace("\n", "");
     }
 
     private static String readFile(String path) {

@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.officer.delta.processor.serialization;
 
-import java.nio.charset.StandardCharsets;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.specific.SpecificDatumWriter;
@@ -34,26 +33,25 @@ public class ChsDeltaSerializer implements Serializer<Object> {
     @Override
     public byte[] serialize(String topic, Object payload) {
         try {
-            if (payload == null) {
-                return "".getBytes();
-            }
+            switch (payload) {
+                case null -> {
+                    return "".getBytes();
+                }
+                case byte[] bytes -> {
+                    return bytes;
+                }
+                case ChsDelta chsDelta -> {
+                    DatumWriter<ChsDelta> writer = new SpecificDatumWriter<>();
+                    var encoderFactory = EncoderFactory.get();
 
-            if (payload instanceof byte[]) {
-                return (byte[]) payload;
-            }
-
-            if (payload instanceof ChsDelta) {
-                var chsDelta = (ChsDelta) payload;
-                DatumWriter<ChsDelta> writer = new SpecificDatumWriter<>();
-                var encoderFactory = EncoderFactory.get();
-
-                AvroSerializer<ChsDelta> avroSerializer = new AvroSerializer<>(writer,
+                    AvroSerializer<ChsDelta> avroSerializer = new AvroSerializer<>(writer,
                         encoderFactory);
 
-                return avroSerializer.toBinary(chsDelta);
+                    return avroSerializer.toBinary(chsDelta);
+                }
+                default -> throw new IllegalStateException("Unexpected payload type: " + payload.getClass().getName() + ", value: " + payload);
             }
 
-            return payload.toString().getBytes(StandardCharsets.UTF_8);
         } catch (Exception ex) {
             logger.error("Serialization exception while writing to byte array", ex,
                     DataMapHolder.getLogMap());

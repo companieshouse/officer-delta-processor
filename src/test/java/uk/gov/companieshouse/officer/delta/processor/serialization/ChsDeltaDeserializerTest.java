@@ -25,7 +25,7 @@ class ChsDeltaDeserializerTest {
     }
 
     @Test
-    void When_deserialize_Expect_ValidChsDeltaObject() {
+    void whenDeserializeExpectValidChsDeltaObject() {
         ChsDelta chsDelta = new ChsDelta("{\"key\": \"value\"}", 1, "context_id", false);
         byte[] data = encodedData(chsDelta);
 
@@ -35,7 +35,7 @@ class ChsDeltaDeserializerTest {
     }
 
     @Test
-    void When_deserializeFails_throwsNonRetryableError() {
+    void whenDeserializeFailsThrowsNonRetryableError() {
         byte[] data = "Invalid message".getBytes();
         assertThrows(NonRetryableErrorException.class, () -> deserializer.deserialize("", data));
     }

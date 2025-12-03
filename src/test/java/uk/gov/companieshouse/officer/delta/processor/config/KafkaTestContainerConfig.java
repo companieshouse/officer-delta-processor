@@ -20,7 +20,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
-import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.kafka.ConfluentKafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 import uk.gov.companieshouse.delta.ChsDelta;
@@ -118,7 +117,7 @@ import java.util.Map;
     }
 
     @Bean
-    public CountDownLatch CountDownLatch() {
+    public CountDownLatch countDownLatch() {
         return new CountDownLatch(1);
     }
 }

@@ -72,8 +72,8 @@ class StructuredLoggingKafkaListenerAspect {
     }
 
     private Optional<String> extractContextId(Object payload) {
-        if (payload instanceof ChsDelta) {
-            return Optional.of(((ChsDelta) payload).getContextId());
+        if (payload instanceof ChsDelta chsDelta) {
+            return Optional.of(chsDelta.getContextId());
         }
         return Optional.empty();
     }
