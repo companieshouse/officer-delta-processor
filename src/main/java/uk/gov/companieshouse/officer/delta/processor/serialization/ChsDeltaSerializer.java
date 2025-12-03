@@ -49,7 +49,7 @@ public class ChsDeltaSerializer implements Serializer<Object> {
 
                     return avroSerializer.toBinary(chsDelta);
                 }
-                default -> throw new IllegalStateException("Unexpected value: " + payload);
+                default -> throw new IllegalStateException("Unexpected payload type: " + payload.getClass().getName() + ", value: " + payload);
             }
 
         } catch (Exception ex) {
