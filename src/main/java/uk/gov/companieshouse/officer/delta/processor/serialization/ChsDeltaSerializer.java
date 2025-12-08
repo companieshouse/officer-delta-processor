@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.officer.delta.processor.serialization;
 
+import java.nio.charset.StandardCharsets;
+
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.specific.SpecificDatumWriter;
@@ -49,7 +51,9 @@ public class ChsDeltaSerializer implements Serializer<Object> {
 
                     return avroSerializer.toBinary(chsDelta);
                 }
-                default -> throw new IllegalStateException("Unexpected payload type: " + payload.getClass().getName() + ", value: " + payload);
+                default -> {
+                    return payload.toString().getBytes(StandardCharsets.UTF_8);
+                }
             }
 
         } catch (Exception ex) {
