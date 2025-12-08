@@ -44,4 +44,10 @@ class ChsDeltaDeserializerTest {
         ChsDeltaSerializer serializer = new ChsDeltaSerializer(this.logger);
         return serializer.serialize("", chsDelta);
     }
+
+    @Test
+    void whenDeserializeWithInvalidData_thenThrowsNonRetryableErrorException() {
+        byte[] invalidData = new byte[] {0x00, 0x01, 0x02};
+        assertThrows(NonRetryableErrorException.class, () -> deserializer.deserialize("test-topic", invalidData));
+    }
 }

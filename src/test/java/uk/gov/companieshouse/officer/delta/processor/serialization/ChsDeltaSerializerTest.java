@@ -7,8 +7,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class ChsDeltaSerializerTest {
@@ -48,4 +52,23 @@ class ChsDeltaSerializerTest {
         ChsDeltaDeserializer deltaSerializer = new ChsDeltaDeserializer(this.logger);
         return deltaSerializer.deserialize("", chsDelta);
     }
+
+    @Test
+    void whenSerializationExceptionOccursThrowsNonRetryableErrorException() {
+        Object invalidPayload = new Object() {
+            @Override
+            public String toString() {
+                throw new RuntimeException("toString failure");
+            }
+        };
+
+        NonRetryableErrorException thrown = assertThrows(
+            NonRetryableErrorException.class,
+            () -> serializer.serialize("", invalidPayload)
+        );
+
+        assertThat(thrown.getCause()).isInstanceOf(RuntimeException.class);
+        verify(logger).error(eq("Serialization exception while writing to byte array"), any(), any());
+    }
+
 }
