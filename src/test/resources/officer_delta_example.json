@@ -70,7 +70,12 @@
         "country": "United Kingdom",
         "postal_code": "CF2 1B6",
         "usual_country_of_residence": "United Kingdom"
-      }
+      },
+      "contribution_currency_type": "USD",
+      "contribution_currency_value": "67345.22",
+      "contribution_sub_types": [{
+        "sub_type": "3"
+      }]
     }
   ],
   "CreatedTime": "07-JUN-21 15.26.17.000000",

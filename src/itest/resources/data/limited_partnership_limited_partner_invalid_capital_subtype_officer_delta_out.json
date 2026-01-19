@@ -68,10 +68,7 @@
       "responsibilities":null,
       "former_names":null,
       "contribution_currency_type": "USD",
-      "contribution_currency_value": "67345.22",
-      "contribution_sub_types": [{
-        "sub_type": "land-or-property"
-      }]
+      "contribution_currency_value": "67345.22"
     },
     "sensitive_data": null,
     "internal_id":"0025987375",

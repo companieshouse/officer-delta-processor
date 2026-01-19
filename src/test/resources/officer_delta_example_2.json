@@ -36,7 +36,17 @@
         "region": "SOUTH GLAMORGAN",
         "postal_code": "CF14 6EH",
         "usual_country_of_residence": "ENGLAND"
-      }
+      },
+      "contribution_currency_type": "USD",
+      "contribution_currency_value": "67345.22",
+      "contribution_sub_types": [
+        {
+          "sub_type": "3"
+        },
+        {
+        "sub_type": "5"
+        }
+      ]
     }
   ],
   "CreatedTime": "17-AUG-23 11.52.54.000000",

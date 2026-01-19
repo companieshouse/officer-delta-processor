@@ -47,6 +47,7 @@ import uk.gov.companieshouse.officer.delta.processor.model.Officers;
 import uk.gov.companieshouse.officer.delta.processor.model.OfficersItem;
 import uk.gov.companieshouse.officer.delta.processor.service.api.ApiClientService;
 import uk.gov.companieshouse.officer.delta.processor.transformer.AppointmentTransform;
+import uk.gov.companieshouse.officer.delta.processor.transformer.ContributionSubTypeTransform;
 import uk.gov.companieshouse.officer.delta.processor.transformer.FormerNameTransform;
 import uk.gov.companieshouse.officer.delta.processor.transformer.IdentificationTransform;
 import uk.gov.companieshouse.officer.delta.processor.transformer.IdentityVerificationDetailsTransform;
@@ -84,6 +85,7 @@ class DeltaProcessorTest {
                 new IdentityVerificationDetailsTransform(),
                 new ServiceAddressTransform(),
                 new FormerNameTransform(),
+                new ContributionSubTypeTransform(),
                 new PrincipalOfficeAddressTransform());
         SensitiveOfficerTransform sensitiveOfficerTransform = new SensitiveOfficerTransform(
                 new UsualResidentialAddressTransform());

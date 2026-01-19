@@ -58,6 +58,8 @@ class OfficerTransformTest {
     @Mock
     private FormerNameTransform formerNameTransform;
     @Mock
+    private ContributionSubTypeTransform contributionSubTypeTransform;
+    @Mock
     private PrincipalOfficeAddressTransform principalOfficeAddressTransform;
     @Mock
     private AddressAPI addressAPI;
@@ -85,7 +87,7 @@ class OfficerTransformTest {
     @BeforeEach
     void setUp() {
         testTransform = new OfficerTransform(identificationTransform, identityVerificationDetailsTransform,
-                serviceAddressTransform, formerNameTransform, principalOfficeAddressTransform);
+                serviceAddressTransform, formerNameTransform, contributionSubTypeTransform, principalOfficeAddressTransform);
     }
 
     @Test
