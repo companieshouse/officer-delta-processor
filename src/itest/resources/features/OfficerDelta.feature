@@ -74,3 +74,8 @@ Scenario: Can transform and send a limited-partnership-limited-partner-legal-ent
   Given the application is running
   When the consumer receives a limited_partnership_limited_partner_legal_entity officer delta with id EcEKO1YhIKexb0cSDZsn_OHsFw4
   Then a PUT request is sent to the appointments api with the transformed data
+
+Scenario: Can transform and send a limited-partnership-limited-partner-invalid-capital-contribution-subtype officer
+  Given the application is running
+  When the consumer receives a limited_partnership_limited_partner_invalid_capital_contribution_subtype officer delta with id EcEKO1YhIKexb0cSDZsn_OHsFw4
+  Then a PUT request is sent to the appointments api with the transformed data

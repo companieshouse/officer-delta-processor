@@ -119,6 +119,15 @@ public class OfficersItem {
     @JsonProperty("previous_name_array")
     private List<PreviousNameArray> previousNameArray;
 
+    @JsonProperty("contribution_currency_type")
+    private String contributionCurrencyType;
+
+    @JsonProperty("contribution_currency_value")
+    private String contributionCurrencyValue;
+
+    @JsonProperty("contribution_sub_types")
+    private List<DeltaContributionSubType> contributionSubTypes;
+
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -398,6 +407,30 @@ public class OfficersItem {
         this.companyStatus = companyStatus;
     }
 
+    public String getContributionCurrencyType() {
+        return contributionCurrencyType;
+    }
+
+    public void setContributionCurrencyType(String contributionCurrencyType) {
+        this.contributionCurrencyType = contributionCurrencyType;
+    }
+
+    public String getContributionCurrencyValue() {
+        return contributionCurrencyValue;
+    }
+
+    public void setContributionCurrencyValue(String contributionCurrencyValue) {
+        this.contributionCurrencyValue = contributionCurrencyValue;
+    }
+
+    public List<DeltaContributionSubType> getContributionSubTypes() {
+        return contributionSubTypes;
+    }
+
+    public void setContributionSubTypes(final List<DeltaContributionSubType> contributionSubTypes) {
+        this.contributionSubTypes = contributionSubTypes;
+    }
+
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
@@ -437,7 +470,9 @@ public class OfficersItem {
                 Objects.equals(getPreviousNameArray(), that.getPreviousNameArray()) && Objects.equals(
                 getAdditionalProperties(), that.getAdditionalProperties()) && Objects.equals(
                 getCompanyName(), that.getCompanyName()) && Objects.equals(getCompanyStatus(),
-                that.getCompanyStatus());
+                that.getCompanyStatus()) && Objects.equals(getContributionCurrencyType(), that.getContributionCurrencyType())
+                && Objects.equals(getContributionCurrencyValue(), that.getContributionCurrencyValue())
+                && Objects.equals(getContributionSubTypes(), that.getContributionSubTypes());
     }
 
     @Override
@@ -451,7 +486,8 @@ public class OfficersItem {
                 getContactDetails(), getForename(), getOfficerId(), getPreviousOfficerId(),
                 getIdentification(), getIdentityVerificationDetails(), getNationality(), getSurname(),
                 getExternalNumber(), getSecureDirector(), getPreviousNameArray(), getAdditionalProperties(),
-                getCompanyName(), getCompanyStatus());
+                getCompanyName(), getCompanyStatus(), getContributionCurrencyType(), getContributionCurrencyValue(),
+                getContributionSubTypes());
     }
 
     @Override

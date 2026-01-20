@@ -47,6 +47,8 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
 
     private final FormerNameTransform formerNameTransform;
 
+    private final ContributionSubTypeTransform contributionSubTypeTransform;
+
     private final PrincipalOfficeAddressTransform principalOfficeAddressTransform;
 
     /**
@@ -62,11 +64,13 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
                             IdentityVerificationDetailsTransform identityVerificationDetailsTransform,
                             ServiceAddressTransform serviceAddressTransform,
                             FormerNameTransform formerNameTransform,
+                            ContributionSubTypeTransform contributionSubTypeTransform,
                             PrincipalOfficeAddressTransform principalOfficeAddressTransform) {
         this.idTransform = idTransform;
         this.identityVerificationDetailsTransform = identityVerificationDetailsTransform;
         this.serviceAddressTransform = serviceAddressTransform;
         this.formerNameTransform = formerNameTransform;
+        this.contributionSubTypeTransform = contributionSubTypeTransform;
         this.principalOfficeAddressTransform = principalOfficeAddressTransform;
     }
 
@@ -156,6 +160,14 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
                 .concat(TransformerUtils.encode(source.getOfficerId())).concat(APPOINTMENTS);
         itemLinkTypes.getOfficer().setAppointments(officerAppointments);
         officer.setLinks(Collections.singletonList(itemLinkTypes));
+
+        officer.setContributionCurrencyValue(source.getContributionCurrencyValue());
+        officer.setContributionCurrencyType(source.getContributionCurrencyType());
+
+        if (source.getContributionSubTypes() != null) {
+            officer.setContributionSubTypes(
+                    source.getContributionSubTypes().stream().map(contributionSubTypeTransform::transform).toList());
+        }
 
         return officer;
     }
