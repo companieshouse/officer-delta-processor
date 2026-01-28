@@ -20,14 +20,6 @@
       "officer_id": "3001237435",
       "secure_director": "N",
       "officer_detail_id": "3456251385",
-      "identification": {
-        "EEA": {
-          "place_registered": "United Kingdom",
-          "registration_number": "38298",
-          "legal_authority": "Chapter 32",
-          "legal_form": "Hong Kong"
-        }
-      },
       "service_address": {
         "premise": "1",
         "address_line_1" : "1 Crown Way",

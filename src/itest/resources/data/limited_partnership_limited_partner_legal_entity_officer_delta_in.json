@@ -16,9 +16,10 @@
       "secure_director": "N",
       "officer_detail_id": "3456251385",
       "identification": {
-        "non_EEA": {
+        "limited_partnership_corporate_partner": {
           "place_registered": "United Kingdom",
           "registration_number": "38298",
+          "register_location": "UNITED KINGDOM",
           "legal_authority": "Chapter 32",
           "legal_form": "Hong Kong"
         }

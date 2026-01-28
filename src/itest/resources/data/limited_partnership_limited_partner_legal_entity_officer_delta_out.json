@@ -38,9 +38,10 @@
       "officer_role":"corporate-limited-partner-in-a-limited-partnership",
       "is_secure_officer":null,
       "identification":{
-        "identification_type":"non-eea",
+        "identification_type":"limited-partnership-corporate-partner",
         "legal_authority":"Chapter 32",
         "legal_form":"Hong Kong",
+        "register_location": "UNITED KINGDOM",
         "place_registered":"United Kingdom",
         "registration_number":"38298"
       },

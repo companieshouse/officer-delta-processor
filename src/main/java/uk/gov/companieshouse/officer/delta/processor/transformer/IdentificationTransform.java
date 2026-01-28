@@ -61,6 +61,13 @@ public class IdentificationTransform implements
             identification.setPlaceRegistered(roeIdentification.getPlaceRegistered());
             identification.setRegistrationNumber(roeIdentification.getRegistrationNumber());
 
+        } else if (source.getLimitedPartnershipCorporatePartner() != null) {
+            identification.setIdentificationType(IdentificationTypeEnum.LIMITED_PARTNERSHIP_CORPORATE_PARTNER);
+            identification.setLegalAuthority(source.getLimitedPartnershipCorporatePartner().getLegalAuthority());
+            identification.setLegalForm(source.getLimitedPartnershipCorporatePartner().getLegalForm());
+            identification.setPlaceRegistered(source.getLimitedPartnershipCorporatePartner().getPlaceRegistered());
+            identification.setRegistrationNumber(source.getLimitedPartnershipCorporatePartner().getRegistrationNumber());
+            identification.setRegisterLocation(source.getLimitedPartnershipCorporatePartner().getRegisterLocation());
         }
 
         return identification;
