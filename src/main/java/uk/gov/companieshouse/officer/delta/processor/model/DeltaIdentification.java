@@ -28,6 +28,9 @@ public class DeltaIdentification {
     @JsonProperty("registered_overseas_entity_corporate_managing_officer")
     private Identification registeredOverseasEntityCorporateManagingOfficer;
 
+    @JsonProperty("limited_partnership_corporate_partner")
+    private Identification limitedPartnershipCorporatePartner;
+
     /**
      * Gets eea.
      *
@@ -121,6 +124,26 @@ public class DeltaIdentification {
                 registeredOverseasEntityCorporateManagingOfficer;
     }
 
+    /**
+     * Gets limited partnership corporate partner identification details.
+     *
+     * @return the limited partnership corporate partner identification details
+     */
+    public Identification getLimitedPartnershipCorporatePartner() {
+        return limitedPartnershipCorporatePartner;
+    }
+
+    /**
+     * Sets limited partnership corporate partner identification details.
+     *
+     * @param limitedPartnershipCorporatePartner the limited partnership corporate
+     *                                           partner identification details
+     */
+    public void setLimitedPartnershipCorporatePartner(
+            Identification limitedPartnershipCorporatePartner) {
+        this.limitedPartnershipCorporatePartner = limitedPartnershipCorporatePartner;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -134,13 +157,15 @@ public class DeltaIdentification {
                 that.otherCorporateBodyOrFirm) && Objects.equals(nonEeaApi, that.nonEeaApi)
                 && Objects.equals(ukLimitedCompany, that.ukLimitedCompany) && Objects.equals(
                 registeredOverseasEntityCorporateManagingOfficer,
-                that.registeredOverseasEntityCorporateManagingOfficer);
+                that.registeredOverseasEntityCorporateManagingOfficer)
+                && Objects.equals(limitedPartnershipCorporatePartner,
+                that.limitedPartnershipCorporatePartner);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(eea, otherCorporateBodyOrFirm, nonEeaApi, ukLimitedCompany,
-                registeredOverseasEntityCorporateManagingOfficer);
+                registeredOverseasEntityCorporateManagingOfficer, limitedPartnershipCorporatePartner);
     }
 
     @Override
