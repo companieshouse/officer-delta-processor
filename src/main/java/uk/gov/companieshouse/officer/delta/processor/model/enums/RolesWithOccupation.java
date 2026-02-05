@@ -42,14 +42,6 @@ public enum RolesWithOccupation {
     /**
      * LP General Partner role with occupation.
      */
-    LLPGENPART(OfficerRole.LLPGENPART),
-    /**
-     * LP Limited Partner role with occupation.
-     */
-    LLPLIMPART(OfficerRole.LLPLIMPART),
-    /**
-     * LP General Partner role with occupation.
-     */
     LPGENPART(OfficerRole.LPGENPART),
     /**
      * LP Limited Partner role with occupation.

@@ -50,14 +50,6 @@ public enum RolesWithResidentialAddress {
     /**
      * LP General Partner natural person role with residential address.
      */
-    LLPGENPART(OfficerRole.LLPGENPART),
-    /**
-     * LP Limited Partner natural person role with residential address.
-     */
-    LLPLIMPART(OfficerRole.LLPLIMPART),
-    /**
-     * LP General Partner natural person role with residential address.
-     */
     LPGENPART(OfficerRole.LPGENPART),
     /**
      * LP Limited Partner natural person role with residential address.

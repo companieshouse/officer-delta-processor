@@ -12,14 +12,6 @@ public enum OfficerRole {
     FACTOR("judicial-factor"),
     LLPDESMEM("llp-designated-member"),
     LLPDESMEMCORP("corporate-llp-designated-member"),
-
-    // TODO 'LLP' Limited Partnership role definitions will be removed when CHIPS DB code has been changed
-    //      to correctly send in the 'LP' versions of these values (LPGENPART etc.) in the 'kind' message field
-    LLPGENPART("general-partner-in-a-limited-partnership"),
-    LLPGENPARTCORP("corporate-general-partner-in-a-limited-partnership"),
-    LLPLIMPART("limited-partner-in-a-limited-partnership"),
-    LLPLIMPARTCORP("corporate-limited-partner-in-a-limited-partnership"),
-
     LPGENPART("general-partner-in-a-limited-partnership"),
     LPGENPARTCORP("corporate-general-partner-in-a-limited-partnership"),
     LPLIMPART("limited-partner-in-a-limited-partnership"),
