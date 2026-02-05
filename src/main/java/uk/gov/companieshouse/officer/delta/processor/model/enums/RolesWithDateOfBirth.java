@@ -41,14 +41,6 @@ public enum RolesWithDateOfBirth {
     /**
      * LP General Partner role with date of birth.
      */
-    LLPGENPART(OfficerRole.LLPGENPART),
-    /**
-     * LP Limited Partner role with date of birth.
-     */
-    LLPLIMPART(OfficerRole.LLPLIMPART),
-    /**
-     * LP General Partner role with date of birth.
-     */
     LPGENPART(OfficerRole.LPGENPART),
     /**
      * LP Limited Partner role with date of birth.

@@ -42,14 +42,6 @@ public enum RolesWithCountryOfResidence {
     /**
      * LP General Partner natural person role with country of residence.
      */
-    LLPGENPART(OfficerRole.LLPGENPART),
-    /**
-     * LP Limited Partner natural person role with country of residence.
-     */
-    LLPLIMPART(OfficerRole.LLPLIMPART),
-    /**
-     * LP General Partner natural person role with country of residence.
-     */
     LPGENPART(OfficerRole.LPGENPART),
     /**
      * LP Limited Partner natural person role with country of residence.

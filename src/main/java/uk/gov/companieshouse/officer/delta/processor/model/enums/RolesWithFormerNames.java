@@ -50,14 +50,6 @@ public enum RolesWithFormerNames {
     /**
      * LP General Partner role with former names.
      */
-    LLPGENPART(OfficerRole.LLPGENPART),
-    /**
-     * LP Limited Partner role with former names.
-     */
-    LLPLIMPART(OfficerRole.LLPLIMPART),
-    /**
-     * LP General Partner role with former names.
-     */
     LPGENPART(OfficerRole.LPGENPART),
     /**
      * LP Limited Partner role with former names.
