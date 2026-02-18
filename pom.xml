@@ -108,7 +108,7 @@
       <!-- Pinning version to address CVE-2025-53103 in 1.12.2 pulled transitively by spring-kafka-test:jar:3.3.12-->
       <dependency>
         <groupId>org.junit.platform</groupId>
-        <artifactId>junit-platform-launcher</artifactId>
+        <artifactId>junit-platform-reporting</artifactId>
         <version>1.14.3</version>
         <scope>test</scope>
       </dependency>
