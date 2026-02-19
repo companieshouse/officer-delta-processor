@@ -24,16 +24,16 @@
     <java.version>21</java.version>
 
     <ch-kafka.version>3.0.6</ch-kafka.version>
-    <kafka-models.version>3.0.18</kafka-models.version>
-    <private-sdk.version>4.0.444</private-sdk.version>
-    <spring.boot.version>3.5.4</spring.boot.version>
-    <apache-avro.version>1.12.0</apache-avro.version>
-    <spring-core.version>6.2.10</spring-core.version>
+    <kafka-models.version>3.0.28</kafka-models.version>
+    <private-sdk.version>4.0.454</private-sdk.version>
+    <spring.boot.version>3.5.10</spring.boot.version>
+    <apache-avro.version>1.12.1</apache-avro.version>
+    <spring-core.version>6.2.16</spring-core.version>
     <tomcat-embed-dependencies.version>10.1.49</tomcat-embed-dependencies.version>
 
     <!-- Logging -->
-    <structured-logging.version>3.0.37</structured-logging.version>
-    <api-sdk-manager-java-library.version>3.0.10</api-sdk-manager-java-library.version>
+    <structured-logging.version>3.0.50</structured-logging.version>
+    <api-sdk-manager-java-library.version>3.0.15</api-sdk-manager-java-library.version>
 
     <!-- Test -->
     <equalsverifier.version>4.0.4</equalsverifier.version>
@@ -57,8 +57,6 @@
     <!-- Sonar dependency -->
     <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
     <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
-    <sonar.login/>
-    <sonar.password/>
     <sonar.projectName>officer-delta-processor</sonar.projectName>
     <sonar.projectKey>uk.gov.companieshouse:officer-delta-processor</sonar.projectKey>
     <sonar.sources>src/main</sonar.sources>
@@ -99,6 +97,20 @@
         <version>${io-cucumber.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <!-- Pinning version to address CVE-2024-29371 in 0.9.4 pulled transitively by spring-kafka-test:jar:3.3.12-->
+      <dependency>
+        <groupId>org.bitbucket.b_c</groupId>
+        <artifactId>jose4j</artifactId>
+        <version>0.9.6</version>
+        <scope>compile</scope>
+      </dependency>
+      <!-- Pinning version to address CVE-2025-53103 in 1.12.2 pulled transitively by spring-kafka-test:jar:3.3.12-->
+      <dependency>
+        <groupId>org.junit.platform</groupId>
+        <artifactId>junit-platform-reporting</artifactId>
+        <version>1.14.3</version>
+        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -153,13 +165,6 @@
       <groupId>uk.gov.companieshouse</groupId>
       <artifactId>ch-kafka</artifactId>
       <version>${ch-kafka.version}</version>
-      <exclusions>
-        <!-- CVE-2024-47561(9.3)-->
-        <exclusion>
-          <groupId>org.apache.avro</groupId>
-          <artifactId>avro</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <!-- Override for CVE-2024-47561(9.3)-->
     <dependency>
@@ -173,11 +178,6 @@
       <artifactId>kafka-models</artifactId>
       <version>${kafka-models.version}</version>
       <exclusions>
-        <!-- CVE-2024-47561(9.3)-->
-        <exclusion>
-          <groupId>org.apache.avro</groupId>
-          <artifactId>avro</artifactId>
-        </exclusion>
         <exclusion>
           <groupId>org.eclipse.jetty</groupId>
           <artifactId>jetty-webapp</artifactId>
