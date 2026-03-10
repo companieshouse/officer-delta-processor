@@ -23,17 +23,17 @@
 
     <java.version>21</java.version>
 
-    <ch-kafka.version>3.0.6</ch-kafka.version>
-    <kafka-models.version>3.0.28</kafka-models.version>
-    <private-sdk.version>4.0.454</private-sdk.version>
-    <spring.boot.version>3.5.10</spring.boot.version>
+    <ch-kafka.version>3.0.8</ch-kafka.version>
+    <kafka-models.version>3.0.29</kafka-models.version>
+    <private-sdk.version>4.0.476</private-sdk.version>
+    <spring.boot.version>3.5.11</spring.boot.version>
     <apache-avro.version>1.12.1</apache-avro.version>
     <spring-core.version>6.2.16</spring-core.version>
-    <tomcat-embed-dependencies.version>10.1.49</tomcat-embed-dependencies.version>
+    <tomcat-embed-dependencies.version>10.1.52</tomcat-embed-dependencies.version>
 
     <!-- Logging -->
-    <structured-logging.version>3.0.50</structured-logging.version>
-    <api-sdk-manager-java-library.version>3.0.15</api-sdk-manager-java-library.version>
+    <structured-logging.version>3.0.51</structured-logging.version>
+    <api-sdk-manager-java-library.version>3.0.16</api-sdk-manager-java-library.version>
 
     <!-- Test -->
     <equalsverifier.version>4.0.4</equalsverifier.version>
