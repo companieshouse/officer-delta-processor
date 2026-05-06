@@ -406,6 +406,27 @@ class OfficerTransformTest {
         assertThat(testTransform.transform((OfficersItem) null), is(nullValue()));
     }
 
+    @ParameterizedTest
+    @EnumSource(value = OfficerRole.class, names = {"LPLIMPARTCORP", "LPGENPARTCORP"})
+    void testPrincipalOfficeAddressIsSetWhenCorporatePartnerIsTransformed(OfficerRole officerRole) throws NonRetryableErrorException {
+        Data officerAPI = testTransform.factory();
+        OfficersItem officer = createOfficer(addressAPI, identification);
+        AddressAPI principalOfficeAddressAPI = new AddressAPI();
+
+        officer.setKind(officerRole.name());
+        officer.setPrincipalOfficeAddress(principalOfficeAddressAPI);
+
+        officer.setAppointmentDate(VALID_DATE);
+        officer.setDateOfBirth(VALID_DATE);
+
+        when(identificationTransform.transform(identification)).thenReturn(identificationAPI);
+        when(principalOfficeAddressTransform.transform(principalOfficeAddressAPI)).thenReturn(principalOfficeAddress);
+
+        final Data result = testTransform.transform(officer, officerAPI);
+
+        assertThat(result.getPrincipalOfficeAddress(), is(principalOfficeAddress));
+    }
+
     private void verifyProcessingError(final Data data, final OfficersItem officer,
             final String expectedMessage) {
 

@@ -4,7 +4,7 @@
     "company_status": "active",
     "data":{
       "person_number": "12345",
-      "service_address":{
+      "principal_office_address":{
         "address_line_1":"1 Crown Way",
         "address_line_2":"Pavement",
         "care_of" : "John Smith",
@@ -64,7 +64,7 @@
       "title":null,
       "company_number":"01777777",
       "contact_details":null,
-      "principal_office_address":null,
+      "service_address":null,
       "resigned_on":null,
       "responsibilities":null,
       "former_names":null,
