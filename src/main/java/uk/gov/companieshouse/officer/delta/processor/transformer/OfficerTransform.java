@@ -169,6 +169,10 @@ public class OfficerTransform implements Transformative<OfficersItem, Data> {
                     source.getContributionSubTypes().stream().map(contributionSubTypeTransform::transform).toList());
         }
 
+        if (OfficerRole.LPGENPARTCORP.getValue().equals(officerRole) || OfficerRole.LPLIMPARTCORP.getValue().equals(officerRole)) {
+            officer.setPrincipalOfficeAddress(principalOfficeAddressTransform.transform(source.getPrincipalOfficeAddress()));
+        }
+
         return officer;
     }
 

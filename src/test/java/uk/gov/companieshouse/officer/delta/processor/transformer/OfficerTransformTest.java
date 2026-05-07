@@ -406,6 +406,51 @@ class OfficerTransformTest {
         assertThat(testTransform.transform((OfficersItem) null), is(nullValue()));
     }
 
+    @ParameterizedTest
+    @EnumSource(value = OfficerRole.class, names = {"LPLIMPARTCORP", "LPGENPARTCORP"})
+    void testCorrectAddressesAreSetWhenCorporatePartnerIsTransformed(OfficerRole officerRole) throws NonRetryableErrorException {
+        Data officerAPI = testTransform.factory();
+        OfficersItem officer = createOfficer(addressAPI, identification);
+
+        officer.setKind(officerRole.name());
+        officer.setAppointmentDate(VALID_DATE);
+        officer.setDateOfBirth(VALID_DATE);
+
+        officer.setServiceAddress(null);
+        AddressAPI principalOfficeAddressAPI = new AddressAPI();
+        officer.setPrincipalOfficeAddress(principalOfficeAddressAPI);
+
+        when(identificationTransform.transform(identification)).thenReturn(identificationAPI);
+        when(principalOfficeAddressTransform.transform(principalOfficeAddressAPI)).thenReturn(principalOfficeAddress);
+
+        final Data result = testTransform.transform(officer, officerAPI);
+
+        assertThat(result.getPrincipalOfficeAddress(), is(principalOfficeAddress));
+        assertThat(result.getServiceAddress(), is(nullValue()));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = OfficerRole.class, names = {"LPLIMPART", "LPGENPART"})
+    void testCorrectAddressesAreSetWhenNaturalPersonPartnerIsTransformed(OfficerRole officerRole) throws NonRetryableErrorException {
+        Data officerAPI = testTransform.factory();
+        OfficersItem officer = createOfficer(addressAPI, identification);
+
+        officer.setKind(officerRole.name());
+        officer.setAppointmentDate(VALID_DATE);
+        officer.setDateOfBirth(VALID_DATE);
+
+        AddressAPI principalOfficeAddressAPI = new AddressAPI();
+        officer.setPrincipalOfficeAddress(principalOfficeAddressAPI);
+
+        when(identificationTransform.transform(identification)).thenReturn(identificationAPI);
+        when(serviceAddressTransform.transform(addressAPI)).thenReturn(serviceAddress);
+
+        final Data result = testTransform.transform(officer, officerAPI);
+
+        assertThat(result.getPrincipalOfficeAddress(), is(nullValue()));
+        assertThat(result.getServiceAddress(), is(sameInstance(serviceAddress)));
+    }
+
     private void verifyProcessingError(final Data data, final OfficersItem officer,
             final String expectedMessage) {
 
