@@ -6,6 +6,9 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
+// NOTE: This code is temporary and will not be deployed to STAGING or LIVE. It is only to investigate a deployment
+//       issue in the CiDev environment
+
 @Component
 public class LoggingHealthIndicator implements HealthIndicator {
     private static final Logger logger = LoggerFactory.getLogger(LoggingHealthIndicator.class);

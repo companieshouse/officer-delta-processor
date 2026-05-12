@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import java.io.IOException;
 
+// NOTE: This code is temporary and will not be deployed to STAGING or LIVE. It is only to investigate a deployment
+//       issue in the CiDev environment
+
 @Component
 public class HealthCheckLoggingFilter implements Filter {
     private static final Logger logger = LoggerFactory.getLogger(HealthCheckLoggingFilter.class);
