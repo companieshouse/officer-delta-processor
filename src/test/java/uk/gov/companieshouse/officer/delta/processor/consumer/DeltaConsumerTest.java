@@ -4,7 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
-import org.junit.Assert;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,7 +54,8 @@ class DeltaConsumerTest {
         doThrow(new NonRetryableErrorException(new Exception()))
                 .when(processor).process(brokenMessage);
 
-        Assert.assertThrows(Exception.class, ()->consumer
-                .receiveMainMessages(message, 0, TOPIC, 10, 1L));
+        Assertions.assertThatThrownBy(() -> consumer
+                .receiveMainMessages(message, 0, TOPIC, 10, 1L))
+                .isInstanceOf(Exception.class);
     }
 }
