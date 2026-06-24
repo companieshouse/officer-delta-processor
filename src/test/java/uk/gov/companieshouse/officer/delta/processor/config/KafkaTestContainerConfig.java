@@ -4,6 +4,7 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
+
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -12,6 +13,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
@@ -31,8 +33,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@EnableKafka
 @TestConfiguration
-    public class KafkaTestContainerConfig {
+public class KafkaTestContainerConfig {
 
     private final ChsDeltaDeserializer chsDeltaDeserializer;
     private final ChsDeltaSerializer chsDeltaSerializer;

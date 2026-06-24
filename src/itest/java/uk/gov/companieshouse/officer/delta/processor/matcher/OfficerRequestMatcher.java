@@ -1,12 +1,12 @@
 package uk.gov.companieshouse.officer.delta.processor.matcher;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.RequestMethod;
 import com.github.tomakehurst.wiremock.matching.MatchResult;
 import com.github.tomakehurst.wiremock.matching.ValueMatcher;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.companieshouse.logging.Logger;
 
 import java.util.Iterator;
@@ -17,10 +17,10 @@ import java.util.Iterator;
  */
 public class OfficerRequestMatcher implements ValueMatcher<Request> {
 
-    private String expectedOutput;
-    private String conumb;
-    private String id;
-    private Logger logger;
+    private final String expectedOutput;
+    private final String conumb;
+    private final String id;
+    private final Logger logger;
 
     public OfficerRequestMatcher(Logger logger, String conumb, String output, String id) {
         this.conumb = conumb;
@@ -72,7 +72,7 @@ public class OfficerRequestMatcher implements ValueMatcher<Request> {
                 logger.error("Body does not match expected:\n<" + expectedNode + ">\nactual:\n<" + actualNode + ">");
             }
             return MatchResult.of(match);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             logger.error("Could not process JSON: " + e.getMessage());
             return MatchResult.of(false);
         }
@@ -95,8 +95,7 @@ public class OfficerRequestMatcher implements ValueMatcher<Request> {
     }
 
     private boolean compareJsonObjects(JsonNode expected, JsonNode actual) {
-        for (Iterator<String> fieldNames = expected.fieldNames(); fieldNames.hasNext(); ) {
-            String field = fieldNames.next();
+        for (String field : expected.propertyNames()) {
             if (!actual.has(field) || !compareJson(expected.get(field), actual.get(field))) {
                 return false;
             }

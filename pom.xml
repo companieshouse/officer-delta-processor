@@ -40,7 +40,7 @@
         <jib-maven-plugin.version>3.5.1</jib-maven-plugin.version>
 
         <!-- Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot -->
-        <spring-boot.version>3.5.15</spring-boot.version>
+        <spring-boot.version>4.1.0</spring-boot.version>
         <!-- Source: https://mvnrepository.com/artifact/org.apache.avro/avro -->
         <apache-avro.version>1.12.1</apache-avro.version>
         <!-- Source: https://mvnrepository.com/artifact/org.awaitility/awaitility -->
@@ -198,6 +198,11 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-json</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-logging</artifactId>
             <exclusions>
                 <exclusion>
@@ -213,12 +218,20 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
+            <artifactId>spring-boot-starter-aspectj</artifactId>
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-opentelemetry</artifactId>
+        </dependency>
+
+        <!-- Source: https://mvnrepository.com/artifact/io.opentelemetry.instrumentation/opentelemetry-logback-appender-1.0 -->
+        <dependency>
             <groupId>io.opentelemetry.instrumentation</groupId>
-            <artifactId>opentelemetry-spring-boot-starter</artifactId>
+            <artifactId>opentelemetry-logback-appender-1.0</artifactId>
+            <version>${opentelemetry.version}-alpha</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -302,7 +315,7 @@
 
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>kafka</artifactId>
+            <artifactId>testcontainers-kafka</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -314,7 +327,7 @@
 
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
 

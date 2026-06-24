@@ -3,13 +3,13 @@ package uk.gov.companieshouse.officer.delta.processor.processor;
 import static uk.gov.companieshouse.officer.delta.processor.OfficerDeltaProcessorApplication.APPLICATION_NAME_SPACE;
 import static uk.gov.companieshouse.officer.delta.processor.transformer.TransformerUtils.parseOffsetDateTime;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 import uk.gov.companieshouse.api.appointment.FullRecordCompanyOfficerApi;
 import uk.gov.companieshouse.api.delta.OfficerDeleteDelta;
 import uk.gov.companieshouse.delta.ChsDelta;
@@ -38,7 +38,7 @@ public class DeltaProcessor implements Processor<ChsDelta> {
 
     private final AppointmentTransform transformer;
     private final ApiClientService apiClientService;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper objectMapper;
 
     /**
      * Instantiates a new Delta processor.
@@ -49,7 +49,7 @@ public class DeltaProcessor implements Processor<ChsDelta> {
      */
     @Autowired
     public DeltaProcessor(AppointmentTransform transformer, ApiClientService apiClientService,
-            ObjectMapper objectMapper) {
+            JsonMapper objectMapper) {
         this.transformer = transformer;
         this.apiClientService = apiClientService;
         this.objectMapper = objectMapper;
@@ -72,7 +72,7 @@ public class DeltaProcessor implements Processor<ChsDelta> {
 
                 apiClientService.putAppointment(officer.getCompanyNumber(), appointmentApi);
             }
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             /* IMPORTANT: do not propagate the original cause as it contains the full source JSON
              with potentially sensitive data.
              */
@@ -100,7 +100,7 @@ public class DeltaProcessor implements Processor<ChsDelta> {
         OfficerDeleteDelta officersDelete;
         try {
             officersDelete = objectMapper.readValue(chsDelta.getData(), OfficerDeleteDelta.class);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             LOGGER.error("Error when extracting officers delete delta", ex,
                     DataMapHolder.getLogMap());
             throw new NonRetryableErrorException("Error when extracting officers delete delta", ex);
