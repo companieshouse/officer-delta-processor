@@ -2,7 +2,6 @@ package uk.gov.companieshouse.officer.delta.processor.config;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import org.junit.jupiter.api.Test;
 
