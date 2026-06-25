@@ -6,10 +6,10 @@ import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.retrytopic.DltStrategy;
 import org.springframework.kafka.retrytopic.RetryTopicHeaders;
 import org.springframework.kafka.retrytopic.SameIntervalTopicReuseStrategy;
+import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.officer.delta.processor.exception.NonRetryableErrorException;
@@ -36,7 +36,7 @@ public class DeltaConsumer {
      * Receives Main topic messages.
      */
     @RetryableTopic(attempts = "${officer.delta.processor.attempts}",
-            backoff = @Backoff(delayExpression = "${officer.delta.processor.backoff-delay}"),
+            backOff = @BackOff(delayString = "${officer.delta.processor.backoff-delay}"),
             sameIntervalTopicReuseStrategy = SameIntervalTopicReuseStrategy.SINGLE_TOPIC,
             dltTopicSuffix = "-error",
             dltStrategy = DltStrategy.FAIL_ON_ERROR,
@@ -53,7 +53,7 @@ public class DeltaConsumer {
                                     @Header(KafkaHeaders.OFFSET) Long offset) {
         var chsDelta = message.getPayload();
 
-        if (Boolean.TRUE.equals(chsDelta.getIsDelete())) {
+        if (chsDelta.getIsDelete()) {
             processor.processDelete(chsDelta);
         } else {
             processor.process(chsDelta);

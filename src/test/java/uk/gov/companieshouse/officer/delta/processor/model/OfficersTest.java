@@ -1,11 +1,11 @@
 package uk.gov.companieshouse.officer.delta.processor.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.ResourceUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +25,7 @@ class OfficersTest {
 
     @Test
     @DisplayName("Example JSON can be serialized into model")
-    void jsonDecodeExample() throws JsonProcessingException {
+    void jsonDecodeExample() throws JacksonException {
         // Given
         String rawJSON = loadExampleJSON();
 

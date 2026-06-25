@@ -11,9 +11,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static uk.gov.companieshouse.officer.delta.processor.transformer.TransformerUtils.parseOffsetDateTime;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -36,6 +33,10 @@ import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import tools.jackson.core.StreamReadFeature;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
 import uk.gov.companieshouse.api.appointment.FullRecordCompanyOfficerApi;
 import uk.gov.companieshouse.api.delta.OfficerDeleteDelta;
 import uk.gov.companieshouse.delta.ChsDelta;
@@ -63,8 +64,11 @@ class DeltaProcessorTest {
 
     private static final String CONTEXT_ID = "context_id";
     private static final String DELTA_AT = "20230724093435661593";
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-            .registerModule(new JavaTimeModule());
+    private static final JsonMapper OBJECT_MAPPER = JsonMapper.builder()
+            .enable(DateTimeFeature.WRITE_DATES_WITH_ZONE_ID)
+            .enable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION)
+            .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .build();
 
     private static AppointmentTransform appointmentTransform;
     private static String json;
@@ -95,9 +99,7 @@ class DeltaProcessorTest {
         expectedAppointment = jsonToAppointment(json);
     }
 
-    private static FullRecordCompanyOfficerApi jsonToAppointment(final String json)
-            throws JsonProcessingException, NonRetryableErrorException {
-
+    private static FullRecordCompanyOfficerApi jsonToAppointment(final String json) {
         final Officers officers = OBJECT_MAPPER.readValue(json, Officers.class);
         final List<OfficersItem> officersOfficers = officers.getOfficers();
         final OfficersItem officer = officersOfficers.get(0);
@@ -108,15 +110,13 @@ class DeltaProcessorTest {
         return appointmentAPI;
     }
 
-    private static OfficerDeleteDelta jsonToDelete(final String json)
-            throws JsonProcessingException, NonRetryableErrorException {
+    private static OfficerDeleteDelta jsonToDelete(final String json) {
         return OBJECT_MAPPER.readValue(json, OfficerDeleteDelta.class);
     }
 
     @BeforeEach
     void setUp() {
-        deltaProcessor = new DeltaProcessor(appointmentTransform, apiClientService,
-                OBJECT_MAPPER);
+        deltaProcessor = new DeltaProcessor(appointmentTransform, apiClientService, OBJECT_MAPPER);
     }
 
     @Test
@@ -140,7 +140,7 @@ class DeltaProcessorTest {
         final NonRetryableErrorException exception =
                 assertThrows(NonRetryableErrorException.class, () -> deltaProcessor.process(delta));
         final String redactedMessage = "Unexpected character ('-' (code 45)): was expecting a colon"
-                + " to separate field name and value\n at [Source line: 2, column: 13]";
+                + " to separate property name and value\n at [Source line: 2, column: 13]";
 
         assertThat(exception.getMessage(), is("Unable to JSON parse CHSDelta"));
         assertThat(exception.getCause().getMessage(), is(redactedMessage));
