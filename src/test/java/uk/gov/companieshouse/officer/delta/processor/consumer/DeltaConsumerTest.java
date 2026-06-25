@@ -56,6 +56,6 @@ class DeltaConsumerTest {
 
         Assertions.assertThatThrownBy(() -> consumer
                 .receiveMainMessages(message, 0, TOPIC, 10, 1L))
-                .isInstanceOf(Exception.class);
+                .isInstanceOf(NonRetryableErrorException.class);
     }
 }

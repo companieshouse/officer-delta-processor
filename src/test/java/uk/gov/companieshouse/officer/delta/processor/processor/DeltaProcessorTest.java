@@ -99,9 +99,7 @@ class DeltaProcessorTest {
         expectedAppointment = jsonToAppointment(json);
     }
 
-    private static FullRecordCompanyOfficerApi jsonToAppointment(final String json)
-            throws NonRetryableErrorException {
-
+    private static FullRecordCompanyOfficerApi jsonToAppointment(final String json) {
         final Officers officers = OBJECT_MAPPER.readValue(json, Officers.class);
         final List<OfficersItem> officersOfficers = officers.getOfficers();
         final OfficersItem officer = officersOfficers.get(0);
@@ -112,15 +110,13 @@ class DeltaProcessorTest {
         return appointmentAPI;
     }
 
-    private static OfficerDeleteDelta jsonToDelete(final String json)
-            throws NonRetryableErrorException {
+    private static OfficerDeleteDelta jsonToDelete(final String json) {
         return OBJECT_MAPPER.readValue(json, OfficerDeleteDelta.class);
     }
 
     @BeforeEach
     void setUp() {
-        deltaProcessor = new DeltaProcessor(appointmentTransform, apiClientService,
-                OBJECT_MAPPER);
+        deltaProcessor = new DeltaProcessor(appointmentTransform, apiClientService, OBJECT_MAPPER);
     }
 
     @Test
