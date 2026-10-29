@@ -27,7 +27,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
-        <ch-bom.version>0.1.21</ch-bom.version>
+        <ch-bom.version>0.1.35</ch-bom.version>
 
         <!-- Plugin Versions -->
         <!-- Source: https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
@@ -47,8 +47,6 @@
         <apache-avro.version>1.12.1</apache-avro.version>
         <!-- Source: https://mvnrepository.com/artifact/org.awaitility/awaitility -->
         <awaitility.version>4.3.0</awaitility.version>
-        <!-- Source: https://mvnrepository.com/artifact/io.opentelemetry.instrumentation/opentelemetry-instrumentation-bom -->
-        <opentelemetry.version>2.31.1</opentelemetry.version>
         <!-- Source: https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-bom -->
         <kotlin.version>2.3.21</kotlin.version>
 
@@ -84,14 +82,6 @@
         <dependencies>
 
             <dependency>
-                <groupId>io.opentelemetry.instrumentation</groupId>
-                <artifactId>opentelemetry-instrumentation-bom</artifactId>
-                <version>${opentelemetry.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers-bom</artifactId>
                 <version>${testcontainers.version}</version>
@@ -105,15 +95,6 @@
                 <version>${io-cucumber.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-
-            <!-- Pinning for CVE-2025-48924 in commons-lang3 < 3.18.0 -->
-            <!-- Source: https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>3.20.0</version>
-                <scope>compile</scope>
             </dependency>
 
             <!-- Source: https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-bom -->
@@ -130,13 +111,6 @@
                 <groupId>org.apache.zookeeper</groupId>
                 <artifactId>zookeeper</artifactId>
                 <version>3.8.6</version>
-            </dependency>
-
-            <!-- Source: https://mvnrepository.com/artifact/com.google.guava/guava -->
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>33.6.0-jre</version>
             </dependency>
 
             <!-- Import CH BOM first so CH-approved versions (CVE overrides) take precedence -->
@@ -228,7 +202,6 @@
         <dependency>
             <groupId>io.opentelemetry.instrumentation</groupId>
             <artifactId>opentelemetry-logback-appender-1.0</artifactId>
-            <version>${opentelemetry.version}-alpha</version>
             <scope>compile</scope>
         </dependency>
 
