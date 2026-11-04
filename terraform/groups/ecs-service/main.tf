@@ -45,6 +45,7 @@ module "ecs-service" {
   healthcheck_path                  = local.healthcheck_path
   healthcheck_matcher               = local.healthcheck_matcher
   health_check_grace_period_seconds = 480
+  task_healthcheck_start_period     = 180
 
   # Docker container details
   docker_registry   = var.docker_registry
